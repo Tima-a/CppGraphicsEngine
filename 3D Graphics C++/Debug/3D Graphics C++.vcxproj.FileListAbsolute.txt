@@ -1,0 +1,2 @@
+C:\Users\ACER\source\repos\3D Graphics C++\Debug\3D Graphics C++.exe
+C:\Users\ACER\source\repos\3D Graphics C++\Debug\3D Graphics C++.pdb
