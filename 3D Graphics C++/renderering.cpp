@@ -2,9 +2,9 @@ static float render_scale = 0.01f;
 static float gravity = -9.81f;
 static float Gravitational_constant = 0.000000000016f;
 //Set window screen color
-static void clear_screen(unsigned int color, Render* render_vars) // accessing struct to an argument, to contrinue
+static void clear_screen(unsigned int color) // accessing struct to an argument, to contrinue
 {
-	unsigned int* pixel = (unsigned int*)render_vars->memory;
+	unsigned int* pixel = (unsigned int*)render.memory;
 	for (int y = 0; y < render.height; y++)
 	{
 		for (int x = 0; x < render.width; x++)
@@ -122,9 +122,9 @@ namespace vector2d
 	class VECTOR
 	{
 	private:
-		/*void check(float x1, float x2, float y1, float y2, float x_modifier, float y_modifier, float& x_increasement, float& y_increasement, bool directions[4])
+		void check(float x1, float x2, float y1, float y2, float x_modifier, float y_modifier, float& x_increasement, float& y_increasement, bool directions[4])
 		{
-			float differencex;
+			/*float differencex;
 			float differencey;
 			if (x2 > x1)
 			{
@@ -177,8 +177,8 @@ namespace vector2d
 			if (differencey < 0.0f)
 			{
 				y_increasement = 0.0f;
-			}
-		}*/
+			}*/
+		}
 		void draw_vector(float x1, float y1, float x2, float y2, float pixelsize, unsigned int color, bool save_pixels_matrix_x, bool save_pixels_matrix_y, bool save_pixels_matrix_x_cycle, bool save_pixels_matrix_y_cycle)
 		{
 			bool x_y_outweight = false, xy_swap = false; // if x2>y2, false, y2>x2, true; if x2&&y2 < x1&&y1 swap them
@@ -192,6 +192,10 @@ namespace vector2d
 			int g = 0;
 			int p = 0;
 			int q = 0;
+			//vector2d::VECTOR v1(100.0f, 100.0f, 100.0f, 0.0f, color, true);
+			//vector2d::VECTOR v2(0.0f, -50.0f, 0.0f, 50.0f, color, true);
+			vector2d::VECTOR v1(-100.0f, 0.0f, 100.0f, 0.0f, color, true);
+			vector2d::VECTOR v2(0.0f, -50.0f, 0.0f, 50.0f, color, true);
 			if (x1 == y1 && x1 == x2 && x2 != y2 && neg_or_pos_num(y2)) //right
 			{
 				straight_line_drawing = true;
@@ -212,7 +216,7 @@ namespace vector2d
 				straight_line_drawing = true;
 				straight_line_type = 3;
 			}
-			/*if (x1 == x2 && y2 > y1)
+			if (x1 == x2 && y2 > y1)
 			{
 				straight_line_drawing = true;
 				straight_line_type = 0;
@@ -231,7 +235,7 @@ namespace vector2d
 			{
 				straight_line_drawing = true;
 				straight_line_type = 3;
-			}*/
+			}
 			if (x1 == x2 && y1 == y2)
 			{
 				draw_pixel(x2, y2, PIXEL_SIZE, PIXEL_SIZE, color);
@@ -276,12 +280,12 @@ namespace vector2d
 			dx > 0.0f && dy < 0.0f ? directions[2] = true : directions[2] = false;
 			dx < 0.0f && dy < 0.0f ? directions[3] = true : directions[3] = false;
 			float x_modifier = 0.0f, y_modifier = 0.0f;
-			/*for (int i = 0; i < 5; i++)
+			for (int i = 0; i < 5; i++)
 			{
 				draw_pixel(x1, y1 + i, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
 				draw_pixel(x2, y2 + i, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
 			}
-			draw_pixel(0.0f, 0.0f, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));*/
+			draw_pixel(0.0f, 0.0f, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
 			float x_addition = 1.0f, y_addition = 1.0f;
 			int start_x = 0, start_y = 0;
 			fabs(x2) > fabs(y2) ? x_addition = make_float_divisible(fabs(adx), fabs(ady)) * 2.0f : y_addition = make_float_divisible(fabs(ady), fabs(adx)) * 2.0f;
@@ -294,33 +298,34 @@ namespace vector2d
 			}*/
 			if (straight_line_drawing == false && draw_just_pixel == false)
 			{
-				int max_pixels = 0;
-				if (adx > ady)
-				{
-					max_pixels = ((x2 - x1) * 100) - 1;
-				}
-				if (ady > adx)
-				{
-					max_pixels = ((y2 - y1) * 100) - 1;
-				}
-				if (adx == ady)
-				{
-					max_pixels = ((x2 - x1) * 100) - 1; // or max_pixels = ((y2 - y1) * 100) - 1; there is no matter
-				}
+				//int max_pixels = 0;
+				//if (adx > ady)
+				//{
+				//	max_pixels = ((x2 - x1) * 100) - 1;
+				//}
+				//if (ady > adx)
+				//{
+				//	max_pixels = ((y2 - y1) * 100) - 1;
+				//}
+				//if (adx == ady)
+				//{
+				//	max_pixels = ((x2 - x1) * 100) - 1; // or max_pixels = ((y2 - y1) * 100) - 1; there is no matter
+				//}
 				//
 				//
 				//draw line
-				//float max_pixels = 100.0f;
-				//if (dx != 0.0f)
-				//{
-				//	max_pixels *= fabs(dx);
-				//}
-				//if (dy != 0.0f)
-				//{
-				//	max_pixels *= fabs(dy);
-				//}
-				for (int i = 0; i < max_pixels; i++) // max value. x2*y2
+				float max_pixels = 100.0f;
+				if (dx != 0.0f)
 				{
+					max_pixels *= fabs(dx);
+				}
+				if (dy != 0.0f)
+				{
+					max_pixels *= fabs(dy);
+				}
+				for (int i = 0; i < int(max_pixels); i++) // max value. x2*y2
+				{
+					int d = 0;
 					bool x_cycle = false, y_cycle = false;
 					i % 2 == start_y ? x_cycle = true : x_cycle = false;
 					i % 2 == start_x ? y_cycle = true : y_cycle = false;
@@ -346,18 +351,18 @@ namespace vector2d
 												x_increasement = PIXEL_SIZE;
 											}
 										}
-										//check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
+										check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
 										if (i >= max_pixels)
 										{
 											x_increasement = 0.0f;
 											y_increasement = 0.0f;
 											break;
 										}
-										/*if (x_increasement == 0.0f && y_increasement == 0.0f)
+										if (x_increasement == 0.0f && y_increasement == 0.0f)
 										{
 											pixelindex = i;
 											break;
-										}*/
+										}
 										if (j == 0 || j == 2)
 										{
 											x_modifier += x_increasement;
@@ -408,18 +413,18 @@ namespace vector2d
 										}
 										g += 1;
 										p += 1;
-										//check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
+										check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
 										if (i >= max_pixels)
 										{
 											x_increasement = 0.0f;
 											y_increasement = 0.0f;
 											break;
 										}
-										/*if (x_increasement == 0.0f && y_increasement == 0.0f)
+										if (x_increasement == 0.0f && y_increasement == 0.0f)
 										{
 											pixelindex = i;
 											break;
-										}*/
+										}
 										if (j == 0 || j == 2)
 										{
 											x_modifier += x_increasement;
@@ -455,18 +460,18 @@ namespace vector2d
 												y_increasement = PIXEL_SIZE;
 											}
 										}
-										//check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
+										check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
 										if (i >= max_pixels)
 										{
 											x_increasement = 0.0f;
 											y_increasement = 0.0f;
 											break;
 										}
-										/*if (x_increasement == 0.0f && y_increasement == 0.0f)
+										if (x_increasement == 0.0f && y_increasement == 0.0f)
 										{
 											pixelindex = i;
 											break;
-										}*/
+										}
 										if (k == 0 || k == 1)
 										{
 											y_modifier += y_increasement;
@@ -517,18 +522,18 @@ namespace vector2d
 										}
 										g += 1;
 										q += 1;
-										//check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
+										check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
 										if (i >= max_pixels)
 										{
 											x_increasement = 0.0f;
 											y_increasement = 0.0f;
 											break;
 										}
-										/*if (x_increasement == 0.0f && y_increasement == 0.0f)
+										if (x_increasement == 0.0f && y_increasement == 0.0f)
 										{
 											pixelindex = i;
 											break;
-										}*/
+										}
 										if (k == 0 || k == 1)
 										{
 											y_modifier += y_increasement;
@@ -543,23 +548,24 @@ namespace vector2d
 						}
 					}
 					float x_increasement = PIXEL_SIZE, y_increasement = PIXEL_SIZE;
-					//check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
+					check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
 					if (i >= max_pixels)
 					{
 						x_increasement = 0.0f;
 						y_increasement = 0.0f;
 						break;
 					}
-					/*if (x_increasement == 0.0f && y_increasement == 0.0f)
+					if (x_increasement == 0.0f && y_increasement == 0.0f)
 					{
 						pixelindex = i;
 						break;
-					}*/
+					}
 				}
 			}
 			if (straight_line_drawing == true)
 			{
 				int max_pixels = 0;
+
 				if (straight_line_type == 0 || straight_line_type == 1)
 				{
 					max_pixels = (fabs(y2 - y1) * 100.0f) - 1;
@@ -1204,8 +1210,8 @@ namespace vector2d
 }
 static void draw_coordinate_grid(unsigned int color)
 {
-	vector2d::VECTOR v1(-100.0f, 0.0f, 100.0f, 0.0f, color, true); v1.draw();
-	vector2d::VECTOR v2(0.0f, -50.0f, 0.0f, 50.0f, color, true); v1.draw();
+	vector2d::VECTOR v1(-100.0f, 0.0f, 100.0f, 0.0f, color, true);
+	vector2d::VECTOR v2(0.0f, -50.0f, 0.0f, 50.0f, color, true);
 }
 namespace cube
 {
