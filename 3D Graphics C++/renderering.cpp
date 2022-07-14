@@ -116,101 +116,13 @@ namespace rectangle
 		}
 	};
 }
-VERTEX universal_vector_pixels_matrixes[MAX_STORAGE_SIZE];
-float universal_vectors_indexes[MAX_STORAGE_SIZE];
 namespace vector2d
 {
 	class VECTOR
 	{
 	private:
-		//float build_vector_index(float x1, float y1, float x2, float y2, int thickness_l_, int thickness_r_, unsigned int color)
-		//{
-		//	int minus_addition = 0;
-		//	if (!neg_or_pos_num(x1))
-		//	{
-		//		minus_addition++;
-		//	}
-		//	if (!neg_or_pos_num(x2))
-		//	{
-		//		minus_addition++;
-		//	}
-		//	if (!neg_or_pos_num(y1))
-		//	{
-		//		minus_addition++;
-		//	}
-		//	if (!neg_or_pos_num(y2))
-		//	{
-		//		minus_addition++;
-		//	}
-		//	return (x1 * y1 * x2 * y2) * (thickness_l_ * thickness_r_) + float(color / 1000.0f) + minus_addition;
-		//}
-		//bool CheckVectorActivity(float x1, float y1, float x2, float y2, int thickness_l, int thickness_r)
-		//{
-		//	for (int i = 0; i < 5000; i++)
-		//	{
-
-		//	}
-		//}
-		void check(float x1, float x2, float y1, float y2, float x_modifier, float y_modifier, float& x_increasement, float& y_increasement, bool directions[4])
-		{
-			float differencex;
-			float differencey;
-			if (x2 > x1)
-			{
-				if (directions[0] == true || directions[2] == true)
-				{
-					differencex = x2 - (x1 + x_modifier);
-				}
-				if (directions[1] == true || directions[3] == true)
-				{
-					differencex = x2 - (x1 - x_modifier);
-				}
-			}
-			if (x1 > x2)
-			{
-				if (directions[0] == true || directions[2] == true)
-				{
-					differencex = x1 - (x2 + x_modifier);
-				}
-				if (directions[1] == true || directions[3] == true)
-				{
-					differencex = x1 - (x2 - x_modifier);
-				}
-			}
-			if (y2 > y1)
-			{
-				if (directions[0] == true || directions[1] == true)
-				{
-					differencey = y2 - (y1 + y_modifier);
-				}
-				if (directions[2] == true || directions[3] == true)
-				{
-					differencey = y2 - (y1 - y_modifier);
-				}
-			}
-			if (y1 > y2)
-			{
-				if (directions[0] == true || directions[1] == true)
-				{
-					differencey = y1 - (y2 + y_modifier);
-				}
-				if (directions[2] == true || directions[3] == true)
-				{
-					differencey = y1 - (y2 - y_modifier);
-				}
-			}
-			if (differencex < 0.0f)
-			{
-				x_increasement = 0.0f;
-			}
-			if (differencey < 0.0f)
-			{
-				y_increasement = 0.0f;
-			}
-		}
 		void draw_vector(float x1, float y1, float x2, float y2, float pixelsize, unsigned int color, bool save_pixels_matrix, bool save_pixels_matrix_x_cycle, bool save_pixels_matrix_y_cycle)
 		{
-			//float u = build_vector_index(x1, y1, x2, y2, thickness_l, thickness_r, color);
 			bool x_y_outweight = false, xy_swap = false; // if x2>y2, false, y2>x2, true; if x2&&y2 < x1&&y1 swap them
 			bool straight_line_drawing = false;
 			bool draw_just_pixel = false;
@@ -227,42 +139,42 @@ namespace vector2d
 				straight_line_drawing = true;
 				straight_line_type = 0;
 			}
-			if (x1 == y1 && x1 == x2 && x2 != y2 && !neg_or_pos_num(y2)) //left
+			else if (x1 == y1 && x1 == x2 && x2 != y2 && !neg_or_pos_num(y2)) //left
 			{
 				straight_line_drawing = true;
 				straight_line_type = 1;
 			}
-			if (x1 == y1 && x1 == y2 && y2 != x2 && neg_or_pos_num(x2)) //up
+			else if (x1 == y1 && x1 == y2 && y2 != x2 && neg_or_pos_num(x2)) //up
 			{
 				straight_line_drawing = true;
 				straight_line_type = 2;
 			}
-			if (x1 == y1 && x1 == y2 && y2 != x2 && !neg_or_pos_num(x2)) //down
+			else if (x1 == y1 && x1 == y2 && y2 != x2 && !neg_or_pos_num(x2)) //down
 			{
 				straight_line_drawing = true;
 				straight_line_type = 3;
 			}
-			if (x1 == x2 && y2 > y1)
+			else if (x1 == x2 && y2 > y1)
 			{
 				straight_line_drawing = true;
 				straight_line_type = 0;
 			}
-			if (x1 == x2 && y1 > y2)
+			else if (x1 == x2 && y1 > y2)
 			{
 				straight_line_drawing = true;
 				straight_line_type = 1;
 			}
-			if (y1 == y2 && x2 > x1)
+			else if (y1 == y2 && x2 > x1)
 			{
 				straight_line_drawing = true;
 				straight_line_type = 2;
 			}
-			if (y1 == y2 && x1 > x2)
+			else if (y1 == y2 && x1 > x2)
 			{
 				straight_line_drawing = true;
 				straight_line_type = 3;
 			}
-			if (x1 == x2 && y1 == y2)
+			else if (x1 == x2 && y1 == y2)
 			{
 				draw_pixel(x2, y2, PIXEL_SIZE, PIXEL_SIZE, color);
 				if (save_pixels_matrix == true)
@@ -274,8 +186,8 @@ namespace vector2d
 				{
 					matrix_pixels_x_cycle[p].x = x2;
 					matrix_pixels_x_cycle[p].y = y2;
-					matrix_pixels_y_cycle[p].x = x2;
-					matrix_pixels_y_cycle[p].y = y2;
+					matrix_pixels_y_cycle[q].x = x2;
+					matrix_pixels_y_cycle[q].y = y2;
 				}
 				g += 1;
 				p += 1;
@@ -351,15 +263,16 @@ namespace vector2d
 				{
 					max_pixels = ((x2 - x1) * 100) - 1;
 				}
-				if (ady > adx)
+				else if (ady > adx)
 				{
 					max_pixels = ((y2 - y1) * 100) - 1;
 				}
-				if (adx == ady)
+				else if (adx == ady)
 				{
 					max_pixels = ((x2 - x1) * 100) - 1; // or max_pixels = ((y2 - y1) * 100) - 1; there is no matter
 				}
-				for (int i = 0; i < int(max_pixels); i++) // max value. x2*y2
+				
+				for (int i = 0; i < int(max_pixels); i++)
 				{
 					if (break_loop) { break; }
 					bool x_cycle = false, y_cycle = false;
@@ -378,20 +291,16 @@ namespace vector2d
 									{
 										x_increasement = (fabs(x_addition) - floor(fabs(x_addition))) * PIXEL_SIZE * direction_modifier_x;
 									}
-									if (x != floor(fabs(x_addition)))// if the loop is not the last then it doesn't change pixels' size.
+									else if (x != floor(fabs(x_addition)))// if the loop is not the last then it doesn't change pixels' size.
 									{
 										x_increasement = PIXEL_SIZE * direction_modifier_x;
 									}
 								}
-								//check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
 								if (i >= max_pixels)
 								{
 									x_increasement = 0.0f;
 									y_increasement = 0.0f;
-								}
-								if (x_increasement == 0.0f && y_increasement == 0.0f)
-								{
-									pixelindex = i;
+									px_quantity = i;
 									break_loop = true;
 									break;
 								}
@@ -414,7 +323,7 @@ namespace vector2d
 								}
 							}
 						}
-						if (x_y_outweight == true)
+						else if (x_y_outweight == true)
 						{
 							for (int x = 0; x < 2; x++)
 							{
@@ -436,10 +345,7 @@ namespace vector2d
 								{
 									x_increasement = 0.0f;
 									y_increasement = 0.0f;
-								}
-								if (x_increasement == 0.0f && y_increasement == 0.0f)
-								{
-									pixelindex = i;
+									px_quantity = i;
 									break_loop = true;
 									break;
 								}
@@ -460,7 +366,7 @@ namespace vector2d
 									{ //if statement checks the last loop of for-i loop because only last pixel's size must be changed in x_cycle or y_cycle
 										y_increasement = (fabs(y_addition) - floor(fabs(y_addition))) * PIXEL_SIZE * direction_modifier_y;
 									}
-									if (y != floor(fabs(y_addition))) // if the loop is not the last then it doesn't change pixels' size.
+									else if (y != floor(fabs(y_addition))) // if the loop is not the last then it doesn't change pixels' size.
 									{
 										y_increasement = PIXEL_SIZE * direction_modifier_y;
 									}
@@ -469,10 +375,7 @@ namespace vector2d
 								{
 									x_increasement = 0.0f;
 									y_increasement = 0.0f;
-								}
-								if (x_increasement == 0.0f && y_increasement == 0.0f)
-								{
-									pixelindex = i;
+									px_quantity = i;
 									break_loop = true;
 									break;
 								}
@@ -495,7 +398,7 @@ namespace vector2d
 								}
 							}
 						}
-						if (x_y_outweight == false)
+						else if (x_y_outweight == false)
 						{
 							for (int x = 0; x < 2; x++) //+2 because of < sign in for, and because when the first pixel generates at y1+y_modifier it will not be counted in for
 							{
@@ -517,10 +420,7 @@ namespace vector2d
 								{
 									x_increasement = 0.0f;
 									y_increasement = 0.0f;
-								}
-								if (x_increasement == 0.0f && y_increasement == 0.0f)
-								{
-									pixelindex = i;
+									px_quantity = i;
 									break_loop = true;
 									break;
 								}
@@ -533,28 +433,24 @@ namespace vector2d
 					{
 						x_increasement = 0.0f;
 						y_increasement = 0.0f;
-					}
-					if (x_increasement == 0.0f && y_increasement == 0.0f)
-					{
-						pixelindex = i;
+						px_quantity = i;
 						break_loop = true;
 						break;
 					}
 				}
 			}
-			if (straight_line_drawing == true)
+			else if (straight_line_drawing == true)
 			{
 				int max_pixels = 0;
-
 				if (straight_line_type == 0 || straight_line_type == 1)
 				{
 					max_pixels = (fabs(y2 - y1) * 100.0f) - 1;
 				}
-				if (straight_line_type == 2 || straight_line_type == 3)
+				else if (straight_line_type == 2 || straight_line_type == 3)
 				{
 					max_pixels = (fabs(x2 - x1) * 100.0f) - 1;
 				}
-				for (int x = 0; x < max_pixels; x++) // changing max
+				for (int x = 0; x < max_pixels; x++)
 				{
 					if (straight_line_type == 0) //down
 					{
@@ -603,46 +499,6 @@ namespace vector2d
 							y_modifier = 0.0f;
 							break;
 						}
-						//if (truncA(y1 + y_modifier, 2) == truncA(y2, 2))
-						//{
-						//	draw_pixel(x1, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
-						//	if (save_pixels_matrix_x == true)
-						//	{
-						//		matrix_pixels_x[g] = x1;
-						//	}
-						//	if (save_pixels_matrix_y == true)
-						//	{
-						//		matrix_pixels_y[g] = y1 + y_modifier;
-						//	}
-						//	if (save_pixels_matrix_y_cycle == true)
-						//	{
-						//		matrix_pixels_y_cycle_x[q] = x1 + x_modifier;
-						//		matrix_pixels_y_cycle_y[q] = y1 + y_modifier;
-						//	}
-						//	q += 1;
-						//	g += 1;
-						//	y_modifier -= y_increasement;
-						//	draw_pixel(x1, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color); // round function bug(rounding too much)
-						//	if (save_pixels_matrix_x == true)
-						//	{
-						//		matrix_pixels_x[g] = x1;
-						//	}
-						//	if (save_pixels_matrix_y == true)
-						//	{
-						//		matrix_pixels_y[g] = y1 + y_modifier;
-						//	}
-						//	if (save_pixels_matrix_y_cycle == true)
-						//	{
-						//		matrix_pixels_y_cycle_x[q] = x1 + x_modifier;
-						//		matrix_pixels_y_cycle_y[q] = y1 + y_modifier;
-						//	}
-						//	q += 1;
-						//	g += 1;
-						//	y_modifier -= y_increasement;
-						//	y_increasement = 0.0f;
-						//	pixelindex = x;
-						//	break;
-						//}
 					}
 					else if (straight_line_type == 2) //right
 					{
@@ -691,52 +547,12 @@ namespace vector2d
 							x_modifier = 0.0f;
 							break;
 						}
-						//if (truncA(x1 + x_modifier, 2) == truncA(x2, 2))
-						//{
-						//	draw_pixel(x1 + x_modifier, y1, PIXEL_SIZE, PIXEL_SIZE, color); // round function bug(rounding too much)
-						//	if (save_pixels_matrix_x == true)
-						//	{
-						//		matrix_pixels_x[g] = x1 + x_modifier;
-						//	}
-						//	if (save_pixels_matrix_y == true)
-						//	{
-						//		matrix_pixels_y[g] = y1;
-						//	}
-						//	if (save_pixels_matrix_x_cycle == true)
-						//	{
-						//		matrix_pixels_x_cycle_x[p] = x1 + x_modifier;
-						//		matrix_pixels_x_cycle_y[p] = y1 + y_modifier;
-						//	}
-						//	p += 1;
-						//	g += 1;
-						//	x_modifier -= x_increasement;
-						//	draw_pixel(x1 + x_modifier, y1, PIXEL_SIZE, PIXEL_SIZE, color); // round function bug(rounding too much)
-						//	if (save_pixels_matrix_x == true)
-						//	{
-						//		matrix_pixels_x[g] = x1 + x_modifier;
-						//	}
-						//	if (save_pixels_matrix_x == true)
-						//	{
-						//		matrix_pixels_y[g] = y1;
-						//	}
-						//	if (save_pixels_matrix_x_cycle == true)
-						//	{
-						//		matrix_pixels_x_cycle_x[p] = x1 + x_modifier;
-						//		matrix_pixels_x_cycle_y[p] = y1 + y_modifier;
-						//	}
-						//	p += 1;
-						//	g += 1;
-						//	x_modifier -= x_increasement;
-						//	x_increasement = 0.0f;
-						//	pixelindex = x;
-						//	break;
-						//}
 					}
 				}
 			}
 		}
 	public:
-		int pixelindex;
+		int px_quantity;
 		VERTEX matrix_pixels[MAX_STORAGE_SIZE];
 		VERTEX matrix_pixels_x_cycle[MAX_STORAGE_SIZE];
 		VERTEX matrix_pixels_y_cycle[MAX_STORAGE_SIZE];
@@ -819,7 +635,7 @@ namespace vector2d
 		//Calculate Vector's magnitude in pixels
 		float magnitude()
 		{
-			return pixelindex + 2; // 2 is start and end pixels of the vector
+			return px_quantity + 2; // 2 is start and end pixels of the vector
 		}
 		//Calculate Vector's angle
 		float angle()
@@ -955,7 +771,7 @@ namespace vector2d
 				{
 					//angle_vector_array_fill(v1.pixelsposx, v1.pixelsposy, v1.pixelindex, save_pixels_x, save_pixels_y);
 				}
-				pixelindex = v1.pixelindex;
+				px_quantity = v1.px_quantity;
 				straight_angles = true;
 			}
 			if (angle == 45.0f)
@@ -966,7 +782,7 @@ namespace vector2d
 				{
 					//angle_vector_array_fill(v1.pixelsposx, v1.pixelsposy, v1.pixelindex, save_pixels_x, save_pixels_y);
 				}
-				pixelindex = v1.pixelindex;
+				px_quantity = v1.px_quantity;
 			}
 			if (angle == 90.0f)
 			{
@@ -976,7 +792,7 @@ namespace vector2d
 				{
 					//angle_vector_array_fill(v1.pixelsposx, v1.pixelsposy, v1.pixelindex, save_pixels_x, save_pixels_y);
 				}
-				pixelindex = v1.pixelindex;
+				px_quantity = v1.px_quantity;
 			}
 			if (angle == 135.0f)
 			{
@@ -986,7 +802,7 @@ namespace vector2d
 				{
 					//angle_vector_array_fill(v1.pixelsposx, v1.pixelsposy, v1.pixelindex, save_pixels_x, save_pixels_y);
 				}
-				pixelindex = v1.pixelindex;
+				px_quantity = v1.px_quantity;
 			}
 			if (angle == 180.0f)
 			{
@@ -996,7 +812,7 @@ namespace vector2d
 				{
 					//angle_vector_array_fill(v1.pixelsposx, v1.pixelsposy, v1.pixelindex, save_pixels_x, save_pixels_y);
 				}
-				pixelindex = v1.pixelindex;
+				px_quantity = v1.px_quantity;
 			}
 			if (angle == 225.0f)
 			{
@@ -1006,7 +822,7 @@ namespace vector2d
 				{
 					//angle_vector_array_fill(v1.pixelsposx, v1.pixelsposy, v1.pixelindex, save_pixels_x, save_pixels_y);
 				}
-				pixelindex = v1.pixelindex;
+				px_quantity = v1.px_quantity;
 			}
 			if (angle == 270.0f)
 			{
@@ -1016,7 +832,7 @@ namespace vector2d
 				{
 					//angle_vector_array_fill(v1.pixelsposx, v1.pixelsposy, v1.pixelindex, save_pixels_x, save_pixels_y);
 				}
-				pixelindex = v1.pixelindex;
+				px_quantity = v1.px_quantity;
 			}
 			if (angle == 315.0f)
 			{
@@ -1026,7 +842,7 @@ namespace vector2d
 				{
 					//angle_vector_array_fill(v1.pixelsposx, v1.pixelsposy, v1.pixelindex, save_pixels_x, save_pixels_y);
 				}
-				pixelindex = v1.pixelindex;
+				px_quantity = v1.px_quantity;
 			}
 			if (straight_angles == false)
 			{
@@ -1083,13 +899,13 @@ namespace vector2d
 				{
 					//angle_vector_array_fill(v1.pixelsposx, v1.pixelsposy, v1.pixelindex, save_pixels_x, save_pixels_y);
 				}
-				pixelindex = v1.pixelindex;
+				px_quantity = v1.px_quantity;
 			}
 		}
 	public:
 		float pixelsposx[1000];
 		float pixelsposy[1000];
-		int pixelindex;
+		int px_quantity;
 		float angle;
 		float length;
 		float x1, y1, x2, y2 = 0.0f;
