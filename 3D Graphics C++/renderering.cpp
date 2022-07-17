@@ -1,3 +1,4 @@
+
 static float render_scale = 0.01f;
 static float gravity = -9.81f;
 static float Gravitational_constant = 0.000000000016f;
@@ -121,7 +122,64 @@ namespace vector2d
 	class VECTOR
 	{
 	private:
-		void draw_vector(float x1, float y1, float x2, float y2, float pixelsize, unsigned int color, bool save_pixels_matrix, bool save_pixels_matrix_x_cycle, bool save_pixels_matrix_y_cycle)
+		void check(float x1, float x2, float y1, float y2, float x_modifier, float y_modifier, float& x_increasement, float& y_increasement, bool directions[4])
+		{
+			float differencex = 0.0f;
+			float differencey = 0.0f;
+			if (x2 > x1)
+			{
+				if (directions[0] == true || directions[2] == true)
+				{
+					differencex = x2 - (x1 + x_modifier);
+				}
+				if (directions[1] == true || directions[3] == true)
+				{
+					differencex = x2 - (x1 - x_modifier);
+				}
+			}
+			if (x1 > x2)
+			{
+				if (directions[0] == true || directions[2] == true)
+				{
+					differencex = x1 - (x2 + x_modifier);
+				}
+				if (directions[1] == true || directions[3] == true)
+				{
+					differencex = x1 - (x2 - x_modifier);
+				}
+			}
+			if (y2 > y1)
+			{
+				if (directions[0] == true || directions[1] == true)
+				{
+					differencey = y2 - (y1 + y_modifier);
+				}
+				if (directions[2] == true || directions[3] == true)
+				{
+					differencey = y2 - (y1 - y_modifier);
+				}
+			}
+			if (y1 > y2)
+			{
+				if (directions[0] == true || directions[1] == true)
+				{
+					differencey = y1 - (y2 + y_modifier);
+				}
+				if (directions[2] == true || directions[3] == true)
+				{
+					differencey = y1 - (y2 - y_modifier);
+				}
+			}
+			if (differencex < 0.0f)
+			{
+				x_increasement = 0.0f;
+			}
+			if (differencey < 0.0f)
+			{
+				y_increasement = 0.0f;
+			}
+		}
+		void draw_vector(float x1, float y1, float x2, float y2, float pixelsize, unsigned int color)
 		{
 			bool x_y_outweight = false, xy_swap = false; // if x2>y2, false, y2>x2, true; if x2&&y2 < x1&&y1 swap them
 			bool straight_line_drawing = false;
@@ -131,9 +189,6 @@ namespace vector2d
 			//1 - down
 			//2 - right
 			//3 - left
-			int g = 0;
-			int p = 0;
-			int q = 0;
 			if (x1 == y1 && x1 == x2 && x2 != y2 && neg_or_pos_num(y2)) //right
 			{
 				straight_line_drawing = true;
@@ -177,104 +232,90 @@ namespace vector2d
 			else if (x1 == x2 && y1 == y2)
 			{
 				draw_pixel(x2, y2, PIXEL_SIZE, PIXEL_SIZE, color);
-				if (save_pixels_matrix == true)
-				{
-					matrix_pixels[g].x = x2;
-					matrix_pixels[g].y = y2;
-				}
-				if (save_pixels_matrix_x_cycle == true || save_pixels_matrix_y_cycle == true)
-				{
-					matrix_pixels_x_cycle[p].x = x2;
-					matrix_pixels_x_cycle[p].y = y2;
-					matrix_pixels_y_cycle[q].x = x2;
-					matrix_pixels_y_cycle[q].y = y2;
-				}
-				g += 1;
-				p += 1;
-				q += 1;
 				draw_just_pixel = true;
 			}
-			fabs(x1) > fabs(x2) && fabs(y1) > fabs(y2) ? xy_swap = true : xy_swap = false;
-			if (xy_swap == true)
-			{
-				swap(x2, x1);
-				swap(y2, y1);
-				//swapping function
-			}
-			bool directions[4]
-			{
-				false, // up_right
-				false, // up_left
-				false, // down_right
-				false // down_left
-			};
-			float dx = x2 - x1;
-			float dy = y2 - y1;
+			int i_px = 0;
+			float x_modifier = 0.0f, y_modifier = 0.0f;
 			float adx = fabs(x2 - x1);
 			float ady = fabs(y2 - y1);
-			dx > 0.0f && dy > 0.0f ? directions[0] = true : directions[0] = false; // if (dx > 0.0f && dy > 0.0f){directions[0]=true} else {directions=false}
-			dx < 0.0f && dy > 0.0f ? directions[1] = true : directions[1] = false;
-			dx > 0.0f && dy < 0.0f ? directions[2] = true : directions[2] = false;
-			dx < 0.0f && dy < 0.0f ? directions[3] = true : directions[3] = false;
-			float x_modifier = 0.0f, y_modifier = 0.0f;
-			//for (int i = 0; i < 5; i++)
-			//{
-			//	draw_pixel(x1, y1 + i, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
-			//	draw_pixel(x2, y2 + i, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
-			//}
-			//draw_pixel(0.0f, 0.0f, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
-			float x_addition = 1.0f, y_addition = 1.0f;
-			int start_x = 0, start_y = 0;
-			fabs(x2) > fabs(y2) ? x_addition = make_float_divisible(fabs(adx), fabs(ady)) * 2.0f : y_addition = make_float_divisible(fabs(ady), fabs(adx)) * 2.0f;
-			fabs(x2) > fabs(y2) ? x_y_outweight = false : x_y_outweight = true;
-			fabs(x2) > fabs(y2) ? start_x = 1 : start_y = 1;
-			float cl_x_add = ceil(x_addition);
-			float cl_y_add = ceil(y_addition);
-			bool break_loop = false;
-			int direction_index = -1;
-			float direction_modifier_x = 0.0f;
-			float direction_modifier_y = 0.0f;
-			for (int j = 0; j < 4; j++)
-			{
-				if (directions[j])
-				{
-					if (j == 0 || j == 2)
-					{
-						direction_modifier_x = 1.0f;
-					}
-					else if (j == 1 || j == 3)
-					{
-						direction_modifier_x = -1.0f;
-					}
-					if (j == 0 || j == 1)
-					{
-						direction_modifier_y = 1.0f;
-					}
-					else if (j == 2 || j == 3)
-					{
-						direction_modifier_y = -1.0f;
-					}
-				}
-			}
 			if (straight_line_drawing == false && draw_just_pixel == false)
 			{
+				fabs(x1) > fabs(x2) && fabs(y1) > fabs(y2) ? xy_swap = true : xy_swap = false;
+				if (xy_swap == true)
+				{
+					swap(x2, x1);
+					swap(y2, y1);
+					//swapping function
+				}
+				bool directions[4]
+				{
+					false, // up_right
+					false, // up_left
+					false, // down_right
+					false // down_left
+				};
+				float dx = x2 - x1;
+				float dy = y2 - y1;
+				dx > 0.0f && dy > 0.0f ? directions[0] = true : directions[0] = false; // if (dx > 0.0f && dy > 0.0f){directions[0]=true} else {directions=false}
+				dx < 0.0f && dy > 0.0f ? directions[1] = true : directions[1] = false;
+				dx > 0.0f && dy < 0.0f ? directions[2] = true : directions[2] = false;
+				dx < 0.0f && dy < 0.0f ? directions[3] = true : directions[3] = false;
+				//for (int i = 0; i < 5; i++)
+				//{
+				//	draw_pixel(x1, y1 + i, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
+				//	draw_pixel(x2, y2 + i, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
+				//}
+				//draw_pixel(0.0f, 0.0f, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
+				float x_addition = 1.0f, y_addition = 1.0f;
+				int start_x = 0, start_y = 0;
+				fabs(x2) > fabs(y2) ? x_addition = make_float_divisible(fabs(adx), fabs(ady)) * 2.0f : y_addition = make_float_divisible(fabs(ady), fabs(adx)) * 2.0f;
+				fabs(x2) > fabs(y2) ? x_y_outweight = false : x_y_outweight = true;
+				fabs(x2) > fabs(y2) ? start_x = 1 : start_y = 1;
+				float cl_x_add = ceil(x_addition);
+				float cl_y_add = ceil(y_addition);
+				bool break_loop = false;
+				int direction_index = -1;
+				float direction_modifier_x = 0.0f;
+				float direction_modifier_y = 0.0f;
+				for (int j = 0; j < 4; j++)
+				{
+					if (directions[j])
+					{
+						if (j == 0 || j == 2)
+						{
+							direction_modifier_x = 1.0f;
+						}
+						else if (j == 1 || j == 3)
+						{
+							direction_modifier_x = -1.0f;
+						}
+						if (j == 0 || j == 1)
+						{
+							direction_modifier_y = 1.0f;
+						}
+						else if (j == 2 || j == 3)
+						{
+							direction_modifier_y = -1.0f;
+						}
+					}
+				}
 				int max_pixels = 0;
 				if (adx > ady)
 				{
-					max_pixels = ((x2 - x1) * 100) - 1;
+					max_pixels = adx * 100.0f;
 				}
 				else if (ady > adx)
 				{
-					max_pixels = ((y2 - y1) * 100) - 1;
+					max_pixels = ady * 100.0f;
 				}
 				else if (adx == ady)
 				{
-					max_pixels = ((x2 - x1) * 100) - 1; // or max_pixels = ((y2 - y1) * 100) - 1; there is no matter
+					max_pixels = ady * 100.0f; // or max_pixels = ((y2 - y1) * 100) - 1; there is no matter
 				}
-				
+
 				for (int i = 0; i < int(max_pixels); i++)
 				{
-					if (break_loop) { break; }
+					if (break_loop) { break; px_quantity = i; }
 					bool x_cycle = false, y_cycle = false;
 					i % 2 == start_y ? x_cycle = true : x_cycle = false;
 					i % 2 == start_x ? y_cycle = true : y_cycle = false;
@@ -284,22 +325,21 @@ namespace vector2d
 						{
 							for (int x = 0; x < cl_x_add; x++)
 							{
-								float x_increasement = PIXEL_SIZE * direction_modifier_x, y_increasement = PIXEL_SIZE * direction_modifier_x;
+								float x_increasement = PIXEL_SIZE_CU * direction_modifier_x, y_increasement = PIXEL_SIZE_CU * direction_modifier_y;
 								if (check_number_type(x_addition) == false)// floor(fabs(y_addition)) will detect the last loop and that's why there is ceil in for-i loop statement.
 								{ //if statement checks the last loop of for-i loop because only last pixel's size must be changed in x_cycle or y_cycle
 									if (x == floor(fabs(x_addition)))
 									{
-										x_increasement = (fabs(x_addition) - floor(fabs(x_addition))) * PIXEL_SIZE * direction_modifier_x;
+										x_increasement = (fabs(x_addition) - floor(fabs(x_addition))) * PIXEL_SIZE_CU * direction_modifier_x;
 									}
 									else if (x != floor(fabs(x_addition)))// if the loop is not the last then it doesn't change pixels' size.
 									{
-										x_increasement = PIXEL_SIZE * direction_modifier_x;
+										x_increasement = PIXEL_SIZE_CU * direction_modifier_x;
 									}
 								}
-								if (i >= max_pixels)
+								check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
+								if (x_increasement == 0.0f && y_increasement == 0.0f)
 								{
-									x_increasement = 0.0f;
-									y_increasement = 0.0f;
 									px_quantity = i;
 									break_loop = true;
 									break;
@@ -308,18 +348,6 @@ namespace vector2d
 								if (x == floor(fabs(x_addition)))
 								{
 									draw_pixel(x1 + x_modifier, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
-									if (save_pixels_matrix == true)
-									{
-										matrix_pixels[g].x = x1 + x_modifier;
-										matrix_pixels[g].y = y1 + y_modifier;
-									}
-									if (save_pixels_matrix_x_cycle == true)
-									{
-										matrix_pixels_x_cycle[p].x = x1 + x_modifier;
-										matrix_pixels_x_cycle[p].y = y1 + y_modifier;
-									}
-									g += 1;
-									p += 1;
 								}
 							}
 						}
@@ -327,24 +355,11 @@ namespace vector2d
 						{
 							for (int x = 0; x < 2; x++)
 							{
-								float x_increasement = PIXEL_SIZE * direction_modifier_x, y_increasement = PIXEL_SIZE * direction_modifier_x;
+								float x_increasement = PIXEL_SIZE_CU * direction_modifier_x, y_increasement = PIXEL_SIZE_CU * direction_modifier_y;
 								draw_pixel(x1 + x_modifier, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
-								if (save_pixels_matrix == true)
+								check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
+								if (x_increasement == 0.0f && y_increasement == 0.0f)
 								{
-									matrix_pixels[g].x = x1 + x_modifier;
-									matrix_pixels[g].y = y1 + y_modifier;
-								}
-								if (save_pixels_matrix_x_cycle == true)
-								{
-									matrix_pixels_x_cycle[p].x = x1 + x_modifier;
-									matrix_pixels_x_cycle[p].y = y1 + y_modifier;
-								}
-								g += 1;
-								p += 1;
-								if (i >= max_pixels)
-								{
-									x_increasement = 0.0f;
-									y_increasement = 0.0f;
 									px_quantity = i;
 									break_loop = true;
 									break;
@@ -359,22 +374,21 @@ namespace vector2d
 						{
 							for (int y = 0; y < cl_y_add; y++)
 							{
-								float x_increasement = PIXEL_SIZE * direction_modifier_y, y_increasement = PIXEL_SIZE * direction_modifier_y;
+								float x_increasement = PIXEL_SIZE_CU * direction_modifier_y, y_increasement = PIXEL_SIZE_CU * direction_modifier_y;
 								if (check_number_type(y_addition) == false)
 								{
 									if (y == floor(fabs(y_addition))) // floor(fabs(y_addition)) will detect the last loop and that's why there is ceil in for-i loop statement.
 									{ //if statement checks the last loop of for-i loop because only last pixel's size must be changed in x_cycle or y_cycle
-										y_increasement = (fabs(y_addition) - floor(fabs(y_addition))) * PIXEL_SIZE * direction_modifier_y;
+										y_increasement = (fabs(y_addition) - floor(fabs(y_addition))) * PIXEL_SIZE_CU * direction_modifier_y;
 									}
 									else if (y != floor(fabs(y_addition))) // if the loop is not the last then it doesn't change pixels' size.
 									{
-										y_increasement = PIXEL_SIZE * direction_modifier_y;
+										y_increasement = PIXEL_SIZE_CU * direction_modifier_y;
 									}
 								}
-								if (i >= max_pixels)
+								check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
+								if (x_increasement == 0.0f && y_increasement == 0.0f)
 								{
-									x_increasement = 0.0f;
-									y_increasement = 0.0f;
 									px_quantity = i;
 									break_loop = true;
 									break;
@@ -383,18 +397,6 @@ namespace vector2d
 								if (y == floor(fabs(x_addition)))
 								{
 									draw_pixel(x1 + x_modifier, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
-									if (save_pixels_matrix == true)
-									{
-										matrix_pixels[g].x = x1 + x_modifier;
-										matrix_pixels[g].y = y1 + y_modifier;
-									}
-									if (save_pixels_matrix_y_cycle == true)
-									{
-										matrix_pixels_y_cycle[q].x = x1 + x_modifier;
-										matrix_pixels_y_cycle[q].y = y1 + y_modifier;
-									}
-									g += 1;
-									q += 1;
 								}
 							}
 						}
@@ -402,24 +404,11 @@ namespace vector2d
 						{
 							for (int x = 0; x < 2; x++) //+2 because of < sign in for, and because when the first pixel generates at y1+y_modifier it will not be counted in for
 							{
-								float x_increasement = PIXEL_SIZE * direction_modifier_y, y_increasement = PIXEL_SIZE * direction_modifier_y;
+								float x_increasement = PIXEL_SIZE_CU * direction_modifier_y, y_increasement = PIXEL_SIZE_CU * direction_modifier_y;
 								draw_pixel(x1 + x_modifier, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
-								if (save_pixels_matrix == true)
+								check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
+								if (x_increasement == 0.0f && y_increasement == 0.0f)
 								{
-									matrix_pixels[g].x = x1 + x_modifier;
-									matrix_pixels[g].y = y1 + y_modifier;
-								}
-								if (save_pixels_matrix_y_cycle == true)
-								{
-									matrix_pixels_y_cycle[q].x = x1 + x_modifier;
-									matrix_pixels_y_cycle[q].y = y1 + y_modifier;
-								}
-								g += 1;
-								q += 1;
-								if (i >= max_pixels)
-								{
-									x_increasement = 0.0f;
-									y_increasement = 0.0f;
 									px_quantity = i;
 									break_loop = true;
 									break;
@@ -428,15 +417,15 @@ namespace vector2d
 							}
 						}
 					}
-					float x_increasement = PIXEL_SIZE * direction_modifier_y, y_increasement = PIXEL_SIZE * direction_modifier_y;
-					if (i >= max_pixels)
+					float x_increasement = PIXEL_SIZE_CU * direction_modifier_y, y_increasement = PIXEL_SIZE_CU * direction_modifier_y;
+					check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
+					if (x_increasement == 0.0f && y_increasement == 0.0f)
 					{
-						x_increasement = 0.0f;
-						y_increasement = 0.0f;
 						px_quantity = i;
 						break_loop = true;
 						break;
 					}
+					i_px = i;
 				}
 			}
 			else if (straight_line_drawing == true)
@@ -444,140 +433,61 @@ namespace vector2d
 				int max_pixels = 0;
 				if (straight_line_type == 0 || straight_line_type == 1)
 				{
-					max_pixels = (fabs(y2 - y1) * 100.0f) - 1;
+					max_pixels = ady * 10.0f;
 				}
 				else if (straight_line_type == 2 || straight_line_type == 3)
 				{
-					max_pixels = (fabs(x2 - x1) * 100.0f) - 1;
+					max_pixels = adx * 10.0f;
 				}
 				for (int x = 0; x < max_pixels; x++)
 				{
 					if (straight_line_type == 0) //down
 					{
-						float y_increasement = PIXEL_SIZE;
+						float y_increasement = PIXEL_SIZE_STLN; float x_increasement = PIXEL_SIZE_STLN;
 						draw_pixel(x1, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
-						if (save_pixels_matrix == true)
-						{
-							matrix_pixels[g].x = x1;
-							matrix_pixels[g].y = y1 + y_modifier;
-						}
-						if (save_pixels_matrix_y_cycle == true)
-						{
-							matrix_pixels_y_cycle[q].x = x1;
-							matrix_pixels_y_cycle[q].y = y1 + y_modifier;
-						}
-						q += 1;
-						g += 1;
 						y_modifier += y_increasement;
-						if (x >= max_pixels)
-						{
-							y_increasement = 0.0f;
-							y_modifier = 0.0f;
-							break;
-						}
 					}
 					else if (straight_line_type == 1) //up
 					{
-						float y_increasement = PIXEL_SIZE;
+						float y_increasement = PIXEL_SIZE_STLN; float x_increasement = PIXEL_SIZE_STLN;
 						draw_pixel(x1, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
-						if (save_pixels_matrix == true)
-						{
-							matrix_pixels[g].x = x1;
-							matrix_pixels[g].y = y1 + y_modifier;
-						}
-						if (save_pixels_matrix_y_cycle == true)
-						{
-							matrix_pixels_y_cycle[q].x = x1;
-							matrix_pixels_y_cycle[q].y = y1 + y_modifier;
-						}
-						q += 1;
-						g += 1;
 						y_modifier -= y_increasement;
-						if (x >= max_pixels)
-						{
-							y_increasement = 0.0f;
-							y_modifier = 0.0f;
-							break;
-						}
 					}
 					else if (straight_line_type == 2) //right
 					{
-						float x_increasement = PIXEL_SIZE;
+						float y_increasement = PIXEL_SIZE_STLN; float x_increasement = PIXEL_SIZE_STLN;
 						draw_pixel(x1 + x_modifier, y1, PIXEL_SIZE, PIXEL_SIZE, color);
-						if (save_pixels_matrix == true)
-						{
-							matrix_pixels[g].x = x1 + x_modifier;
-							matrix_pixels[g].y = y1;
-						}
-						if (save_pixels_matrix_x_cycle == true)
-						{
-							matrix_pixels_x_cycle[p].x = x1 + x_modifier;
-							matrix_pixels_x_cycle[p].y = y1;
-						}
-						p += 1;
-						g += 1;
 						x_modifier += x_increasement;
-						if (x >= max_pixels)
-						{
-							x_increasement = 0.0f;
-							x_modifier = 0.0f;
-							break;
-						}
 					}
 					else if (straight_line_type == 3) //left
 					{
-						float x_increasement = PIXEL_SIZE;
+						float y_increasement = PIXEL_SIZE_STLN; float x_increasement = PIXEL_SIZE_STLN;
 						draw_pixel(x1 + x_modifier, y1, PIXEL_SIZE, PIXEL_SIZE, color);
-						if (save_pixels_matrix == true)
-						{
-							matrix_pixels[g].x = x1 + x_modifier;
-							matrix_pixels[g].y = y1;
-						}
-						if (save_pixels_matrix_x_cycle == true)
-						{
-							matrix_pixels_x_cycle[p].x = x1 + x_modifier;
-							matrix_pixels_x_cycle[p].y = y1;
-						}
-						p += 1;
-						g += 1;
 						x_modifier -= x_increasement;
-						if (x >= max_pixels)
-						{
-							x_increasement = 0.0f;
-							x_modifier = 0.0f;
-							break;
-						}
 					}
+					i_px = x;
 				}
 			}
+			px_quantity = i_px;
 		}
 	public:
 		int px_quantity;
-		VERTEX matrix_pixels[MAX_STORAGE_SIZE];
-		VERTEX matrix_pixels_x_cycle[MAX_STORAGE_SIZE];
-		VERTEX matrix_pixels_y_cycle[MAX_STORAGE_SIZE];
 		float startx;
 		float starty;
 		float x2;
 		float y2;
 		float pixelsize;
 		unsigned int color;
-		bool save_pixels_position;
-		bool save_pixels_position_x_cycle;
-		bool save_pixels_position_y_cycle;
 		int thickness_l; //thickness left
 		int thickness_r; //thickness right
 		//Draw 2d vector.
-		VECTOR(float startx_, float starty_, float x2_, float y2_, unsigned int color_, bool initial_draw = true, int thickness_l_ = 1, int thickness_r_ = 1, bool save_pixels_position_ = false, bool save_pixels_position_x_cycle_ = false, bool save_pixels_position_y_cycle_ = false)
+		VECTOR(float startx_, float starty_, float x2_, float y2_, unsigned int color_, bool initial_draw = true, int thickness_l_ = 1, int thickness_r_ = 1)
 		{
 			startx = startx_;
 			starty = starty_;
 			x2 = x2_;
 			y2 = y2_;
 			color = color_;
-			save_pixels_position = save_pixels_position_;
-			save_pixels_position_x_cycle = save_pixels_position_x_cycle_;
-			save_pixels_position_y_cycle = save_pixels_position_y_cycle_;
 			thickness_l = thickness_l_;
 			thickness_r = thickness_r_;
 			if (initial_draw == true)
@@ -712,11 +622,11 @@ namespace vector2d
 				//this if-statements are to merge two expected for-loops(one for-loop is for left thickness and the second for-loop is for right thickness) to one for-loop
 				if (i < thickness_l) //this is to draw left thickness
 				{
-					draw_vector(startx - (0.1f * i), starty + (0.1f * i), x2 - (0.1f * i), y2 + (0.1f * i), pixelsize, color, save_pixels_position, save_pixels_position_x_cycle, save_pixels_position_y_cycle);
+					draw_vector(startx - (0.1f * i), starty + (0.1f * i), x2 - (0.1f * i), y2 + (0.1f * i), pixelsize, color);
 				}
 				if (i > thickness_l && i < thickness_r + thickness_r)
 				{
-					draw_vector(startx + (0.1f * (i - thickness_l)), starty - (0.1f * (i - thickness_l)), x2 + (0.1f * (i - thickness_l)), y2 - (0.1f * (i - thickness_l)), pixelsize, color, save_pixels_position, save_pixels_position_x_cycle, save_pixels_position_y_cycle);
+					draw_vector(startx + (0.1f * (i - thickness_l)), starty - (0.1f * (i - thickness_l)), x2 + (0.1f * (i - thickness_l)), y2 - (0.1f * (i - thickness_l)), pixelsize, color);
 				}
 			}
 		}
@@ -949,6 +859,563 @@ namespace vector2d
 			angle_draw_vector(save_pixels_x_, save_pixels_y_);
 		}
 	};
+	class VECTOR_SAVE_PIXELS_POSITIONS
+	{
+	private:
+		void check(float x1, float x2, float y1, float y2, float x_modifier, float y_modifier, float& x_increasement, float& y_increasement, bool directions[4])
+		{
+			float differencex;
+			float differencey;
+			if (x2 > x1)
+			{
+				if (directions[0] == true || directions[2] == true)
+				{
+					differencex = x2 - (x1 + x_modifier);
+				}
+				if (directions[1] == true || directions[3] == true)
+				{
+					differencex = x2 - (x1 - x_modifier);
+				}
+			}
+			if (x1 > x2)
+			{
+				if (directions[0] == true || directions[2] == true)
+				{
+					differencex = x1 - (x2 + x_modifier);
+				}
+				if (directions[1] == true || directions[3] == true)
+				{
+					differencex = x1 - (x2 - x_modifier);
+				}
+			}
+			if (y2 > y1)
+			{
+				if (directions[0] == true || directions[1] == true)
+				{
+					differencey = y2 - (y1 + y_modifier);
+				}
+				if (directions[2] == true || directions[3] == true)
+				{
+					differencey = y2 - (y1 - y_modifier);
+				}
+			}
+			if (y1 > y2)
+			{
+				if (directions[0] == true || directions[1] == true)
+				{
+					differencey = y1 - (y2 + y_modifier);
+				}
+				if (directions[2] == true || directions[3] == true)
+				{
+					differencey = y1 - (y2 - y_modifier);
+				}
+			}
+			if (differencex < 0.0f)
+			{
+				x_increasement = 0.0f;
+			}
+			if (differencey < 0.0f)
+			{
+				y_increasement = 0.0f;
+			}
+		}
+
+		void draw_vector_(float x1, float y1, float x2, float y2, float pixelsize, unsigned int color, bool save_pixels_matrix, bool save_pixels_matrix_x_cycle, bool save_pixels_matrix_y_cycle)
+		{
+			bool x_y_outweight = false, xy_swap = false; // if x2>y2, false, y2>x2, true; if x2&&y2 < x1&&y1 swap them
+			bool straight_line_drawing = false;
+			bool draw_just_pixel = false;
+			int straight_line_type = -1;
+			//0 - up
+			//1 - down
+			//2 - right
+			//3 - left
+			int g = 0;
+			int p = 0;
+			int q = 0;
+			if (x1 == y1 && x1 == x2 && x2 != y2 && neg_or_pos_num(y2)) //right
+			{
+				straight_line_drawing = true;
+				straight_line_type = 0;
+			}
+			else if (x1 == y1 && x1 == x2 && x2 != y2 && !neg_or_pos_num(y2)) //left
+			{
+				straight_line_drawing = true;
+				straight_line_type = 1;
+			}
+			else if (x1 == y1 && x1 == y2 && y2 != x2 && neg_or_pos_num(x2)) //up
+			{
+				straight_line_drawing = true;
+				straight_line_type = 2;
+			}
+			else if (x1 == y1 && x1 == y2 && y2 != x2 && !neg_or_pos_num(x2)) //down
+			{
+				straight_line_drawing = true;
+				straight_line_type = 3;
+			}
+			else if (x1 == x2 && y2 > y1)
+			{
+				straight_line_drawing = true;
+				straight_line_type = 0;
+			}
+			else if (x1 == x2 && y1 > y2)
+			{
+				straight_line_drawing = true;
+				straight_line_type = 1;
+			}
+			else if (y1 == y2 && x2 > x1)
+			{
+				straight_line_drawing = true;
+				straight_line_type = 2;
+			}
+			else if (y1 == y2 && x1 > x2)
+			{
+				straight_line_drawing = true;
+				straight_line_type = 3;
+			}
+			else if (x1 == x2 && y1 == y2)
+			{
+				draw_pixel(x2, y2, PIXEL_SIZE, PIXEL_SIZE, color);
+				if (save_pixels_matrix == true)
+				{
+					matrix_pixels[g].x = x2;
+					matrix_pixels[g].y = y2;
+				}
+				if (save_pixels_matrix_x_cycle == true || save_pixels_matrix_y_cycle == true)
+				{
+					matrix_pixels_x_cycle[p].x = x2;
+					matrix_pixels_x_cycle[p].y = y2;
+					matrix_pixels_y_cycle[q].x = x2;
+					matrix_pixels_y_cycle[q].y = y2;
+				}
+				g += 1;
+				p += 1;
+				q += 1;
+				draw_just_pixel = true;
+			}
+			float adx = fabs(x2 - x1);
+			float ady = fabs(y2 - y1);
+			float x_modifier = 0.0f, y_modifier = 0.0f;
+			//for (int i = 0; i < 5; i++)
+			//{
+			//	draw_pixel(x1, y1 + i, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
+			//	draw_pixel(x2, y2 + i, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
+			//}
+			//draw_pixel(0.0f, 0.0f, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
+			int px_i = 0;
+			float x_addition = 1.0f, y_addition = 1.0f;
+			if (straight_line_drawing == false && draw_just_pixel == false)
+			{
+				int max_pixels = 0;
+				fabs(x1) > fabs(x2) && fabs(y1) > fabs(y2) ? xy_swap = true : xy_swap = false;
+				if (xy_swap == true)
+				{
+					swap(x2, x1);
+					swap(y2, y1);
+					//swapping function
+				}
+				bool directions[4]
+				{
+					false, // up_right
+					false, // up_left
+					false, // down_right
+					false // down_left
+				};
+				float dx = x2 - x1;
+				float dy = y2 - y1;
+				dx > 0.0f && dy > 0.0f ? directions[0] = true : directions[0] = false; // if (dx > 0.0f && dy > 0.0f){directions[0]=true} else {directions=false}
+				dx < 0.0f && dy > 0.0f ? directions[1] = true : directions[1] = false;
+				dx > 0.0f && dy < 0.0f ? directions[2] = true : directions[2] = false;
+				dx < 0.0f && dy < 0.0f ? directions[3] = true : directions[3] = false;
+				int start_x = 0, start_y = 0;
+				fabs(x2) > fabs(y2) ? x_addition = make_float_divisible(fabs(adx), fabs(ady)) * 2.0f : y_addition = make_float_divisible(fabs(ady), fabs(adx)) * 2.0f;
+				fabs(x2) > fabs(y2) ? x_y_outweight = false : x_y_outweight = true;
+				fabs(x2) > fabs(y2) ? start_x = 1 : start_y = 1;
+				float cl_x_add = ceil(x_addition);
+				float cl_y_add = ceil(y_addition);
+				bool break_loop = false;
+				int direction_index = -1;
+				float direction_modifier_x = 0.0f;
+				float direction_modifier_y = 0.0f;
+				for (int j = 0; j < 4; j++)
+				{
+					if (directions[j])
+					{
+						if (j == 0 || j == 2)
+						{
+							direction_modifier_x = 1.0f;
+						}
+						else if (j == 1 || j == 3)
+						{
+							direction_modifier_x = -1.0f;
+						}
+						if (j == 0 || j == 1)
+						{
+							direction_modifier_y = 1.0f;
+						}
+						else if (j == 2 || j == 3)
+						{
+							direction_modifier_y = -1.0f;
+						}
+					}
+				}
+				if (adx > ady)
+				{
+					max_pixels = adx * 100.0f;
+				}
+				else if (ady > adx)
+				{
+					max_pixels = ady * 100.0f;
+				}
+				else if (adx == ady)
+				{
+					max_pixels = adx * 100.0f; // or max_pixels = ((y2 - y1) * 100) - 1; there is no matter
+				}
+
+				for (int i = 0; i < int(max_pixels); i++)
+				{
+					if (break_loop) { break; px_quantity = i; }
+					bool x_cycle = false, y_cycle = false;
+					i % 2 == start_y ? x_cycle = true : x_cycle = false;
+					i % 2 == start_x ? y_cycle = true : y_cycle = false;
+					if (x_cycle == true)
+					{
+						if (x_y_outweight == false)
+						{
+							for (int x = 0; x < cl_x_add; x++)
+							{
+								float x_increasement = PIXEL_SIZE_CU * direction_modifier_x, y_increasement = PIXEL_SIZE_CU * direction_modifier_x;
+								if (check_number_type(x_addition) == false)// floor(fabs(y_addition)) will detect the last loop and that's why there is ceil in for-i loop statement.
+								{ //if statement checks the last loop of for-i loop because only last pixel's size must be changed in x_cycle or y_cycle
+									if (x == floor(fabs(x_addition)))
+									{
+										x_increasement = (fabs(x_addition) - floor(fabs(x_addition))) * PIXEL_SIZE_CU * direction_modifier_x;
+									}
+									else if (x != floor(fabs(x_addition)))// if the loop is not the last then it doesn't change pixels' size.
+									{
+										x_increasement = PIXEL_SIZE_CU * direction_modifier_x;
+									}
+								}
+								check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
+								if (x_increasement == 0.0f && y_increasement == 0.0f)
+								{
+									px_quantity = i;
+									break_loop = true;
+									break;
+								}
+								x_modifier += x_increasement;
+								if (x == floor(fabs(x_addition)))
+								{
+									draw_pixel(x1 + x_modifier, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
+									if (save_pixels_matrix == true)
+									{
+										matrix_pixels[g].x = x1 + x_modifier;
+										matrix_pixels[g].y = y1 + y_modifier;
+									}
+									if (save_pixels_matrix_x_cycle == true)
+									{
+										matrix_pixels_x_cycle[p].x = x1 + x_modifier;
+										matrix_pixels_x_cycle[p].y = y1 + y_modifier;
+									}
+									g += 1;
+									p += 1;
+								}
+							}
+						}
+						else if (x_y_outweight == true)
+						{
+							for (int x = 0; x < 2; x++)
+							{
+								float x_increasement = PIXEL_SIZE_CU * direction_modifier_x, y_increasement = PIXEL_SIZE_CU * direction_modifier_x;
+								draw_pixel(x1 + x_modifier, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
+								if (save_pixels_matrix == true)
+								{
+									matrix_pixels[g].x = x1 + x_modifier;
+									matrix_pixels[g].y = y1 + y_modifier;
+								}
+								if (save_pixels_matrix_x_cycle == true)
+								{
+									matrix_pixels_x_cycle[p].x = x1 + x_modifier;
+									matrix_pixels_x_cycle[p].y = y1 + y_modifier;
+								}
+								g += 1;
+								p += 1;
+								check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
+								if (x_increasement == 0.0f && y_increasement == 0.0f)
+								{
+									px_quantity = i;
+									break_loop = true;
+									break;
+								}
+								x_modifier += x_increasement;
+							}
+						}
+					}
+					if (y_cycle == true)
+					{
+						if (x_y_outweight == true)
+						{
+							for (int y = 0; y < cl_y_add; y++)
+							{
+								float x_increasement = PIXEL_SIZE_CU * direction_modifier_y, y_increasement = PIXEL_SIZE_CU * direction_modifier_y;
+								if (check_number_type(y_addition) == false)
+								{
+									if (y == floor(fabs(y_addition))) // floor(fabs(y_addition)) will detect the last loop and that's why there is ceil in for-i loop statement.
+									{ //if statement checks the last loop of for-i loop because only last pixel's size must be changed in x_cycle or y_cycle
+										y_increasement = (fabs(y_addition) - floor(fabs(y_addition))) * PIXEL_SIZE_CU * direction_modifier_y;
+									}
+									else if (y != floor(fabs(y_addition))) // if the loop is not the last then it doesn't change pixels' size.
+									{
+										y_increasement = PIXEL_SIZE_CU * direction_modifier_y;
+									}
+								}
+								check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
+								if (x_increasement == 0.0f && y_increasement == 0.0f)
+								{
+									px_quantity = i;
+									break_loop = true;
+									break;
+								}
+								y_modifier += y_increasement;
+								if (y == floor(fabs(x_addition)))
+								{
+									draw_pixel(x1 + x_modifier, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
+									if (save_pixels_matrix == true)
+									{
+										matrix_pixels[g].x = x1 + x_modifier;
+										matrix_pixels[g].y = y1 + y_modifier;
+									}
+									if (save_pixels_matrix_y_cycle == true)
+									{
+										matrix_pixels_y_cycle[q].x = x1 + x_modifier;
+										matrix_pixels_y_cycle[q].y = y1 + y_modifier;
+									}
+									g += 1;
+									q += 1;
+								}
+							}
+						}
+						else if (x_y_outweight == false)
+						{
+							for (int x = 0; x < 2; x++) //+2 because of < sign in for, and because when the first pixel generates at y1+y_modifier it will not be counted in for
+							{
+								float x_increasement = PIXEL_SIZE_CU * direction_modifier_y, y_increasement = PIXEL_SIZE_CU * direction_modifier_y;
+								draw_pixel(x1 + x_modifier, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
+								if (save_pixels_matrix == true)
+								{
+									matrix_pixels[g].x = x1 + x_modifier;
+									matrix_pixels[g].y = y1 + y_modifier;
+								}
+								if (save_pixels_matrix_y_cycle == true)
+								{
+									matrix_pixels_y_cycle[q].x = x1 + x_modifier;
+									matrix_pixels_y_cycle[q].y = y1 + y_modifier;
+								}
+								g += 1;
+								q += 1;
+								check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
+								if (x_increasement == 0.0f && y_increasement == 0.0f)
+								{
+									px_quantity = i;
+									break_loop = true;
+									break;
+								}
+								y_modifier += y_increasement;
+							}
+						}
+					}
+					float x_increasement = PIXEL_SIZE_CU * direction_modifier_y, y_increasement = PIXEL_SIZE_CU * direction_modifier_y;
+					check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
+					if (x_increasement == 0.0f && y_increasement == 0.0f)
+					{
+						px_quantity = i;
+						break_loop = true;
+						break;
+					}
+					px_i = i;
+				}
+			}
+			else if (straight_line_drawing == true)
+			{
+				int max_pixels = 0;
+				if (straight_line_type == 0 || straight_line_type == 1)
+				{
+					max_pixels = ady * 10.0f;
+				}
+				else if (straight_line_type == 2 || straight_line_type == 3)
+				{
+					max_pixels = adx * 10.0f;
+				}
+				for (int x = 0; x < max_pixels; x++)
+				{
+					if (straight_line_type == 0) //down
+					{
+						float y_increasement = PIXEL_SIZE_STLN;
+						draw_pixel(x1, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
+						if (save_pixels_matrix == true)
+						{
+							matrix_pixels[g].x = x1;
+							matrix_pixels[g].y = y1 + y_modifier;
+						}
+						if (save_pixels_matrix_y_cycle == true)
+						{
+							matrix_pixels_y_cycle[q].x = x1;
+							matrix_pixels_y_cycle[q].y = y1 + y_modifier;
+						}
+						q += 1;
+						g += 1;
+						y_modifier += y_increasement;
+						if (x >= max_pixels)
+						{
+							px_quantity = x;
+							y_increasement = 0.0f;
+							y_modifier = 0.0f;
+							break;
+						}
+					}
+					else if (straight_line_type == 1) //up
+					{
+						float y_increasement = PIXEL_SIZE_STLN;
+						draw_pixel(x1, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
+						if (save_pixels_matrix == true)
+						{
+							matrix_pixels[g].x = x1;
+							matrix_pixels[g].y = y1 + y_modifier;
+						}
+						if (save_pixels_matrix_y_cycle == true)
+						{
+							matrix_pixels_y_cycle[q].x = x1;
+							matrix_pixels_y_cycle[q].y = y1 + y_modifier;
+						}
+						q += 1;
+						g += 1;
+						y_modifier -= y_increasement;
+						if (x >= max_pixels)
+						{
+							px_quantity = x;
+							y_increasement = 0.0f;
+							y_modifier = 0.0f;
+							break;
+						}
+					}
+					else if (straight_line_type == 2) //right
+					{
+						float x_increasement = PIXEL_SIZE_STLN;
+						draw_pixel(x1 + x_modifier, y1, PIXEL_SIZE, PIXEL_SIZE, color);
+						if (save_pixels_matrix == true)
+						{
+							matrix_pixels[g].x = x1 + x_modifier;
+							matrix_pixels[g].y = y1;
+						}
+						if (save_pixels_matrix_x_cycle == true)
+						{
+							matrix_pixels_x_cycle[p].x = x1 + x_modifier;
+							matrix_pixels_x_cycle[p].y = y1;
+						}
+						p += 1;
+						g += 1;
+						x_modifier += x_increasement;
+						if (x >= max_pixels)
+						{
+							px_quantity = x;
+							x_increasement = 0.0f;
+							x_modifier = 0.0f;
+							break;
+						}
+					}
+					else if (straight_line_type == 3) //left
+					{
+						float x_increasement = PIXEL_SIZE_STLN;
+						draw_pixel(x1 + x_modifier, y1, PIXEL_SIZE, PIXEL_SIZE, color);
+						if (save_pixels_matrix == true)
+						{
+							matrix_pixels[g].x = x1 + x_modifier;
+							matrix_pixels[g].y = y1;
+						}
+						if (save_pixels_matrix_x_cycle == true)
+						{
+							matrix_pixels_x_cycle[p].x = x1 + x_modifier;
+							matrix_pixels_x_cycle[p].y = y1;
+						}
+						p += 1;
+						g += 1;
+						x_modifier -= x_increasement;
+						if (x >= max_pixels)
+						{
+							px_quantity = x;
+							x_increasement = 0.0f;
+							x_modifier = 0.0f;
+							break;
+						}
+					}
+					px_i = x;
+				}
+			}
+			px_quantity = px_i;
+		}
+	public:
+		int px_quantity;
+		VERTEX matrix_pixels[MAX_STORAGE_SIZE];
+		VERTEX matrix_pixels_x_cycle[MAX_STORAGE_SIZE];
+		VERTEX matrix_pixels_y_cycle[MAX_STORAGE_SIZE];
+		float startx;
+		float starty;
+		float x2;
+		float y2;
+		float pixelsize;
+		unsigned int color;
+		bool save_pixels_position;
+		bool save_pixels_position_x_cycle;
+		bool save_pixels_position_y_cycle;
+		int thickness_l; //thickness left
+		int thickness_r; //thickness right
+		//Draw 2d vector.
+		VECTOR_SAVE_PIXELS_POSITIONS(float startx_, float starty_, float x2_, float y2_, unsigned int color_, bool initial_draw = true, int thickness_l_ = 1, int thickness_r_ = 1, bool save_pixels_position_ = false, bool save_pixels_position_x_cycle_ = false, bool save_pixels_position_y_cycle_ = false)
+		{
+			startx = startx_;
+			starty = starty_;
+			x2 = x2_;
+			y2 = y2_;
+			color = color_;
+			save_pixels_position = save_pixels_position_;
+			save_pixels_position_x_cycle = save_pixels_position_x_cycle_;
+			save_pixels_position_y_cycle = save_pixels_position_y_cycle_;
+			thickness_l = thickness_l_;
+			thickness_r = thickness_r_;
+			if (initial_draw == true)
+			{
+				draw_();
+			}
+		}
+		VECTOR_SAVE_PIXELS_POSITIONS(VERTEX& vx1, VERTEX& vx2, unsigned int color_, bool initial_draw = true)
+		{
+			startx = vx1.x;
+			starty = vx1.y;
+			x2 = vx2.x;
+			y2 = vx2.y;
+			color = color_;
+			if (initial_draw == true)
+			{
+				draw_();
+			}
+		}
+		//Draw function
+		void draw_()
+		{
+			for (int i = 0; i < thickness_l + thickness_r + 1; i++) // +1 because thickness_l and thickness_r are by default zero and by default normal vector must be build and therefore to start for-loop with 1 loop.
+			{
+				//this if-statements are to merge two expected for-loops(one for-loop is for left thickness and the second for-loop is for right thickness) to one for-loop
+				if (i < thickness_l) //this is to draw left thickness
+				{
+					draw_vector_(startx - (0.1f * i), starty + (0.1f * i), x2 - (0.1f * i), y2 + (0.1f * i), pixelsize, color, save_pixels_position, save_pixels_position_x_cycle, save_pixels_position_y_cycle);
+				}
+				if (i > thickness_l && i < thickness_r + thickness_r)
+				{
+					draw_vector_(startx + (0.1f * (i - thickness_l)), starty - (0.1f * (i - thickness_l)), x2 + (0.1f * (i - thickness_l)), y2 - (0.1f * (i - thickness_l)), pixelsize, color, save_pixels_position, save_pixels_position_x_cycle, save_pixels_position_y_cycle);
+				}
+			}
+		}
+	};
 }
 static void draw_coordinate_grid(unsigned int color)
 {
@@ -1048,54 +1515,28 @@ namespace triangle2d
 		}
 		void draw_triangle(float a, float b, float c, float h_apex, float x, float y, unsigned int color, bool filled)
 		{
-			vector2d::VECTOR v1(x - c / 2.0f, y, x + c / 2.0f, y, color, true, 1, 1, true, true, true); v1.draw(); //draw horizontal c-value line
-			vector2d::VECTOR v2(x - c / 2.0f, y, (x - c / 2.0f) + a, y + h_apex, color, true, 1, 1, true, true, true); v2.draw(); //draw horizontal a-value line
-			vector2d::VECTOR v3(x + c / 2.0f, y, (x + c / 2.0f) - b, y + h_apex, color, true, 1, 1, true, true, true); v3.draw(); //draw horizontal b-value line
-			/*VERTEX v1_x_cycle[2500];
-			VERTEX v1_y_cycle[2500];
-			VERTEX v2_x_cycle[2500];
-			VERTEX v2_y_cycle[2500];
-			VERTEX v3_x_cycle[2500];
-			VERTEX v3_y_cycle[2500];*/
-			float biggest_side = 0.0f;
-			if (a > b)
-			{
-				biggest_side = a;
-			}
-			else if (a < b)
-			{
-				biggest_side = b;
-			}
-			else if (a == b)
-			{
-				biggest_side = a; // or b, there is no difference
-			}
-			/*for (int i = 0; i < 2500; i++)
-			{
-				v1_x_cycle[i].x = v1.matrix_pixels_x_cycle_x[i];
-				v1_x_cycle[i].y = v1.matrix_pixels_x_cycle_y[i];
-				v1_y_cycle[i].x = v1.matrix_pixels_y_cycle_x[i];
-				v1_y_cycle[i].y = v1.matrix_pixels_y_cycle_y[i];
-				v2_x_cycle[i].x = v2.matrix_pixels_x_cycle_x[i];
-				v2_x_cycle[i].y = v2.matrix_pixels_x_cycle_y[i];
-				v2_y_cycle[i].x = v2.matrix_pixels_y_cycle_x[i];
-				v2_y_cycle[i].y = v2.matrix_pixels_y_cycle_y[i];
-				v3_x_cycle[i].x = v3.matrix_pixels_x_cycle_x[i];
-				v3_x_cycle[i].y = v3.matrix_pixels_x_cycle_y[i];
-				v3_y_cycle[i].x = v3.matrix_pixels_y_cycle_x[i];
-				v3_y_cycle[i].y = v3.matrix_pixels_y_cycle_y[i];
-			}*/
-
+			vector2d::VECTOR_SAVE_PIXELS_POSITIONS v1(x - c / 2.0f, y, x + c / 2.0f, y, color, true, 1, 1, true, true, true); //c-line
+			vector2d::VECTOR_SAVE_PIXELS_POSITIONS v2(x - c / 2.0f, y, (x - c / 2.0f) + a, y + h_apex, color, true, 1, 1, true, true, true); //a-line
+			vector2d::VECTOR_SAVE_PIXELS_POSITIONS v3(x + c/2.0f, y, v2.x2, v2.y2, color, true, 1, 1, true, true, true); //b-line
+			//Drawing triangle works simply by drawing the base line(c-line), then drawing a- or b-line depending on which is bigger and connecting them to each other.
+			//Filling triangle algorithm works simply by connecting all c-line pixels x, y with a-line only y_cycle pixels x, y.
+			float v1y = v1.matrix_pixels[0].y; 
 			if (filled == true)
 			{
 				if (a > b)
 				{
-					for (int j = 0; j < a * 100.0f; j++)
+					for (int j = 0; j < a * 10.0f; j++)
 					{
-						for (int i = 0; i < (v2.matrix_pixels_x_cycle[j].y - v1.matrix_pixels_x_cycle[j].y) * 10.0f; i++)
-						{
-							draw_pixel(v2.matrix_pixels_x_cycle[j].x, v2.matrix_pixels_x_cycle[j].y - i * 0.1f, PIXEL_SIZE, PIXEL_SIZE, color);
-						}
+						float mxp_v1 = v1.matrix_pixels[j].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
+						vector2d::VECTOR v4(mxp_v1, v1y, mxp_v1, v2.matrix_pixels_y_cycle[j].y, color, true);
+						//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
+					}
+					for (int z = (a * 10.0f)-1; z < (a * 10.0f) + v3.px_quantity/2; z++)
+					{
+						int r = int(v3.px_quantity/2 - (z - ((a * 10.0f) - 1)));
+						float mxp_v1 = v1.matrix_pixels[z].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
+						vector2d::VECTOR v4(mxp_v1, v1y, mxp_v1, v3.matrix_pixels_y_cycle[r].y, color, true);
+						//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
 					}
 				}
 			}
