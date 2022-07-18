@@ -1516,29 +1516,39 @@ namespace triangle2d
 		void draw_triangle(float a, float b, float c, float h_apex, float x, float y, unsigned int color, bool filled)
 		{
 			vector2d::VECTOR_SAVE_PIXELS_POSITIONS v1(x - c / 2.0f, y, x + c / 2.0f, y, color, true, 1, 1, true, true, true); //c-line
-			vector2d::VECTOR_SAVE_PIXELS_POSITIONS v2(x - c / 2.0f, y, (x - c / 2.0f) + a, y + h_apex, color, true, 1, 1, true, true, true); //a-line
-			vector2d::VECTOR_SAVE_PIXELS_POSITIONS v3(x + c/2.0f, y, v2.x2, v2.y2, color, true, 1, 1, true, true, true); //b-line
+			vector2d::VECTOR_SAVE_PIXELS_POSITIONS v2(x - c / 2.0f, y, (x - c / 2.0f) + a, y + h_apex, color, false, 1, 1, true, true, true); //a-line
+			vector2d::VECTOR_SAVE_PIXELS_POSITIONS v3(x + c / 2.0f, y, v2.x2, v2.y2, color, false, 1, 1, true, true, true); //b-line
 			//Drawing triangle works simply by drawing the base line(c-line), then drawing a- or b-line depending on which is bigger and connecting them to each other.
 			//Filling triangle algorithm works simply by connecting all c-line pixels x, y with a-line only y_cycle pixels x, y.
-			float v1y = v1.matrix_pixels[0].y; 
+			float v1y = v1.matrix_pixels[0].y;
+			if (a > b)
+			{
+				v2.startx = x - c / 2.0f; v2.starty = y; v2.x2 = (x - c / 2.0f) + a; v2.y2 = y + h_apex; color; v2.draw_();
+				v3.startx = x + c / 2.0f; v3.starty = y; v3.x2 = v2.x2; v3.y2 = v2.y2; v3.draw_();
+			}
+			if (a < b)
+			{
+				float a_ = c - b;
+				v2.startx = x - c / 2.0f; v2.starty = y; v2.x2 = (x - c / 2.0f) + a_; v2.y2 = y + h_apex; color; v2.draw_();
+				v3.startx = x + c / 2.0f; v3.starty = y; v3.x2 = v2.x2; v3.y2 = v2.y2; v3.draw_();
+				//v3.startx = x + c / 2.0f; v3.starty = y; v3.x2 = (x + c / 2.0f) - b; v3.y2 = y + h_apex; color; v3.draw_();
+				//v2.startx = x - c / 2.0f; v2.starty = y; v2.x2 = v3.x2; v2.y2 = v3.y2; v2.draw_();
+			}
 			if (filled == true)
 			{
-				if (a > b)
+				for (int j = b * 10.0f; j > 0; j--)
 				{
-					for (int j = 0; j < a * 10.0f; j++)
-					{
-						float mxp_v1 = v1.matrix_pixels[j].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
-						vector2d::VECTOR v4(mxp_v1, v1y, mxp_v1, v2.matrix_pixels_y_cycle[j].y, color, true);
-						//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
-					}
-					for (int z = (a * 10.0f)-1; z < (a * 10.0f) + v3.px_quantity/2; z++)
-					{
-						int r = int(v3.px_quantity/2 - (z - ((a * 10.0f) - 1)));
-						float mxp_v1 = v1.matrix_pixels[z].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
-						vector2d::VECTOR v4(mxp_v1, v1y, mxp_v1, v3.matrix_pixels_y_cycle[r].y, color, true);
-						//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
-					}
+					float mxp_v1 = v1.matrix_pixels[int(v1.px_quantity-j)].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
+					vector2d::VECTOR v4(mxp_v1, v1y, mxp_v1, v3.matrix_pixels_y_cycle[j].y, color, true);
+					//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
 				}
+				//for (int z = (a * 10.0f) - 1; z < (a * 10.0f) + v3.px_quantity / 2; z++)
+				//{
+				//	int r = int(v3.px_quantity / 2 - (z - ((a * 10.0f) - 1)));
+				//	float mxp_v1 = v1.matrix_pixels[z].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
+				//	vector2d::VECTOR v4(mxp_v1, v1y, mxp_v1, v3.matrix_pixels_y_cycle[r].y, color, true);
+				//	//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
+				//}
 			}
 		}
 	};
