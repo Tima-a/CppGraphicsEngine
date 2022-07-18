@@ -1536,19 +1536,31 @@ namespace triangle2d
 			}
 			if (filled == true)
 			{
-				for (int j = b * 10.0f; j > 0; j--)
+				if (a > b)
 				{
-					float mxp_v1 = v1.matrix_pixels[int(v1.px_quantity-j)].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
-					vector2d::VECTOR v4(mxp_v1, v1y, mxp_v1, v3.matrix_pixels_y_cycle[j].y, color, true);
-					//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
+					for (int j = 0; j < a * 10.0f; j++)
+					{
+						float mxp_v1 = v1.matrix_pixels[j].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
+						vector2d::VECTOR v4(mxp_v1, v1y, mxp_v1, v2.matrix_pixels_y_cycle[j].y, color, true);
+						//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
+					}
+					for (int z = (a * 10.0f) - 1; z < (a * 10.0f) + v3.px_quantity / 2; z++)
+					{
+						int r = int(v3.px_quantity / 2 - (z - ((a * 10.0f) - 1)));
+						float mxp_v1 = v1.matrix_pixels[z].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
+						vector2d::VECTOR v4(mxp_v1, v1y, mxp_v1, v3.matrix_pixels_y_cycle[r].y, color, true);
+						//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
+					}
 				}
-				//for (int z = (a * 10.0f) - 1; z < (a * 10.0f) + v3.px_quantity / 2; z++)
-				//{
-				//	int r = int(v3.px_quantity / 2 - (z - ((a * 10.0f) - 1)));
-				//	float mxp_v1 = v1.matrix_pixels[z].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
-				//	vector2d::VECTOR v4(mxp_v1, v1y, mxp_v1, v3.matrix_pixels_y_cycle[r].y, color, true);
-				//	//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
-				//}
+				if (a < b)
+				{
+					for (int j = b * 10.0f; j > 0; j--)
+					{
+						float mxp_v1 = v1.matrix_pixels[int(v1.px_quantity - j)].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
+						vector2d::VECTOR v4(mxp_v1, v1y, mxp_v1, v3.matrix_pixels_y_cycle[j].y, color, true);
+						//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
+					}
+				}
 			}
 		}
 	};
