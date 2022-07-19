@@ -1,5 +1,3 @@
-#include <cmath>
-#include <time.h>
 #include <complex> //for complex numbers
 const float PI = 3.1f;
 const float HALF_PI = 1.5f;
@@ -59,7 +57,7 @@ static unsigned int rgb(unsigned int r, unsigned int g, unsigned int b)
 static bool neg_or_pos_num(float num)
 {
 	//neg - false, pos - true
-	if (num / 1.0f == fabs(num))
+	if (num >= 0.0f)
 	{
 		return true;
 	}
@@ -134,7 +132,7 @@ float truncA(float num, int digit)
 	numra = int(numa); numrfa = float(numra) / numb;
 	return numrfa;
 }
-static float get_quantity_of_digits(float a, bool after_dot)
+static int get_quantity_of_digits(float a, bool after_dot)
 {
 	int digits_num_after_dot = 0;
 	int digits_num_before_dot = 0;
@@ -184,7 +182,7 @@ static float make_float_divisible(float a, float b) //makes 1.666666666666666666
 	{
 		for (int i = 0; i < 9; i++)
 		{
-			if (get_quantity_of_digits((a + i * 0.01f) / b, true) < 39)
+			if (get_quantity_of_digits((a + i * 0.01f) / b, true) < 39) //39 is the min quantity of digits in infinite fraction
 			{
 				return (a + i * 0.01f) / b;
 				break;
@@ -208,6 +206,20 @@ static bool check_number_type(float num)
 	{
 		return false; // false
 	}
+}
+int combine_ints(int a, int b) //function works by multiplying the bigger number by 10 in power of the quantity of digits of lesser number and adding the lesser number to given result
+{ //Ex:combine_ints(932,124) = 932 * 10^3 + 124 = 932000+124=932124
+	int j = get_quantity_of_digits(b, false);
+	int d = b;
+	if (a < 0)
+	{
+		d = -1 * b;
+	}
+	if (a > 0)
+	{
+		d = b;
+	}
+	return a * pow(10, j) + d;
 }
 static float convert_pixels_to_metres(int px)
 {
