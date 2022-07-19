@@ -1,4 +1,3 @@
-
 static float render_scale = 0.01f;
 static float gravity = -9.81f;
 static float Gravitational_constant = 0.000000000016f;
@@ -1104,7 +1103,7 @@ namespace vector2d
 									break;
 								}
 								x_modifier += x_increasement;
-								if (x == floor(fabs(x_addition)))
+								if (x == floor(fabs(cl_x_add))-1)
 								{
 									draw_pixel(x1 + x_modifier, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
 									if (save_pixels_matrix == true)
@@ -1181,7 +1180,7 @@ namespace vector2d
 									int h = 0;
 								}
 								y_modifier += y_increasement;
-								if (y == floor(fabs(cl_y_add))-1)
+								if (y == floor(fabs(cl_y_add)) - 1)
 								{
 									draw_pixel(x1 + x_modifier, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
 									if (save_pixels_matrix == true)
@@ -1356,9 +1355,13 @@ namespace vector2d
 				}
 			}
 			px_quantity = px_i;
+			px_quantity_x_cycle = px_quantity / 2;
+			px_quantity_y_cycle = px_quantity / 2;
 		}
 	public:
 		int px_quantity;
+		int px_quantity_x_cycle;
+		int px_quantity_y_cycle;
 		VERTEX matrix_pixels[MAX_STORAGE_SIZE];
 		VERTEX matrix_pixels_x_cycle[MAX_STORAGE_SIZE];
 		VERTEX matrix_pixels_y_cycle[MAX_STORAGE_SIZE];
@@ -1520,29 +1523,58 @@ namespace triangle2d
 		void draw_triangle(float a, float b, float c, float h_apex, float x, float y, unsigned int color, bool filled)
 		{
 			vector2d::VECTOR_SAVE_PIXELS_POSITIONS v1(x - c / 2.0f, y, x + c / 2.0f, y, color, true, 1, 1, true, true, true); //c-line
-			vector2d::VECTOR_SAVE_PIXELS_POSITIONS v2(x - c / 2.0f, y, (x - c / 2.0f) + a, y + h_apex, color, true, 1, 1, true, true, true); //a-line
-			vector2d::VECTOR_SAVE_PIXELS_POSITIONS v3(x + c/2.0f, y, v2.x2, v2.y2, color, true, 1, 1, true, true, true); //b-line
+			vector2d::VECTOR_SAVE_PIXELS_POSITIONS v2(x - c / 2.0f, y, (x - c / 2.0f) + a, y + h_apex, color, false, 1, 1, true, true, true); //a-line
+			vector2d::VECTOR_SAVE_PIXELS_POSITIONS v3(x + c / 2.0f, y, v2.x2, v2.y2, color, false, 1, 1, true, true, true); //b-line
+			float a_fx = 0.0f;
+			if (a > b)
+			{
+				a_fx = a;
+				v2.startx = x - c / 2.0f; v2.starty = y; v2.x2 = (x - c / 2.0f) + a; v2.y2 = y + h_apex; color; v2.draw_();
+				v3.startx = x + c / 2.0f; v3.starty = y; v3.x2 = v2.x2; v3.y2 = v2.y2; v3.draw_();
+				
+			}
+			if (a < b)
+			{
+				a_fx = c-b;
+				v2.startx = x - c / 2.0f; v2.starty = y; v2.x2 = (x - c / 2.0f) + a_fx; v2.y2 = y + h_apex; color; v2.draw_();
+				v3.startx = x + c / 2.0f; v3.starty = y; v3.x2 = v2.x2; v3.y2 = v2.y2; v3.draw_();
+			}
 			//Drawing triangle works simply by drawing the base line(c-line), then drawing a- or b-line depending on which is bigger and connecting them to each other.
 			//Filling triangle algorithm works simply by connecting all c-line pixels x, y with a-line only y_cycle pixels x, y.
-			float v1y = v1.matrix_pixels[0].y; 
+			float v1y = v1.matrix_pixels[0].y;
 			if (filled == true)
 			{
-				if (a > b)
+				if (a < b)
 				{
-					for (int j = 0; j < a * 10.0f; j++)
+					for (int j = 0; j < a_fx * 10.0f; j++)
 					{
 						float mxp_v1 = v1.matrix_pixels[j].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
 						vector2d::VECTOR v4(mxp_v1, v1y, mxp_v1, v2.matrix_pixels_y_cycle[j].y, color, true);
 						//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
 					}
-					for (int z = (a * 10.0f)-1; z < (a * 10.0f) + v3.px_quantity/2; z++)
+					for (int z = (a_fx * 10.0f) - 1; z < (a_fx * 10.0f) + v3.px_quantity / 2; z++)
 					{
-						int r = int(v3.px_quantity/2 - (z - ((a * 10.0f) - 1)));
+						int r = int(v3.px_quantity / 2 - (z - ((a_fx * 10.0f) - 1)));
 						float mxp_v1 = v1.matrix_pixels[z].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
 						vector2d::VECTOR v4(mxp_v1, v1y, mxp_v1, v3.matrix_pixels_y_cycle[r].y, color, true);
 						//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
 					}
 				}
+				//if (a < b)
+				//{
+				//	for (int j = v3.px_quantity_y_cycle; j > 0; j--)
+				//	{
+				//		float mxp_v1 = v1.matrix_pixels[int(v1.px_quantity - j)].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
+				//		vector2d::VECTOR v4(mxp_v1, v1y, mxp_v1, v3.matrix_pixels_y_cycle[j].y, color, true);
+				//		//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
+				//	}
+					//for (int z = v2.px_quantity_y_cycle; z > 0; z--)
+					//{
+					//	float mxp_v1 = v1.matrix_pixels[z].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
+					//	vector2d::VECTOR v4(mxp_v1, v1y, mxp_v1, v2.matrix_pixels_y_cycle[z].y, color, true);
+					//	//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
+					//}
+				//}
 			}
 		}
 	};
@@ -1556,7 +1588,7 @@ namespace ellipse2d
 		{
 			float angle = 0.0f;
 			bool middle_line_drawn = false;
-			float j = rb; //temp_j is pre-cycle y value to check if y to place vectors is changed; j is by default is the highest point of the circle from circle is starting to be drawn
+			float j = rb; //temp_j is pre-cycle y value to check if y to place vectors is changed; j is by default is the highest point of the circle
 			for (int i = 0; i < px_quantity_; i++)
 			{
 				int b = 0;
@@ -1567,7 +1599,7 @@ namespace ellipse2d
 				float y2 = rb * fast_cos(circle_trigonometric_var);
 				if (filled == true)
 				{
-					fx2 = fast_trunc_ellipse_function(fabs(x2)); //rounds to tenths(because of coordinate unit and pixel proportion which is 0.1f) here to place certain number of pixels for every line to fill circl
+					fx2 = fast_trunc_ellipse_function(fabs(x2)); //rounds to tenths(because of coordinate unit and pixel proportion which is 0.1f) here to place certain number of pixels for every line to fill circle
 					temp_j = y2; //temp_j is temperate y value to check y current cycle status
 				}
 				if (filled == false)
