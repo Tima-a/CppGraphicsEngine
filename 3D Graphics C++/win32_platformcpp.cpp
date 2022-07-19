@@ -10,8 +10,16 @@
 #define yellow 0xffff00
 #define black 0
 #define PIXEL_SIZE 0.01f
+#define PIXEL_SIZE_CU 0.05f
+#define PIXEL_SIZE_STLN 0.1f
 #define pi 3.14f
 #define d_pi 6.28f
+#define MAX_STORAGE_SIZE 5000
+#define up_ 1
+#define right_ 2
+#define left_ 3
+#define down_ 4
+//10 million
 static bool running = true;
 
 struct Render
