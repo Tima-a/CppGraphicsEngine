@@ -21,7 +21,12 @@
 #define down_ 4
 //10 million
 static bool running = true;
-
+struct Screen
+{
+	bool update_screen = false;
+	unsigned int scr_refresh_color = black;
+};
+Screen screen;
 struct Render
 {
 	void* memory;
@@ -37,10 +42,9 @@ static struct gTime
 	float delta_time;
 };
 gTime gtime;
-
-#include <vector>
-template <class T>
-std::vector<T> name;
+//#include <vector>
+//template <class T>
+//std::vector<T> name;
 #include "renderering.cpp"
 #include <time.h>
 #include "game.cpp"
@@ -117,6 +121,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 			DispatchMessage(&message);
 		}
 		//Simulate
+		refresh_screen(screen.scr_refresh_color);
 		simulategame();
 		//Creating Window
 		StretchDIBits(hdc, 0, 0, render.width, render.height, 0, 0, render.width, render.height, render.memory, &render.bitmap_info, DIB_RGB_COLORS, SRCCOPY);
