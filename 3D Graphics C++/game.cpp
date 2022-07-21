@@ -1,23 +1,22 @@
+bool invisibility = true;
+float xl = 0.0f;
 static void simulategame()
 {
-	//ellipse2d::ELLIPSE e1(0.0f, 0.0f, 30.0f, 20.0f, blue, 3600, true, true, false, false, true);
-	//for (int p = 0; p < 10; p++)
+	//ellipse2d::ELLIPSE e1(0.0f, 0.0f, 1.0f, 1.0f, blue, 3600, true, true);
+	triangle2d::TRIANGLE t1(15.0f, 25.0f, 20.0f, 15.0f, 0.0f, 0.0f, white, true, true);
+	//vector2d::A_VECTOR v1(-10.0f, 0.0f, 5.0f, 15.0f, blue, true, 1, 1, true, true, true);
+	//for (int i = 0; i < v1.px_quantity; i++)
 	//{
-	triangle2d::TRIANGLE t1(16.0f, 13.0f, 20.0f, 12.0f, 0.0f, 0.0f, white, true);
+	//	draw_pixel(v1.matrix_pixels_x_cycle[i].x, v1.matrix_pixels_x_cycle[i].y+5.0f, PIXEL_SIZE, PIXEL_SIZE, yellow);
 	//}
-//	vector2d::VECTOR_SAVE_PIXELS_POSITIONS v3(20.0f, 0.0f, -6.0f, 12.0f, red, true, 1, 1, true, true, true); //b-line
-	//vector2d::VECTOR v4(-3.7f, 0.0f, -3.8f, 4.1f, white, true);
-	//vector2d::VECTOR_SAVE_PIXELS_POSITIONS v1(0.0f, 0.0f, 10.0f, 10.0f, white, true, 1, 1, true, true, true);
-	draw_coordinate_grid(white);
-	//for (int z = 0; z < 10000; z++)
+	//for (int i = 0; i < v1.px_quantity; i++)
 	//{
+	//	draw_pixel(v1.matrix_pixels_y_cycle[i].x, v1.matrix_pixels_y_cycle[i].y + 10.0f, PIXEL_SIZE, PIXEL_SIZE, yellow);
 	//}
-	//vector2d::VECTOR v1(0.0f, 0.0f, 0.0f, 1.0f, red, true);
-	//for (int i = 0; i < 10; i++)
-	//{
-	//	draw_pixel(0.0f+i * 0.1f, 0.0f + i * 0.1f, PIXEL_SIZE, PIXEL_SIZE, white);
-	//}
-	//float n = make_float_divisible(10.0f, 3.0f);
+	//vector2d::A_VECTOR v2(10.0f, 0.0f, 20.0f, 15.0f, blue, true, 1, 1, true, true, true);
+	//vector2d::A_VECTOR v2(10.0f, 0.0f, 20.0f, 15.0f, blue, true, 1, 1, true, true, true);
+	//draw_coordinate_grid(white);
 	//HWND hWnd = FindWindow("Game Window Class", "Tic Tac Toe");
 	//MessageBox(hWnd, "Error because of vector", "Error", 0x00000000L);
+	update_screen(black);
 }
