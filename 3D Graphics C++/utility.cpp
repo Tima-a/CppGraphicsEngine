@@ -1,4 +1,5 @@
 #include <complex> //for complex numbers
+#include <time.h>
 const float PI = 3.1f;
 const float HALF_PI = 1.5f;
 const float DOUBLE_PI = 6.2f;
