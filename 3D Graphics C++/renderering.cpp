@@ -2,15 +2,24 @@ static float render_scale = 0.01f;
 static float gravity = -9.81f;
 static float Gravitational_constant = 0.000000000016f;
 //Set window screen color
-static void clear_screen(unsigned int color) // accessing struct to an argument, to contrinue
+static void update_screen(unsigned int color) // processing screen visibility. This function is done to place update_screen function to the bottom of the code.
 {
-	unsigned int* pixel = (unsigned int*)render.memory;
-	for (int y = 0; y < render.height; y++)
+	screen.update_screen = true;
+	screen.scr_refresh_color = color;
+}
+static void refresh_screen(unsigned int color)
+{
+	if (screen.update_screen)
 	{
-		for (int x = 0; x < render.width; x++)
+		unsigned int* pixel = (unsigned int*)render.memory;
+		for (int y = 0; y < render.height; y++)
 		{
-			*pixel++ = color;
+			for (int x = 0; x < render.width; x++)
+			{
+				*pixel++ = screen.scr_refresh_color;
+			}
 		}
+		screen.update_screen = false;
 	}
 }
 //Draw pixel on x, y positions
@@ -57,14 +66,14 @@ namespace rectangle
 		float b;
 		unsigned int color;
 		//Draw rectangle
-		RECT(float x_, float y_, float a_, float b_, unsigned int color_, bool initial_draw = true)
+		RECT(float x_, float y_, float a_, float b_, unsigned int color_, bool visible = true)
 		{
 			x = x_;
 			y = y_;
 			a = a_;
 			b = b_;
 			color = color_;
-			if (initial_draw == true)
+			if (visible == true)
 			{
 				draw_rect(x_, y_, a_, b_, color_);
 			}
@@ -234,9 +243,10 @@ namespace vector2d
 				draw_just_pixel = true;
 			}
 			int i_px = 0;
-			float x_modifier = 0.0f, y_modifier = 0.0f;
 			float adx = fabs(x2 - x1);
 			float ady = fabs(y2 - y1);
+			float x_modifier = 0.0f, y_modifier = 0.0f;
+
 			if (straight_line_drawing == false && draw_just_pixel == false)
 			{
 				fabs(x1) > fabs(x2) && fabs(y1) > fabs(y2) ? xy_swap = true : xy_swap = false;
@@ -259,12 +269,12 @@ namespace vector2d
 				dx < 0.0f && dy > 0.0f ? directions[1] = true : directions[1] = false;
 				dx > 0.0f && dy < 0.0f ? directions[2] = true : directions[2] = false;
 				dx < 0.0f && dy < 0.0f ? directions[3] = true : directions[3] = false;
-				//for (int i = 0; i < 5; i++)
-				//{
-				//	draw_pixel(x1, y1 + i, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
-				//	draw_pixel(x2, y2 + i, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
-				//}
-				//draw_pixel(0.0f, 0.0f, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
+				for (int i = 0; i < 5; i++)
+				{
+					draw_pixel(x1, y1 + i, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
+					draw_pixel(x2, y2 + i, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
+				}
+				draw_pixel(0.0f, 0.0f, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
 				float x_addition = 1.0f, y_addition = 1.0f;
 				int start_x = 0, start_y = 0;
 				fabs(x2) > fabs(y2) ? x_addition = make_float_divisible(fabs(adx), fabs(ady)) * 2.0f : y_addition = make_float_divisible(fabs(ady), fabs(adx)) * 2.0f;
@@ -344,10 +354,7 @@ namespace vector2d
 									break;
 								}
 								x_modifier += x_increasement;
-								if (x == floor(fabs(x_addition)))
-								{
-									draw_pixel(x1 + x_modifier, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
-								}
+							    draw_pixel(x1 + x_modifier, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
 							}
 						}
 						else if (x_y_outweight == true)
@@ -393,10 +400,7 @@ namespace vector2d
 									break;
 								}
 								y_modifier += y_increasement;
-								if (y == floor(fabs(x_addition)))
-								{
-									draw_pixel(x1 + x_modifier, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
-								}
+								draw_pixel(x1 + x_modifier, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
 							}
 						}
 						else if (x_y_outweight == false)
@@ -468,169 +472,89 @@ namespace vector2d
 				}
 			}
 			px_quantity = i_px;
+			px_quantity_x_cycle = i_px / 2;
+			px_quantity_y_cycle = i_px / 2;
 		}
 	public:
 		int px_quantity;
-		float startx;
-		float starty;
+		int px_quantity_x_cycle;
+		int px_quantity_y_cycle;
+		float x1;
+		float y1;
 		float x2;
+		char name[20];
 		float y2;
-		float pixelsize;
+		bool visible;
 		unsigned int color;
-		int thickness_l; //thickness left
-		int thickness_r; //thickness right
+		int thickness_l = 1; //thickness left
+		int thickness_r = 1; //thickness right
 		//Draw 2d vector.
-		VECTOR(float startx_, float starty_, float x2_, float y2_, unsigned int color_, bool initial_draw = true, int thickness_l_ = 1, int thickness_r_ = 1)
+		VECTOR(float x1_, float y1_, float x2_, float y2_, unsigned int color_, bool visible = true)
 		{
-			startx = startx_;
-			starty = starty_;
+			x1 = x1_;
+			y1 = y1_;
 			x2 = x2_;
 			y2 = y2_;
 			color = color_;
-			thickness_l = thickness_l_;
-			thickness_r = thickness_r_;
-			if (initial_draw == true)
+			if (visible == true)
 			{
 				draw();
+				visible = true;
 			}
 		}
-		VECTOR(VERTEX& vx1, VERTEX& vx2, unsigned int color_, bool initial_draw = true)
+		VECTOR()
 		{
-			startx = vx1.x;
-			starty = vx1.y;
+
+		}
+		VECTOR(VERTEX& vx1, VERTEX& vx2, unsigned int color_, bool visible = true)
+		{
+			x1 = vx1.x;
+			y1 = vx1.y;
 			x2 = vx2.x;
 			y2 = vx2.y;
 			color = color_;
-			if (initial_draw == true)
+			if (visible == true)
 			{
 				draw();
-			}
-		}
-		void create_projection(bool vh, bool ur, static int color) // vh - false - x, true - y; vh - true, if ur - false - left, ur - true - right; vh - false, if ur - false - bootom, if ur - true - top 
-		{
-			if (vh == false)
-			{
-				if (ur == false)
-				{
-					vector2d::VECTOR vprojectionx(startx, starty, x2, starty, color);
-				}
-				if (ur == true)
-				{
-					vector2d::VECTOR vprojectionx(startx, y2, x2, y2, color);
-				}
-			}
-			if (vh == true)
-			{
-				if (ur == false)
-				{
-					vector2d::VECTOR vprojectiony(startx, starty, startx, y2, color);
-				}
-				if (ur == true)
-				{
-					vector2d::VECTOR vprojectiony(x2, starty, x2, y2, color);
-				}
+				visible = true;
 			}
 		}
 		//Calculate X Center of a vector
 		float centerx()
 		{
-			return (x2 - startx) / 2.0f;
+			return (x2 - x1) / 2.0f;
 		}
 		//Calculate Y Center of a vector
 		float centery()
 		{
-			return (y2 - starty) / 2.0f;
+			return (y2 - y1) / 2.0f;
 		}
 		//Calculate Vector's magnitude in pixels
 		float magnitude()
 		{
-			return px_quantity + 2; // 2 is start and end pixels of the vector
-		}
-		//Calculate Vector's angle
-		float angle()
-		{
-			float xbase = false;
-			float x1 = startx;
-			float y1 = starty;
-			float x2_ = x2;
-			float y2_ = y2;
-			float ybase = false;
-			bool xy_swap = false;
-			float theta = atan((y2 - starty) / (x2 - startx)) * 180.0f / pi;
-			fabs(x1) > fabs(x2_) && fabs(y1) > fabs(y2_) ? xy_swap = true : xy_swap = false;
-			if (xy_swap == true)
-			{
-				swap(x2_, x1);
-				swap(y2_, y1);
-			}
-			bool directions[4]
-			{
-				false, // up_right
-				false, // up_left
-				false, // down_right
-				false // down_left
-			};
-			float dx = x2_ - x1;
-			float dy = y2_ - y1;
-			dx > 0.0f && dy > 0.0f ? directions[0] = true : directions[0] = false;
-			dx < 0.0f && dy > 0.0f ? directions[1] = true : directions[1] = false;
-			dx > 0.0f && dy < 0.0f ? directions[2] = true : directions[2] = false;
-			dx < 0.0f && dy < 0.0f ? directions[3] = true : directions[3] = false;
-			if (dx != dy)
-			{
-				if (directions[2] == true)
-				{
-					theta = 90.0f + fabs(theta);
-				}
-				if (directions[3] == true)
-				{
-					theta = 270.0f - fabs(theta);
-				}
-				if (directions[1] == true)
-				{
-					theta = 360.0f - fabs(theta);
-				}
-			}
-			if (dx == dy)
-			{
-				if (directions[0] == true)
-				{
-					theta = 45.0f;
-				}
-				if (directions[2] == true)
-				{
-					theta = 135.0f;
-				}
-				if (directions[3] == true)
-				{
-					theta = 225.0f;
-				}
-				if (directions[1] == true)
-				{
-					theta = 315.0f;
-				}
-			}
-			//
-			return theta;
+			return px_quantity;
 		}
 		//Draw function
 		void draw()
 		{
-			for (int i = 0; i < thickness_l + thickness_r + 1; i++) // +1 because thickness_l and thickness_r are by default zero and by default normal vector must be build and therefore to start for-loop with 1 loop.
+			if (visible)
 			{
-				//this if-statements are to merge two expected for-loops(one for-loop is for left thickness and the second for-loop is for right thickness) to one for-loop
-				if (i < thickness_l) //this is to draw left thickness
+				for (int i = 0; i < thickness_l + thickness_r + 1; i++) // +1 because thickness_l and thickness_r are by default zero and by default normal vector must be build and therefore to start for-loop with 1 loop.
 				{
-					draw_vector(startx - (0.1f * i), starty + (0.1f * i), x2 - (0.1f * i), y2 + (0.1f * i), pixelsize, color);
-				}
-				if (i > thickness_l && i < thickness_r + thickness_r)
-				{
-					draw_vector(startx + (0.1f * (i - thickness_l)), starty - (0.1f * (i - thickness_l)), x2 + (0.1f * (i - thickness_l)), y2 - (0.1f * (i - thickness_l)), pixelsize, color);
+					//this if-statements are to merge two expected for-loops(one for-loop is for left thickness and the second for-loop is for right thickness) to one for-loop
+					if (i < thickness_l) //this is to draw left thickness
+					{
+						draw_vector(x1 - (0.1f * i), y1 + (0.1f * i), x2 - (0.1f * i), y2 + (0.1f * i), PIXEL_SIZE, color);
+					}
+					if (i > thickness_l && i < thickness_r + thickness_r)
+					{
+						draw_vector(x1 + (0.1f * (i - thickness_l)), y1 - (0.1f * (i - thickness_l)), x2 + (0.1f * (i - thickness_l)), y2 - (0.1f * (i - thickness_l)), PIXEL_SIZE, color);
+					}
 				}
 			}
 		}
 	};
-	class ANGLE_VECTOR
+	class ANGLED_VECTOR
 	{
 	private:
 		bool save_pixels_x_;
@@ -821,7 +745,7 @@ namespace vector2d
 		float pixelsize;
 		unsigned int color;
 		//Angled vector draw function
-		ANGLE_VECTOR(float angle_, float length_, float x1_, float y1_, unsigned int color_, bool initial_draw = true, bool save_pixels_x = false, bool save_pixels_y = false)
+		ANGLED_VECTOR(float angle_, float length_, float x1_, float y1_, unsigned int color_, bool visible = true, bool save_pixels_x = false, bool save_pixels_y = false)
 		{
 			x1 = x1_;
 			y1 = y1_;
@@ -830,7 +754,7 @@ namespace vector2d
 			color = color_;
 			save_pixels_x_ = save_pixels_x;
 			save_pixels_y_ = save_pixels_y;
-			if (initial_draw == true)
+			if (visible == true)
 			{
 				angle_draw_vector(save_pixels_x, save_pixels_y);
 			}
@@ -858,7 +782,7 @@ namespace vector2d
 			angle_draw_vector(save_pixels_x_, save_pixels_y_);
 		}
 	};
-	class VECTOR_SAVE_PIXELS_POSITIONS
+	class A_VECTOR
 	{
 	private:
 		void check(float x1, float x2, float y1, float y2, float x_modifier, float y_modifier, float& x_increasement, float& y_increasement, bool directions[4])
@@ -992,16 +916,17 @@ namespace vector2d
 				q += 1;
 				draw_just_pixel = true;
 			}
-			float adx = fabs(x2 - x1);
-			float ady = fabs(y2 - y1);
+			float dx = x2 - x1;
+			float dy = y2 - y1;
+			float adx = fabs(dx);
+			float ady = fabs(dy);
 			float x_modifier = 0.0f, y_modifier = 0.0f;
-			for (int i = 0; i < 5; i++)
-			{
-				draw_pixel(x1, y1 + i, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
-				draw_pixel(x2, y2 + i, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
-			}
-			draw_pixel(0.0f, 0.0f, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
-			int px_i = 0;
+			//for (int i = 0; i < 5; i++)
+			//{
+			//	draw_pixel(x1, y1 + i, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
+			//	draw_pixel(x2, y2 + i, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
+			//}
+			//draw_pixel(0.0f, 0.0f, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
 			float x_addition = 1.0f, y_addition = 1.0f;
 			if (straight_line_drawing == false && draw_just_pixel == false)
 			{
@@ -1020,14 +945,12 @@ namespace vector2d
 					false, // down_right
 					false // down_left
 				};
-				float dx = x2 - x1;
-				float dy = y2 - y1;
 				dx > 0.0f && dy > 0.0f ? directions[0] = true : directions[0] = false; // if (dx > 0.0f && dy > 0.0f){directions[0]=true} else {directions=false}
 				dx < 0.0f && dy > 0.0f ? directions[1] = true : directions[1] = false;
 				dx > 0.0f && dy < 0.0f ? directions[2] = true : directions[2] = false;
 				dx < 0.0f && dy < 0.0f ? directions[3] = true : directions[3] = false;
 				int start_x = 0, start_y = 0;
-				fabs(x2) > fabs(y2) ? x_addition = make_float_divisible(fabs(adx), fabs(ady)) * 2.0f : y_addition = make_float_divisible(fabs(ady), fabs(adx)) * 2.0f;
+				fabs(x2) > fabs(y2) ? x_addition = make_float_divisible(adx, ady) * 2.0f : y_addition = make_float_divisible(ady, adx) * 2.0f;
 				fabs(x2) > fabs(y2) ? x_y_outweight = false : x_y_outweight = true;
 				fabs(x2) > fabs(y2) ? start_x = 1 : start_y = 1;
 				float cl_x_add = ceil(x_addition);
@@ -1070,13 +993,16 @@ namespace vector2d
 				{
 					max_pixels = adx * 100.0f; // or max_pixels = ((y2 - y1) * 100) - 1; there is no matter
 				}
-
 				for (int i = 0; i < int(max_pixels); i++)
 				{
-					if (break_loop) { break; px_quantity = i; }
+					if (break_loop) { break; }
 					bool x_cycle = false, y_cycle = false;
 					i % 2 == start_y ? x_cycle = true : x_cycle = false;
 					i % 2 == start_x ? y_cycle = true : y_cycle = false;
+					if (x1 == -10.0f)
+					{
+						int k = 0;
+					}
 					if (x_cycle == true)
 					{
 						if (x_y_outweight == false)
@@ -1103,9 +1029,9 @@ namespace vector2d
 									break;
 								}
 								x_modifier += x_increasement;
+								draw_pixel(x1 + x_modifier, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
 								if (x == floor(fabs(cl_x_add))-1)
 								{
-									draw_pixel(x1 + x_modifier, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
 									if (save_pixels_matrix == true)
 									{
 										matrix_pixels[g].x = x1 + x_modifier;
@@ -1142,7 +1068,6 @@ namespace vector2d
 								check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
 								if (x_increasement == 0.0f && y_increasement == 0.0f)
 								{
-									px_quantity = i;
 									break_loop = true;
 									break;
 								}
@@ -1171,18 +1096,13 @@ namespace vector2d
 								check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
 								if (x_increasement == 0.0f && y_increasement == 0.0f)
 								{
-									px_quantity = i;
 									break_loop = true;
 									break;
 								}
-								if (x1 == 15.0f)
-								{
-									int h = 0;
-								}
 								y_modifier += y_increasement;
+								draw_pixel(x1 + x_modifier, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
 								if (y == floor(fabs(cl_y_add)) - 1)
 								{
-									draw_pixel(x1 + x_modifier, y1 + y_modifier, PIXEL_SIZE, PIXEL_SIZE, color);
 									if (save_pixels_matrix == true)
 									{
 										matrix_pixels[g].x = x1 + x_modifier;
@@ -1219,7 +1139,6 @@ namespace vector2d
 								check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
 								if (x_increasement == 0.0f && y_increasement == 0.0f)
 								{
-									px_quantity = i;
 									break_loop = true;
 									break;
 								}
@@ -1231,11 +1150,9 @@ namespace vector2d
 					check(x1, x2, y1, y2, x_modifier, y_modifier, x_increasement, y_increasement, directions);
 					if (x_increasement == 0.0f && y_increasement == 0.0f)
 					{
-						px_quantity = i;
 						break_loop = true;
 						break;
 					}
-					px_i = i;
 				}
 			}
 			else if (straight_line_drawing == true)
@@ -1270,7 +1187,6 @@ namespace vector2d
 						y_modifier += y_increasement;
 						if (x >= max_pixels)
 						{
-							px_quantity = x;
 							y_increasement = 0.0f;
 							y_modifier = 0.0f;
 							break;
@@ -1295,7 +1211,6 @@ namespace vector2d
 						y_modifier -= y_increasement;
 						if (x >= max_pixels)
 						{
-							px_quantity = x;
 							y_increasement = 0.0f;
 							y_modifier = 0.0f;
 							break;
@@ -1320,7 +1235,6 @@ namespace vector2d
 						x_modifier += x_increasement;
 						if (x >= max_pixels)
 						{
-							px_quantity = x;
 							x_increasement = 0.0f;
 							x_modifier = 0.0f;
 							break;
@@ -1345,18 +1259,16 @@ namespace vector2d
 						x_modifier -= x_increasement;
 						if (x >= max_pixels)
 						{
-							px_quantity = x;
 							x_increasement = 0.0f;
 							x_modifier = 0.0f;
 							break;
 						}
 					}
-					px_i = x;
 				}
 			}
-			px_quantity = px_i;
-			px_quantity_x_cycle = px_quantity / 2;
-			px_quantity_y_cycle = px_quantity / 2;
+			px_quantity_x_cycle = p;
+			px_quantity_y_cycle = q;
+			px_quantity = p+q;
 		}
 	public:
 		int px_quantity;
@@ -1365,8 +1277,9 @@ namespace vector2d
 		VERTEX matrix_pixels[MAX_STORAGE_SIZE];
 		VERTEX matrix_pixels_x_cycle[MAX_STORAGE_SIZE];
 		VERTEX matrix_pixels_y_cycle[MAX_STORAGE_SIZE];
-		float startx;
-		float starty;
+		char name[20];
+		float x1;
+		float y1;
 		float x2;
 		float y2;
 		float pixelsize;
@@ -1377,10 +1290,10 @@ namespace vector2d
 		int thickness_l; //thickness left
 		int thickness_r; //thickness right
 		//Draw 2d vector.
-		VECTOR_SAVE_PIXELS_POSITIONS(float startx_, float starty_, float x2_, float y2_, unsigned int color_, bool initial_draw = true, int thickness_l_ = 1, int thickness_r_ = 1, bool save_pixels_position_ = false, bool save_pixels_position_x_cycle_ = false, bool save_pixels_position_y_cycle_ = false)
+		A_VECTOR(float x1_, float y1_, float x2_, float y2_, unsigned int color_, bool visible = true, int thickness_l_ = 1, int thickness_r_ = 1, bool save_pixels_position_ = false, bool save_pixels_position_x_cycle_ = false, bool save_pixels_position_y_cycle_ = false)
 		{
-			startx = startx_;
-			starty = starty_;
+			x1 = x1_;
+			y1 = y1_;
 			x2 = x2_;
 			y2 = y2_;
 			color = color_;
@@ -1389,21 +1302,113 @@ namespace vector2d
 			save_pixels_position_y_cycle = save_pixels_position_y_cycle_;
 			thickness_l = thickness_l_;
 			thickness_r = thickness_r_;
-			if (initial_draw == true)
+			if (visible == true)
 			{
 				draw_();
 			}
 		}
-		VECTOR_SAVE_PIXELS_POSITIONS(VERTEX& vx1, VERTEX& vx2, unsigned int color_, bool initial_draw = true)
+		A_VECTOR(VERTEX& vx1, VERTEX& vx2, unsigned int color_, bool visible = true)
 		{
-			startx = vx1.x;
-			starty = vx1.y;
+			x1 = vx1.x;
+			y1 = vx1.y;
 			x2 = vx2.x;
 			y2 = vx2.y;
 			color = color_;
-			if (initial_draw == true)
+			if (visible == true)
 			{
 				draw_();
+			}
+		}
+		//Calculate Vector's angle
+		float angle()
+		{
+			float xbase = false;
+			float x1 = x1;
+			float y1 = y1;
+			float x2_ = x2;
+			float y2_ = y2;
+			float ybase = false;
+			bool xy_swap = false;
+			float theta = atan((y2 - y1) / (x2 - x1)) * 180.0f / pi;
+			fabs(x1) > fabs(x2_) && fabs(y1) > fabs(y2_) ? xy_swap = true : xy_swap = false;
+			if (xy_swap == true)
+			{
+				swap(x2_, x1);
+				swap(y2_, y1);
+			}
+			bool directions[4]
+			{
+				false, // up_right
+				false, // up_left
+				false, // down_right
+				false // down_left
+			};
+			float dx = x2_ - x1;
+			float dy = y2_ - y1;
+			dx > 0.0f && dy > 0.0f ? directions[0] = true : directions[0] = false;
+			dx < 0.0f && dy > 0.0f ? directions[1] = true : directions[1] = false;
+			dx > 0.0f && dy < 0.0f ? directions[2] = true : directions[2] = false;
+			dx < 0.0f && dy < 0.0f ? directions[3] = true : directions[3] = false;
+			if (dx != dy)
+			{
+				if (directions[2] == true)
+				{
+					theta = 90.0f + fabs(theta);
+				}
+				if (directions[3] == true)
+				{
+					theta = 270.0f - fabs(theta);
+				}
+				if (directions[1] == true)
+				{
+					theta = 360.0f - fabs(theta);
+				}
+			}
+			if (dx == dy)
+			{
+				if (directions[0] == true)
+				{
+					theta = 45.0f;
+				}
+				if (directions[2] == true)
+				{
+					theta = 135.0f;
+				}
+				if (directions[3] == true)
+				{
+					theta = 225.0f;
+				}
+				if (directions[1] == true)
+				{
+					theta = 315.0f;
+				}
+			}
+			//
+			return theta;
+		}
+		void create_projection(bool vh, bool ur, static int color) // vh - false - x, true - y; vh - true, if ur - false - left, ur - true - right; vh - false, if ur - false - bootom, if ur - true - top 
+		{
+			if (vh == false)
+			{
+				if (ur == false)
+				{
+					vector2d::VECTOR vprojectionx(x1, y1, x2, y1, color);
+				}
+				if (ur == true)
+				{
+					vector2d::VECTOR vprojectionx(x1, y2, x2, y2, color);
+				}
+			}
+			if (vh == true)
+			{
+				if (ur == false)
+				{
+					vector2d::VECTOR vprojectiony(x1, y1, x1, y2, color);
+				}
+				if (ur == true)
+				{
+					vector2d::VECTOR vprojectiony(x2, y1, x2, y2, color);
+				}
 			}
 		}
 		//Draw function
@@ -1414,11 +1419,11 @@ namespace vector2d
 				//this if-statements are to merge two expected for-loops(one for-loop is for left thickness and the second for-loop is for right thickness) to one for-loop
 				if (i < thickness_l) //this is to draw left thickness
 				{
-					draw_vector_(startx - (0.1f * i), starty + (0.1f * i), x2 - (0.1f * i), y2 + (0.1f * i), pixelsize, color, save_pixels_position, save_pixels_position_x_cycle, save_pixels_position_y_cycle);
+					draw_vector_(x1 - (0.1f * i), y1 + (0.1f * i), x2 - (0.1f * i), y2 + (0.1f * i), pixelsize, color, save_pixels_position, save_pixels_position_x_cycle, save_pixels_position_y_cycle);
 				}
 				if (i > thickness_l && i < thickness_r + thickness_r)
 				{
-					draw_vector_(startx + (0.1f * (i - thickness_l)), starty - (0.1f * (i - thickness_l)), x2 + (0.1f * (i - thickness_l)), y2 - (0.1f * (i - thickness_l)), pixelsize, color, save_pixels_position, save_pixels_position_x_cycle, save_pixels_position_y_cycle);
+					draw_vector_(x1 + (0.1f * (i - thickness_l)), y1 - (0.1f * (i - thickness_l)), x2 + (0.1f * (i - thickness_l)), y2 - (0.1f * (i - thickness_l)), pixelsize, color, save_pixels_position, save_pixels_position_x_cycle, save_pixels_position_y_cycle);
 				}
 			}
 		}
@@ -1458,7 +1463,7 @@ namespace cube
 		float g;
 		float b;
 		int px_cube;
-		CUBE(float x_, float y_, float a_, float r_, float g_, float b_, bool initial_draw = true)
+		CUBE(float x_, float y_, float a_, float r_, float g_, float b_, bool visible = true)
 		{
 			x = x_;
 			y = y_;
@@ -1466,7 +1471,7 @@ namespace cube
 			r = r_;
 			g = g_;
 			b = b_;
-			if (initial_draw == true)
+			if (visible == true)
 			{
 				draw_cube(x_, y_, a_, r_, g_, b_);
 			}
@@ -1485,78 +1490,99 @@ namespace triangle2d
 {
 	class TRIANGLE
 	{
-	public:
-		float a;
-		float b;
-		float c;
-		float h_apex;
-		float x;
-		float y;
-		unsigned int color;
-		bool filled;
-		//Draw triangle funciton. Exception: a + b > c && a + c > b && b + c > a and a,b,c,h > 0
-		TRIANGLE(float a_, float b_, float c_, float h_apex_, float x_, float y_, unsigned int color_, bool filled_, bool initial_draw = true)
-		{
-			a = a_;
-			b = b_;
-			c = c_;
-			h_apex = h_apex_;
-			x = x_;
-			y = y_;
-			color = color_;
-			filled = filled_;
-			if (initial_draw == true)
-			{
-				draw_triangle(a_, b_, c_, h_apex_, x_, y_, color_, filled_);
-			}
-		}
-		//Calculate triangle's perimeter
-		int perimeter()
-		{
-			return a + b + c;
-		}
-		//Calculate triangle's area 
-		int area()
-		{
-			return (h_apex * b) / 2.0f;
-		}
+	private:
 		void draw_triangle(float a, float b, float c, float h_apex, float x, float y, unsigned int color, bool filled)
 		{
-			vector2d::VECTOR_SAVE_PIXELS_POSITIONS v1(x - c / 2.0f, y, x + c / 2.0f, y, color, true, 1, 1, true, true, true); //c-line
-			vector2d::VECTOR_SAVE_PIXELS_POSITIONS v2(x - c / 2.0f, y, (x - c / 2.0f) + a, y + h_apex, color, false, 1, 1, true, true, true); //a-line
-			vector2d::VECTOR_SAVE_PIXELS_POSITIONS v3(x + c / 2.0f, y, v2.x2, v2.y2, color, false, 1, 1, true, true, true); //b-line
-			float a_fx = 0.0f;
-			if (a > b)
+			vector2d::A_VECTOR v1(x - c / 2.0f, y, x + c / 2.0f, y, color, true, 1, 1, true, true, true); //c-line
+			vector2d::A_VECTOR v2(x - c / 2.0f, y, (x - c / 2.0f) + a, y + h_apex, color, false, 1, 1, true, true, true); //a-line
+			vector2d::A_VECTOR v3(x + c / 2.0f, y, v2.x2, v2.y2, color, false, 1, 1, true, true, true); //b-line
+			int px_v2_x = 0;
+			int px_v3_x = 0;
+			float ab_fx = 0.0f;
+			int fill_type = 0; //0 - a > c; 1 - b > c; 2 - a and b < c
+			if (a >= b && a < c && b < c)
 			{
-				a_fx = a;
-				v2.startx = x - c / 2.0f; v2.starty = y; v2.x2 = (x - c / 2.0f) + a; v2.y2 = y + h_apex; color; v2.draw_();
-				v3.startx = x + c / 2.0f; v3.starty = y; v3.x2 = v2.x2; v3.y2 = v2.y2; v3.draw_();
-				
+				ab_fx = a;
+				v2.x1 = x - c / 2.0f; v2.y1 = y; v2.x2 = (x - c / 2.0f) + a; v2.y2 = y + h_apex; color; v2.draw_();
+				v3.x1 = x + c / 2.0f; v3.y1 = y; v3.x2 = v2.x2; v3.y2 = v2.y2; v3.draw_();
+				fill_type = 1;
 			}
-			if (a < b)
+			if (a < b && a < c && b < c)
 			{
-				a_fx = c-b;
-				v2.startx = x - c / 2.0f; v2.starty = y; v2.x2 = (x - c / 2.0f) + a_fx; v2.y2 = y + h_apex; color; v2.draw_();
-				v3.startx = x + c / 2.0f; v3.starty = y; v3.x2 = v2.x2; v3.y2 = v2.y2; v3.draw_();
+				ab_fx = c - b;
+				v2.x1 = x - c / 2.0f; v2.y1 = y; v2.x2 = (x - c / 2.0f) + ab_fx; v2.y2 = y + h_apex; color; v2.draw_();
+				v3.x1 = x + c / 2.0f; v3.y1 = y; v3.x2 = v2.x2; v3.y2 = v2.y2; v3.draw_();
+				fill_type = 2;
+			}
+			if (a > c && b < c && a > b)
+			{
+				ab_fx = a;
+				swap(ab_fx, c);
+				v2.draw_();
+				v3.draw_();
+				px_v2_x = (fabs(v2.x2 - v2.x1)) * 10;
+				px_v3_x = (fabs(v3.x2 - v3.x1)) * 10;
+				fill_type = 0;
+			}
+			if (b > c && a < c && a < b)
+			{
+				ab_fx = b;
+				swap(ab_fx, c);
+				v3.x2 = x - c / 2.0f - (b-c);
+				v3.y2 = y + h_apex;
+				v2.x2 = v3.x2;
+				v2.y2 = v3.y2;
+				v2.draw_();
+				v3.draw_();
+				px_v2_x = (fabs(v2.x2 - v2.x1)) * 10;
+				px_v3_x = (fabs(v3.x2 - v3.x1)) * 10;
+				fill_type = 4;
 			}
 			//Drawing triangle works simply by drawing the base line(c-line), then drawing a- or b-line depending on which is bigger and connecting them to each other.
 			//Filling triangle algorithm works simply by connecting all c-line pixels x, y with a-line only y_cycle pixels x, y.
 			float v1y = v1.matrix_pixels[0].y;
 			if (filled == true)
 			{
-				if (a < b)
+				if (fill_type != 4)
 				{
-					for (int j = 0; j < a_fx * 10.0f; j++)
+					for (int j = 0; j < ab_fx * 10.0f; j++)
 					{
 						float mxp_v1 = v1.matrix_pixels[j].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
 						vector2d::VECTOR v4(mxp_v1, v1y, mxp_v1, v2.matrix_pixels_y_cycle[j].y, color, true);
 						//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
 					}
-					for (int z = (a_fx * 10.0f) - 1; z < (a_fx * 10.0f) + v3.px_quantity / 2; z++)
+				}
+				if (fill_type == 1 || fill_type == 2)
+				{
+					for (int z = (ab_fx * 10.0f) - 1; z < (ab_fx * 10.0f) + v3.px_quantity_y_cycle - 1; z++)
 					{
-						int r = int(v3.px_quantity / 2 - (z - ((a_fx * 10.0f) - 1)));
+						int r = int(v3.px_quantity_y_cycle - (z - ((ab_fx * 10.0f) - 2)));
 						float mxp_v1 = v1.matrix_pixels[z].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
 						vector2d::VECTOR v4(mxp_v1, v1y, mxp_v1, v3.matrix_pixels_y_cycle[r].y, color, true);
+						//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
+					}
+				}
+				if (fill_type == 0)
+				{
+					for (int z = v1.px_quantity; z < v2.px_quantity_y_cycle-50; z++)
+					{
+						float mxp_v1 = v2.matrix_pixels_y_cycle[z].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
+						vector2d::VECTOR v4(mxp_v1, v3.matrix_pixels_y_cycle[abs(v1.px_quantity - z)].y, mxp_v1, v2.matrix_pixels_y_cycle[z].y, color, true);
+						//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
+					}
+				}
+				if (fill_type == 4)
+				{
+					for (int j = 0; j < ab_fx * 10.0f; j++)
+					{
+						float mxp_v1 = v1.matrix_pixels[int((ab_fx * 10.0f) - j)].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
+						vector2d::VECTOR v4(mxp_v1, v1y, mxp_v1, v3.matrix_pixels_y_cycle[j].y, color, true);
+						//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
+					}
+					for (int z = v1.px_quantity; z < v3.px_quantity_y_cycle - 1; z++)
+					{
+						float mxp_v1 = v3.matrix_pixels_y_cycle[z].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
+						vector2d::VECTOR v4(mxp_v1, v2.matrix_pixels_y_cycle[abs(v1.px_quantity - z)].y, mxp_v1, v3.matrix_pixels_y_cycle[z].y, color, true);
 						//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
 					}
 				}
@@ -1577,6 +1603,50 @@ namespace triangle2d
 				//}
 			}
 		}
+	public:
+		float a;
+		float b;
+		float c;
+		float h_apex;
+		float x;
+		float y;
+		char name[20];
+		bool visible;
+		unsigned int color;
+		bool filled;
+		//Draw triangle funciton. Exception: a + b > c && a + c > b && b + c > a and a,b,c,h > 0
+		TRIANGLE(float a_, float b_, float c_, float h_apex_, float x_, float y_, unsigned int color_, bool filled_, bool visible = true)
+		{
+			a = a_;
+			b = b_;
+			c = c_;
+			h_apex = h_apex_;
+			x = x_;
+			y = y_;
+			color = color_;
+			filled = filled_;
+			if (visible == true)
+			{
+				draw_triangle(a_, b_, c_, h_apex_, x_, y_, color_, filled_);
+			}
+		}
+		//Calculate triangle's perimeter
+		int perimeter()
+		{
+			return a + b + c;
+		}
+		//Calculate triangle's area 
+		int area()
+		{
+			return (h_apex * b) / 2.0f;
+		}
+		void draw()
+		{
+			if (visible)
+			{
+				draw_triangle(a, b, c, h_apex, x, y, color, filled);
+			}
+		}
 	};
 }
 namespace ellipse2d
@@ -1584,19 +1654,30 @@ namespace ellipse2d
 	class ELLIPSE
 	{
 	private:
-		void draw_ellipse(float x, float y, float ra, float rb, unsigned int color, int px_quantity_, bool filled, bool get_ellipse_additional_methods, bool invisible = true, bool save_pixels_x = false, bool save_pixels_y = false)
+		void draw_ellipse(float x, float y, float ra, float rb, unsigned int color, int px_quantity_, bool filled)
 		{
 			float angle = 0.0f;
-			bool middle_line_drawn = false;
-			float j = rb; //temp_j is pre-cycle y value to check if y to place vectors is changed; j is by default is the highest point of the circle
+	        float j = rb; //temp_j is pre-cycle y value to check if y to place vectors is changed; j is by default is the highest point of the circle
 			for (int i = 0; i < px_quantity_; i++)
 			{
 				int b = 0;
 				float temp_j = 0.0f;
 				float fx2 = 0.0f;
-				float circle_trigonometric_var = angle * pi / 180.0f;
-				float x2 = ra * fast_sin(circle_trigonometric_var);
-				float y2 = rb * fast_cos(circle_trigonometric_var);
+				float x2 = 0.0f;
+				float y2 = 0.0f;
+				if (i <= 1800)
+				{
+					float circle_trigonometric_var = angle * pi / 180.0f;
+					x2 = ra * fast_sin(circle_trigonometric_var);
+					y2 = rb * fast_cos(circle_trigonometric_var);
+					px_right_half_matrix[i].x = x2;
+					px_right_half_matrix[i].y = y2;
+				}
+				if (i > 1800)
+				{
+					x2 = x - px_right_half_matrix[i - 1801].x;
+					y2 = y - px_right_half_matrix[i - 1801].y;
+				}
 				if (filled == true)
 				{
 					fx2 = fast_trunc_ellipse_function(fabs(x2)); //rounds to tenths(because of coordinate unit and pixel proportion which is 0.1f) here to place certain number of pixels for every line to fill circle
@@ -1605,10 +1686,6 @@ namespace ellipse2d
 				if (filled == false)
 				{
 					draw_pixel(x2 + x, y2 + y, PIXEL_SIZE, PIXEL_SIZE, color);
-				}
-				if (get_ellipse_additional_methods == true)
-				{
-					px_circum_ += 1;
 				}
 				//int q = 0;
 				//if (y2 >= 0.0f)
@@ -1619,138 +1696,102 @@ namespace ellipse2d
 				//{
 				//	q = 3; //because rounding positive number or 0 to tenths in truncA(a, must be 3) because of sign -
 				//}
-				if (filled == true || get_ellipse_additional_methods == true)
+				if (filled == true)
 				{
 					if (fast_trunc_ellipse_function(temp_j) != j)
 					{
 						j = fast_trunc_ellipse_function(temp_j);
-						if (i >= 0 && i <= 3600)
+						//b is value found to remove some obnoxious bugs
+						//if (((i >= 870 && i <= 900) || (i >= 910 && i <= 930))) // some bugs with wrong additional pixels in center
+						//{
+						//	b = 4;
+						//}
+						//else
+						//{
+						//	b = 0;
+						//}
+						// some bugs with wrong additional pixels in center
+						if (i >= 900 && i <= 1000)
 						{
-							//b is value found to remove some obnoxious bugs
-							if (((i >= 870 && i <= 900) || (i >= 910 && i <= 930))) // some bugs with wrong additional pixels in center
-							{
-								b = 4;
-							}
-							else
-							{
-								b = 0;
-							}
-							if ((x2 >= x - ra && x2 <= x + ra))
-							{
-								middle_line_drawn = true;
-							}
-							//if (((i >= 2700 && i <= 2710) || (i >= 870 && i <= 910))) //also fixing some strange bugs
-							//{
-							//	//y2 += 0.1f;
-							//}
-							int k = 0;
-							if (i < 1800)
-							{
-								k = 1;
-							}
-							if (i >= 1800)
-							{
-								k = 2;
-							}
-							// k = 2 when drawing left hand side because right hand side was drawn whe k was 1 and then it must be 2 to draw next hand side (as left)
-							//fx2 * 10 because we draw pixels and we must convert coordinate unit to pixels(because of their 0.1 proportion) 
-							for (int z = 0; z < b + int(fx2 * 10.0f) * k; z++) //fx2 because fx2 is the distance from center of circle to every pixel on same y and fx2 is needed to draw specific number of pixels in every y(as lines) of circle.
-							{
-								if (k == 1)
-								{
-									if (x2 + x - z * 0.1f >= x) // if z is higher than x is to build lines only on the right hand side, fixing bugs when i <= 1800 and some pixel are placed on the left of the ellipse's center
-									{
-										px_area += 1;
-										if (filled == true)
-										{
-											if (invisible == false)
-											{
-												draw_pixel(x2 + x - z * 0.1f, y2 + y, PIXEL_SIZE, PIXEL_SIZE, color); //to place pixels on left half of ellipse
-											}
-											//matrix_pixels_pos[i].x = x2 + x - z * 0.1f;
-											//matrix_pixels_pos[i].y = y2 + y;
-										}
-									}
-								}	// z * 0.1f and for cycle are representation of fast hand-made vector function 
-								if (k == 2)
-								{
-									px_area += 1;
-									if (filled == true)
-									{
-										if (invisible == false)
-										{
-											draw_pixel(x2 + x + z * 0.1f, y2 + y, PIXEL_SIZE, PIXEL_SIZE, color); //to place pixels on right half of ellipse
-										}
-										//matrix_pixels_pos[i].x = x2 + x + z * 0.1f;
-										//matrix_pixels_pos[i].y = y2 + y;
-									}
-								}
-								// z * 0.1f and for cycle are representation of fast hand-made vector function
-							}
-							matrix_pixels_pos[i].x = x2 + x;
-							matrix_pixels_pos[i].y = y2 + y;
+							vector2d::VECTOR v1(fx2 + x, y, x - fx2, y, color, true);
+							draw_pixel(v1.x2, v1.y1, PIXEL_SIZE, PIXEL_SIZE, color);
+							draw_pixel(v1.x2, v1.y1 + 0.3f, PIXEL_SIZE, PIXEL_SIZE, color);
+							draw_pixel(v1.x2, v1.y1 + 0.2f, PIXEL_SIZE, PIXEL_SIZE, color);
+							draw_pixel(v1.x2, v1.y1+0.1f, PIXEL_SIZE, PIXEL_SIZE, color);
+							draw_pixel(v1.x2, v1.y1-0.1f, PIXEL_SIZE, PIXEL_SIZE, color);
+							draw_pixel(v1.x2, v1.y1-0.2f, PIXEL_SIZE, PIXEL_SIZE, color);
+							draw_pixel(v1.x2, v1.y1 - 0.3f, PIXEL_SIZE, PIXEL_SIZE, color);
 						}
+						//if (((i >= 2700 && i <= 2710) || (i >= 870 && i <= 910))) //also fixing some strange bugs
+						{
+							//y2 += 0.1f;
+						}
+						if (i <= 1800)
+						{
+							vector2d::VECTOR v1(fx2 + x, y2, x - fx2, y2, color, true);
+						}
+						//matrix_pixels_pos[i].x = x2 + x;
+						//matrix_pixels_pos[i].y = y2 + y;
 					}
 					else
 					{
-						if (invisible == false)
-						{
-							draw_pixel(x2 + x, y2 + y, PIXEL_SIZE, PIXEL_SIZE, color);
-						}
-						matrix_pixels_pos[i].x = x2 + x;
-						matrix_pixels_pos[i].y = y2 + y;
+						draw_pixel(x2 + x, y2 + y, PIXEL_SIZE, PIXEL_SIZE, color);
+						//matrix_pixels_pos[i].x = x2 + x;
+						//matrix_pixels_pos[i].y = y2 + y;
 					}
 				}
 				angle += 0.1f;
 			}
 		}
 	public:
+		VERTEX px_right_half_matrix[1800];
 		float x;
 		float y;
 		float radiusa;
 		float radiusb;
-		VERTEX matrix_pixels_pos[3600];
+		bool visible;
+		char name[20];
+		//VERTEX matrix_pixels_pos[1];
 		bool filled;
 		bool get_ellipse_additional_methods;
 		unsigned int color;
 		int px_circum_ = 0;
 		int px_circumference;
 		int px_area = 0;
-		bool ignore_warnings = false;
-		bool invisible;
-		ELLIPSE(float x_, float y_, float radiusa_, float radiusb_, unsigned int color_, int px_circumference_, bool filled_, bool ignore_warnings_, bool get_ellipse_additional_methods_, bool invisible_ = false, bool initial_draw = true)
+		bool ignore_warnings = true;
+		ELLIPSE(float x_, float y_, float radiusa_, float radiusb_, unsigned int color_, int px_circumference_, bool filled_, bool visible = true)
 		{
 			x = x_;
 			y = y_;
 			radiusa = radiusa_;
 			radiusb = radiusb_;
 			filled = filled_;
-			ignore_warnings = ignore_warnings_;
-			invisible = invisible_;
 			//if (ignore_warnings == false)
 			//{
 			//		//std::call_once(onceFlag, [] { MessageBox(hWnd, "Radius of the ellipse cannot be negative.", NULL, 0x00000031L); });
 			//}
 			color = color_;
 			px_circumference = px_circumference_;
-			get_ellipse_additional_methods = get_ellipse_additional_methods_;
-			if (initial_draw == true)
+			if (visible == true)
 			{
-				draw_ellipse(x_, y_, radiusa_, radiusb_, color_, px_circumference_, filled_, get_ellipse_additional_methods_, invisible_);
+				draw();
 			}
 		}
 		//Calculate circle's size
-		int circumference()
+		int circumference_px()
 		{
-			return px_circum_;
+			return 3600;
 		}
-		int area()
+		int area_px()
 		{
 			return px_area;
 		}
 		void draw()
 		{
-			draw_ellipse(x, y, radiusa, radiusb, color, px_circumference, filled, get_ellipse_additional_methods, invisible);
+			if (visible)
+			{
+				draw_ellipse(x, y, radiusa, radiusb, color, px_circumference, filled);
+			}
 		}
 	};
 }
