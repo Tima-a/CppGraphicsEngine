@@ -1564,7 +1564,7 @@ namespace triangle2d
 				}
 				if (fill_type == 0)
 				{
-					for (int z = v1.px_quantity; z < v2.px_quantity_y_cycle-50; z++)
+					for (int z = v1.px_quantity; z < v2.px_quantity_y_cycle-1; z++)
 					{
 						float mxp_v1 = v2.matrix_pixels_y_cycle[z].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
 						vector2d::VECTOR v4(mxp_v1, v3.matrix_pixels_y_cycle[abs(v1.px_quantity - z)].y, mxp_v1, v2.matrix_pixels_y_cycle[z].y, color, true);
