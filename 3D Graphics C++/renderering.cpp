@@ -12,7 +12,6 @@
 #define PIXEL_SIZE_STLN 0.1f
 #define pi 3.14f
 #define d_pi 6.28f
-#define CHANNEL_NUM 3
 
 static float render_scale = 0.01f;
 static float gravity = -9.81f;
