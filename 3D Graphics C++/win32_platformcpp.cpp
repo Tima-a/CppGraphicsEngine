@@ -3,28 +3,12 @@
 #include <cmath>
 
 #define delta_time_equalization 1000000
-#define white 0xffffff
-#define green 0x00ff00
-#define red 0xff0000
-#define blue 0x0000ff
-#define yellow 0xffff00
-#define black 0
-#define PIXEL_SIZE 0.01f
-#define PIXEL_SIZE_CU 0.05f
-#define PIXEL_SIZE_STLN 0.1f
-#define pi 3.14f
-#define d_pi 6.28f
 #define MAX_STORAGE_SIZE 5000
-#define up_ 1
-#define right_ 2
-#define left_ 3
-#define down_ 4
-//10 million
 static bool running = true;
 struct Screen
 {
 	bool update_screen = false;
-	unsigned int scr_refresh_color = black;
+	unsigned int scr_refresh_color = 0;
 };
 Screen screen;
 struct Render
