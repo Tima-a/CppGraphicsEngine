@@ -29,7 +29,7 @@ gTime gtime;
 //#include <vector>
 //template <class T>
 //std::vector<T> name;
-#include "renderering.cpp"
+#include "rendering.cpp"
 #include <time.h>
 #include "game.cpp"
 
