@@ -5,6 +5,7 @@ const float HALF_PI = 1.5f;
 const float DOUBLE_PI = 6.2f;
 const float SIN_CURVE_A = 0.04f;
 const float SIN_CURVE_B = 0.0f;
+#define MAX_TEXT_SIZE 1000
 
 float fast_cos(std::complex <float> z)
 {
@@ -193,6 +194,17 @@ static float make_float_divisible(float a, float b) //makes 1.666666666666666666
 	else
 	{
 		return a / b;
+	}
+}
+static int get_text_last_index(const char* txt_)
+{
+	for (int s = 0; s < MAX_TEXT_SIZE; s++)
+	{
+		if (txt_[s] == '\0')
+		{
+			return s;
+			break;
+		}
 	}
 }
 
