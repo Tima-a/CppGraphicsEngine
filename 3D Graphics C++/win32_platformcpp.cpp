@@ -1,9 +1,10 @@
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 #include <windows.h>
 #include "utility.cpp"
 #include <cmath>
-
 #define delta_time_equalization 1000000
-#define MAX_STORAGE_SIZE 5000
+typedef unsigned int uint32;
 static bool running = true;
 struct Screen
 {
@@ -20,7 +21,6 @@ struct Render
 Render render;
 LPCTSTR window_name = "C++ Graphics";
 HWND hWnd = FindWindow("Game Window Class", window_name);
-
 static struct gTime
 {
 	float delta_time;
