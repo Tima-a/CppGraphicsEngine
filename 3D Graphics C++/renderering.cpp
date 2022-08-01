@@ -4,7 +4,7 @@
 #define blue 0x0000ff
 #define yellow 0xffff00
 #define black 0
-#define PIXEL_SIZE_DEF 0.01f
+#define PIXEL_SIZE_DEF 0.05f
 #define PIXEL_SIZE_TRIANGLE 0.1f
 #define VECTOR_HQ 0.01f
 #define VECTOR_MQ 0.05f
@@ -12,7 +12,8 @@
 #define PIXEL_SIZE_STLN 0.1f
 #define pi 3.14f
 #define d_pi 6.28f
-
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 static float render_scale = 0.01f;
 static float gravity = -9.81f;
 static float Gravitational_constant = 0.000000000016f;
@@ -64,11 +65,26 @@ inline static void draw_pixel(float x, float y, unsigned int color)
 	unsigned int* pixel = (unsigned int*)render.memory + x0 + y0 * render.width;
 	*pixel++ = color;
 }
-class VERTEX
+class Vector2f
 {
 public:
 	float x;
 	float y;
+	Vector2f(float x_, float y_)
+	{
+		x = x_;
+		y = y_;
+	}
+	Vector2f()
+	{
+
+	}
+
+	Vector2f(Vector2f& vx)
+	{
+		x = vx.x;
+		y = vx.y;
+	}
 };
 namespace rectangle
 {
@@ -493,7 +509,7 @@ namespace vector2d
 		{
 
 		}
-		VECTOR(VERTEX& vx1, VERTEX& vx2, unsigned int color_, bool visible_ = true)
+		VECTOR(Vector2f& vx1, Vector2f& vx2, unsigned int color_, bool visible_ = true)
 		{
 			x1 = vx1.x;
 			y1 = vx1.y;;
@@ -837,7 +853,7 @@ namespace vector2d
 			}
 		}
 
-		void draw_vector(float x1, float y1, float x2, float y2, float vectorQuality, unsigned int color, bool save_pixels_matrix, bool save_pixels_matrix_x_cycle, bool save_pixels_matrix_y_cycle, float pixel_size)
+		void draw_vector(float x1, float y1, float x2, float y2, float vectorQuality, unsigned int color, bool save_pixels_matrix, bool save_pixels_matrix_x_cycle, bool save_pixels_matrix_y_cycle)
 		{
 			bool x_y_outweight = false, xy_swap = false; // if x2>y2, false, y2>x2, true; if x2&&y2 < x1&&y1 swap them
 			bool straight_line_drawing = false;
@@ -917,10 +933,10 @@ namespace vector2d
 			float slope_x_modf = 0.0f, slope_y_modf = 0.0f;
 			//for (int i = 0; i < 5; i++)
 			//{
-			//	draw_pixel(x1, y1 + i, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
-			//	draw_pixel(x2, y2 + i, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
+			//	draw_pixel(x1, y1 + i,rgb(255, 255, 0));
+			//	draw_pixel(x2, y2 + i, rgb(255, 255, 0));
 			//}
-			//draw_pixel(0.0f, 0.0f, PIXEL_SIZE, PIXEL_SIZE, rgb(255, 255, 0));
+			//draw_pixel(0.0f, 0.0f, rgb(255, 255, 0));
 			float slope_x = 1.0f, slope_y = 1.0f;
 			if (straight_line_drawing == false && draw_just_pixel == false)
 			{
@@ -1226,7 +1242,7 @@ namespace vector2d
 					else if (straight_line_type == 3) //left
 					{
 						float slope_x_incr = PIXEL_SIZE_STLN;
-						draw_pixel(x1 + slope_x_modf, y1, color);
+						draw_pixel(x1 + slope_x_modf, y1,  color);
 						if (save_pixels_matrix == true)
 						{
 							matrix_pixels[g].x = x1 + slope_x_modf;
@@ -1257,10 +1273,9 @@ namespace vector2d
 		int px_quantity;
 		int px_quantity_x_cycle;
 		int px_quantity_y_cycle;
-		VERTEX matrix_pixels[MAX_STORAGE_SIZE];
-		VERTEX matrix_pixels_x_cycle[MAX_STORAGE_SIZE];
-		VERTEX matrix_pixels_y_cycle[MAX_STORAGE_SIZE];
-		char name[20];
+		Vector2f matrix_pixels[MAX_STORAGE_SIZE];
+		Vector2f matrix_pixels_x_cycle[MAX_STORAGE_SIZE];
+		Vector2f matrix_pixels_y_cycle[MAX_STORAGE_SIZE];
 		float x1;
 		float y1;
 		float x2;
@@ -1276,7 +1291,7 @@ namespace vector2d
 		int thickness_l; //thickness left
 		int thickness_r; //thickness right
 		//Draw 2d vector.
-		A_VECTOR(float x1_, float y1_, float x2_, float y2_, unsigned int color_, bool visible_ = true, int thickness_l_ = 1, int thickness_r_ = 1, bool save_pixels_position_ = false, bool save_pixels_position_x_cycle_ = false, bool save_pixels_position_y_cycle_ = false, bool save_all_pixels_from_x_y_cycles_ = false)
+		A_VECTOR(float x1_, float y1_, float x2_, float y2_, unsigned int color_, bool visible_ = true, int thickness_l_ = 1, int thickness_r_ = 1, bool save_pixels_position_ = false, bool save_pixels_position_x_cycle_ = false, bool save_pixels_position_y_cycle_ = false)
 		{
 			x1 = x1_;
 			y1 = y1_;
@@ -1295,7 +1310,7 @@ namespace vector2d
 				draw();
 			}
 		}
-		A_VECTOR(VERTEX& vx1, VERTEX& vx2, unsigned int color_, bool visible_ = true, int thickness_l_ = 1, int thickness_r_ = 1, bool save_pixels_position_ = false, bool save_pixels_position_x_cycle_ = false, bool save_pixels_position_y_cycle_ = false, bool save_all_pixels_from_x_y_cycles_ = false)
+		A_VECTOR(Vector2f& vx1, Vector2f& vx2, unsigned int color_, bool visible_ = true, int thickness_l_ = 1, int thickness_r_ = 1, bool save_pixels_position_ = false, bool save_pixels_position_x_cycle_ = false, bool save_pixels_position_y_cycle_ = false)
 		{
 			x1 = vx1.x;
 			y1 = vx1.y;
@@ -1418,11 +1433,11 @@ namespace vector2d
 				//this if-statements are to merge two expected for-loops(one for-loop is for left thickness and the second for-loop is for right thickness) to one for-loop
 				if (i < thickness_l) //this is to draw left thickness
 				{
-					draw_vector(x1 - (0.1f * i), y1 + (0.1f * i), x2 - (0.1f * i), y2 + (0.1f * i), vectorQuality, color, save_pixels_position, save_pixels_position_x_cycle, save_pixels_position_y_cycle, vectorQuality);
+					draw_vector(x1 - (0.1f * i), y1 + (0.1f * i), x2 - (0.1f * i), y2 + (0.1f * i), vectorQuality, color, save_pixels_position, save_pixels_position_x_cycle, save_pixels_position_y_cycle);
 				}
 				if (i > thickness_l && i < thickness_r + thickness_r)
 				{
-					draw_vector(x1 + (0.1f * (i - thickness_l)), y1 - (0.1f * (i - thickness_l)), x2 + (0.1f * (i - thickness_l)), y2 - (0.1f * (i - thickness_l)), vectorQuality, color, save_pixels_position, save_pixels_position_x_cycle, save_pixels_position_y_cycle, vectorQuality);
+					draw_vector(x1 + (0.1f * (i - thickness_l)), y1 - (0.1f * (i - thickness_l)), x2 + (0.1f * (i - thickness_l)), y2 - (0.1f * (i - thickness_l)), vectorQuality, color, save_pixels_position, save_pixels_position_x_cycle, save_pixels_position_y_cycle);
 				}
 			}
 		}
@@ -1744,102 +1759,179 @@ namespace ellipse2d
 	class ELLIPSE
 	{
 	private:
-		void draw_ellipse(float x, float y, float ra, float rb, unsigned int color, int px_quantity_, bool filled)
+		void draw_ellipse(float x, float y, float ra, float rb, unsigned int color, bool filled)
 		{
 			float angle = 0.0f;
 			float j = rb; //temp_j is pre-cycle y value to check if y to place vectors is changed; j is by default is the highest point of the circle
-			for (int i = 0; i < px_quantity_; i++)
+			int px_amount = 0;
+			int px_circum = 0;
+			if (end_circum > start_circum)
 			{
-				int b = 0;
-				float temp_j = 0.0f;
-				float fx2 = 0.0f;
-				float x2 = 0.0f;
-				float y2 = 0.0f;
-				if (i <= 1800)
+				angle = start_circum * 0.1f;
+				for (int i = start_circum; i < end_circum; i++)
 				{
-					float circle_trigonometric_var = angle * pi / 180.0f;
-					x2 = ra * fast_sin(circle_trigonometric_var);
-					y2 = rb * fast_cos(circle_trigonometric_var);
-					px_right_half_matrix[i].x = x2;
-					px_right_half_matrix[i].y = y2;
-				}
-				if (i > 1800)
-				{
-					x2 = x - px_right_half_matrix[i - 1801].x;
-					y2 = y - px_right_half_matrix[i - 1801].y;
-				}
-				if (filled == true)
-				{
-					fx2 = fast_trunc_ellipse_function(fabs(x2)); //rounds to tenths(because of coordinate unit and pixel proportion which is 0.1f) here to place certain number of pixels for every line to fill circle
-					temp_j = y2; //temp_j is temperate y value to check y current cycle status
-				}
-				if (filled == false)
-				{
-					draw_pixel(x2 + x, y2 + y, color);
-				}
-				if (filled == true)
-				{
-					if (fast_trunc_ellipse_function(temp_j) != j)
+					int b = 0;
+					float temp_j = 0.0f;
+					float fx2 = 0.0f;
+					float x2 = 0.0f;
+					float y2 = 0.0f;
+					//if (i <= 1800)
+					//{
+						float circle_trigonometric_var = angle * pi / 180.0f;
+						x2 = ra * fast_sin(circle_trigonometric_var);
+						y2 = rb * fast_cos(circle_trigonometric_var);
+						//px_right_half_matrix[i].x = x2;
+						//px_right_half_matrix[i].y = y2;
+					//}
+					//if (i > 1800)
+					//{
+					//	x2 = x - px_right_half_matrix[i - 1801].x;
+					//	y2 = y - px_right_half_matrix[i - 1801].y;
+					//}
+					if (filled == true)
 					{
-						j = fast_trunc_ellipse_function(temp_j);
-						// bug with lack of pixels in center
-						if (i >= 900 && i <= 1000)
-						{
-							vector2d::VECTOR v1(fx2 + x, y, x - fx2, y, color, true);
-							draw_pixel(v1.x2, v1.y1, color);
-							draw_pixel(v1.x2, v1.y1 + 0.3f, color);
-							draw_pixel(v1.x2, v1.y1 + 0.2f, color);
-							draw_pixel(v1.x2, v1.y1 + 0.1f, color);
-							draw_pixel(v1.x2, v1.y1 - 0.1f, color);
-							draw_pixel(v1.x2, v1.y1 - 0.2f, color);
-							draw_pixel(v1.x2, v1.y1 - 0.3f, color);
-						}
-						if (i <= 1800)
-						{
-							vector2d::VECTOR v1(fx2 + x, y2, x - fx2, y2, color, true);
-						}
-						//matrix_pixels_pos[i].x = x2 + x;
-						//matrix_pixels_pos[i].y = y2 + y;
+						fx2 = fast_trunc_ellipse_function(fabs(x2)); //rounds to tenths(because of coordinate unit and pixel proportion which is 0.1f) here to place certain number of pixels for every line to fill circle
+						temp_j = y2; //temp_j is temperate y value to check y current cycle status
 					}
-					else
+					if (filled == false)
 					{
 						draw_pixel(x2 + x, y2 + y, color);
-						//matrix_pixels_pos[i].x = x2 + x;
-						//matrix_pixels_pos[i].y = y2 + y;
+						if (get_ellipse_pixel_matrix)
+						{
+							matrix_pixels_pos[i].x = x2 + x;
+							matrix_pixels_pos[i].y = y2 + y;
+						}
 					}
+					if (filled == true)
+					{
+						if (fast_trunc_ellipse_function(temp_j) != j)
+						{
+							j = fast_trunc_ellipse_function(temp_j);
+							// bug with lack of pixels in center
+							if (i >= 900 && i <= 1000)
+							{
+								vector2d::VECTOR v1(fx2 + x, y, x - fx2, y, color, true);
+								draw_pixel(v1.x2, v1.y1, color);
+								draw_pixel(v1.x2, v1.y1 + 0.3f, color);
+								draw_pixel(v1.x2, v1.y1 + 0.2f, color);
+								draw_pixel(v1.x2, v1.y1 + 0.1f, color);
+								draw_pixel(v1.x2, v1.y1 - 0.1f, color);
+								draw_pixel(v1.x2, v1.y1 - 0.2f, color);
+								draw_pixel(v1.x2, v1.y1 - 0.3f, color);
+							}
+							if (i <= 1800)
+							{
+								vector2d::VECTOR v1(fx2 + x, y + y2, x - fx2, y + y2, color, true);
+							}
+							//matrix_pixels_pos[i].x = x2 + x;
+							//matrix_pixels_pos[i].y = y2 + y;
+						}
+						else
+						{
+							draw_pixel(x2 + x, y2 + y, color);
+							//matrix_pixels_pos[i].x = x2 + x;
+							//matrix_pixels_pos[i].y = y2 + y;
+						}
+					}
+					angle += 0.1f;
 				}
-				angle += 0.1f;
+			}
+			else
+			{
+				angle = start_circum * 0.1f;
+				for (int i = start_circum; i > end_circum; i--)
+				{
+					int b = 0;
+					float temp_j = 0.0f;
+					float fx2 = 0.0f;
+					float x2 = 0.0f;
+					float y2 = 0.0f;
+					//if (i >= 1800)
+					//{
+						float circle_trigonometric_var = angle * pi / 180.0f;
+						x2 = ra * fast_sin(circle_trigonometric_var);
+						y2 = rb * fast_cos(circle_trigonometric_var);
+					//	px_right_half_matrix[abs(i-3600)].x = x2;
+					//	px_right_half_matrix[abs(i-3600)].y = y2;
+					//}
+					//if (i < 1800)
+					//{
+					//	x2 = x - px_right_half_matrix[1799-i].x;
+					//	y2 = y - px_right_half_matrix[1799-i].y;
+					//}
+					if (filled == true)
+					{
+						fx2 = fast_trunc_ellipse_function(fabs(x2)); //rounds to tenths(because of coordinate unit and pixel proportion which is 0.1f) here to place certain number of pixels for every line to fill circle
+						temp_j = y2; //temp_j is temperate y value to check y current cycle status
+					}
+					if (filled == false)
+					{
+						draw_pixel(x2 + x, y2 + y, color);
+						if (get_ellipse_pixel_matrix)
+						{
+							matrix_pixels_pos[3600 - i].x = x2 + x;
+							matrix_pixels_pos[3600 - i].y = y2 + y;
+						}
+					}
+					if (filled == true)
+					{
+						if (fast_trunc_ellipse_function(temp_j) != j)
+						{
+							j = fast_trunc_ellipse_function(temp_j);
+							// bug with lack of pixels in center
+							if (i >= 900 && i <= 1000)
+							{
+								vector2d::VECTOR v1(fx2 + x, y, x - fx2, y, color, true);
+								draw_pixel(v1.x2, v1.y1, color);
+								draw_pixel(v1.x2, v1.y1 + 0.3f, color);
+								draw_pixel(v1.x2, v1.y1 + 0.2f, color);
+								draw_pixel(v1.x2, v1.y1 + 0.1f, color);
+								draw_pixel(v1.x2, v1.y1 - 0.1f, color);
+								draw_pixel(v1.x2, v1.y1 - 0.2f, color);
+								draw_pixel(v1.x2, v1.y1 - 0.3f, color);
+							}
+							if (i <= 1800)
+							{
+								vector2d::VECTOR v1(fx2 + x, y + y2, x - fx2, y + y2, color, true);
+							}
+							matrix_pixels_pos[i].x = x2 + x;
+							matrix_pixels_pos[i].y = y2 + y;
+						}
+						else
+						{
+							draw_pixel(x2 + x, y2 + y, color);
+						}
+					}
+					angle -= 0.1f;
+				}
 			}
 		}
 	public:
-		VERTEX px_right_half_matrix[1800];
+		//Vector2f px_right_half_matrix[1800];
 		float x;
 		float y;
 		float radiusa;
 		float radiusb;
 		bool visible;
-		char name[20];
-		//VERTEX matrix_pixels_pos[1];
+		Vector2f matrix_pixels_pos[1];
 		bool filled;
-		bool get_ellipse_additional_methods;
+		bool get_ellipse_pixel_matrix;
 		unsigned int color;
 		int px_circum_ = 0;
-		int px_circumference;
 		int px_area = 0;
-		bool ignore_warnings = true;
-		ELLIPSE(float x_, float y_, float radiusa_, float radiusb_, unsigned int color_, int px_circumference_, bool filled_, bool visible = true)
+		int start_circum;
+		int end_circum;
+		ELLIPSE(float x_, float y_, float radiusa_, float radiusb_, unsigned int color_, int start_circum_, int end_circum_, bool filled_, bool visible = true)
 		{
 			x = x_;
 			y = y_;
 			radiusa = radiusa_;
 			radiusb = radiusb_;
 			filled = filled_;
-			//if (ignore_warnings == false)
-			//{
-			//		//std::call_once(onceFlag, [] { MessageBox(hWnd, "Radius of the ellipse cannot be negative.", NULL, 0x00000031L); });
-			//}
 			color = color_;
-			px_circumference = px_circumference_;
+			start_circum = start_circum_;
+			end_circum = end_circum_;
+			get_ellipse_pixel_matrix = false;
 			if (visible == true)
 			{
 				draw();
@@ -1862,16 +1954,248 @@ namespace ellipse2d
 		{
 			if (visible)
 			{
-				draw_ellipse(x, y, radiusa, radiusb, color, px_circumference, filled);
+				draw_ellipse(x, y, radiusa, radiusb, color, filled);
 			}
 		}
 	};
 }
 namespace text2d
 {
-	class TEXT
+	class text
 	{
+	private:
+		Vector2f* next_pos;
+		void draw_char(const char ch, Vector2f& position)
+		{
+			if (ch == 'A')
+			{
+				vector2d::A_VECTOR v1(position.x, position.y, position.x + ch_width / 2.0f, position.y + ch_height, color, true, 1, 1, true, true, true); // left line
+				vector2d::A_VECTOR v2(position.x + ch_width, position.y, v1.x2, v1.y2, color, true, 1, 1, true, true, true); // right line
+				vector2d::VECTOR v3(v1.matrix_pixels_y_cycle[int(v1.px_quantity_y_cycle/2.0f)-2].x, v1.matrix_pixels_y_cycle[int(v1.px_quantity_y_cycle / 2.0f)-1].y, v2.matrix_pixels_y_cycle[int(v2.px_quantity_y_cycle / 2.0f)-1].x, v1.matrix_pixels_y_cycle[int(v1.px_quantity_y_cycle / 2.0f)-1].y, color, true); // middle line
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'B')
+			{
+				vector2d::A_VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true, 1, 1, true, true, true); // straight line
+				ellipse2d::ELLIPSE e1(position.x, position.y + (ch_height / 4.0f), ch_width, ch_height / 4.0f, color, 0, 1800, false, true); // bottom ellipse
+				ellipse2d::ELLIPSE e2(position.x, position.y + (ch_height / 1.33f), ch_width, ch_height / 4.0f, color, 0, 1800, false, true); // top ellipse
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'C')
+			{
+				ellipse2d::ELLIPSE e1(position.x+ch_width / 2.0f, position.y+ch_height / 2.0f, ch_width / 2.0f, ch_height / 2.0f, color, 1400, 3600, false, true);
+				ellipse2d::ELLIPSE e2(position.x + ch_width / 2.0f, position.y + ch_height / 2.0f, ch_width / 2.0f, ch_height / 2.0f, color, 0, 400, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 1.23f, position.y + ch_height / 2.0f);
+			}
+			if (ch == 'D')
+			{
+				vector2d::A_VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true, 1, 1, true, true, true); // straight line
+				ellipse2d::ELLIPSE e1(position.x, position.y + ch_height / 2.0f, ch_width, ch_height / 2.0f, color, 0, 1800, false, true);
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'E')
+			{
+				vector2d::VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true); // straight line
+				vector2d::VECTOR v2(position.x, position.y + ch_height, position.x + ch_width, position.y + ch_height, color, true); // top line
+				vector2d::VECTOR v3(position.x, position.y + ch_height / 2.0f, position.x + ch_width, position.y + ch_height / 2.0f, color, true); // middle line
+				vector2d::VECTOR v4(position.x, position.y, position.x + ch_width, position.y , color, true); // bottom line
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'F')
+			{
+				vector2d::VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true); // straight line
+				vector2d::VECTOR v2(position.x, position.y + ch_height, position.x + ch_width, position.y + ch_height, color, true); // top line
+				vector2d::VECTOR v3(position.x, position.y + ch_height / 1.5f, position.x + ch_width, position.y + ch_height / 1.5f, color, true); // middle line
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'G')
+			{
+				ellipse2d::ELLIPSE e1(position.x + ch_width, position.y + ch_height / 2.0f, ch_width, ch_height / 2.0f, color, 1800, 3600, false, true);
+				vector2d::VECTOR v1(position.x + ch_width, position.y, position.x + ch_width, position.y + ch_height / 2.0f, color, true);
+				vector2d::VECTOR v2(v1.x2, v1.y2, position.x + ch_width / 2.0f, position.y + ch_height / 2.0f, color, true);
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'H')
+			{
+				vector2d::VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true);
+				vector2d::VECTOR v2(position.x+ch_width, position.y, position.x+ch_width, position.y + ch_height, color, true);
+				vector2d::VECTOR v3(position.x, position.y + ch_height / 2.0f, position.x + ch_width, position.y + ch_height / 2.0f, color, true);
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'I') // Remember about the bug with I
+			{
+				vector2d::VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 6.0f, position.y);
+			}
+			if (ch == 'J')
+			{
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 2.0f, position.y + ch_height / 2.0f, ch_width / 2.0f, ch_height / 2.0f, color, 1100, 2500, false, true);
+				vector2d::VECTOR v1(position.x + ch_width, position.y + ch_height / 2.5f, position.x + ch_width, position.y + ch_height / 0.9f, color, true);
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'K')
+			{
+				vector2d::VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true);
+				vector2d::VECTOR v2(position.x, position.y+ch_height/2.0f, position.x+ch_width, position.y + ch_height, color, true);
+				vector2d::VECTOR v3(position.x, position.y + ch_height / 2.0f, position.x + ch_width, position.y, color, true);
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'L')
+			{
+				vector2d::VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true);
+				vector2d::VECTOR v2(position.x, position.y, position.x + ch_width, position.y, color, true);
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'M')
+			{
+				vector2d::VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true);
+				vector2d::VECTOR v2(position.x, position.y + ch_height, position.x + ch_width / 2.0f, position.y, color, true);
+				vector2d::VECTOR v3(v2.x2, v2.y2, position.x + ch_width, position.y + ch_height, color, true);
+				vector2d::VECTOR v4(position.x + ch_width, position.y, position.x + ch_width, position.y + ch_height, color, true);
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'N')
+			{
+				vector2d::VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true);
+				vector2d::VECTOR v2(position.x, position.y + ch_height, position.x + ch_width, position.y, color, true);
+				vector2d::VECTOR v4(position.x + ch_width, position.y, position.x + ch_width, position.y + ch_height, color, true);
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'O')
+			{
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 2.0f, position.y + ch_height / 2.0f, ch_width / 2.0f, ch_height / 2.0f, color, 0, 3600, false, true);
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'P')
+			{
+				vector2d::VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true); // straight line
+				ellipse2d::ELLIPSE e2(position.x, position.y + (ch_height / 1.33f), ch_width, ch_height / 4.0f, color, 0, 1800, false, true); // top ellipse
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'P')
+			{
+				vector2d::VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true); // straight line
+				ellipse2d::ELLIPSE e2(position.x, position.y + (ch_height / 1.33f), ch_width, ch_height / 4.0f, color, 0, 1800, false, true); // top ellipse
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'Q')
+			{
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 2.0f, position.y + ch_height / 2.0f, ch_width / 2.0f, ch_height / 2.0f, color, 0, 3600, false, true);
+				vector2d::VECTOR v1(position.x + ch_width / 2.0f, position.y, position.x + ch_width / 1.6f, position.y - ch_height / 6.0f, color, true);
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'R')
+			{
+				vector2d::VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true); // straight line
+				ellipse2d::ELLIPSE e2(position.x, position.y + (ch_height / 1.33f), ch_width, ch_height / 4.0f, color, 0, 1800, false, true); // top ellipse
+				vector2d::VECTOR v2(position.x, position.y + ch_height / 2.0f, position.x + ch_width, position.y, color, true); // straight line
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'S')
+			{
+				ellipse2d::ELLIPSE e1(position.x, position.y + ch_height / 4.0f, ch_width, ch_height / 4.0f, color, 300, 1800, false, true); // bottom ellipse
+			    ellipse2d::ELLIPSE e2(position.x + ch_width, position.y + ch_height / 1.33f, ch_width, ch_height / 4.0f, color, 2100, 3600, false, true); // top ellipse
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'T')
+			{
+				vector2d::VECTOR v1(position.x + ch_width / 2.0f, position.y, position.x + ch_width / 2.0f, position.y + ch_height, color, true);
+				vector2d::VECTOR v2(position.x - ch_width / 8.0f, position.y + ch_height, position.x + ch_width + ch_width / 8.0f, position.y + ch_height, color, true);
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'U')
+			{
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 2.0f, position.y + ch_height / 1.6f, ch_width / 2.0f, ch_height / 1.6f, color, 3000, 600, false, true);
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'V')
+			{
+				vector2d::VECTOR v1(position.x, position.y + ch_height, position.x + ch_width / 2.0f, position.y, color, true);
+				vector2d::VECTOR v2(v1.x2, v1.y2, position.x + ch_width, position.y + ch_height, color, true);
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'W')
+			{
+				vector2d::VECTOR v1(position.x, position.y + ch_height, position.x + ch_width / 4.0f, position.y, color, true);
+				vector2d::VECTOR v2(v1.x2, v1.y2, position.x + ch_width/ 2.0f, position.y + ch_height, color, true);
+				vector2d::VECTOR v3(v2.x2, v2.y2, position.x + ch_width / 1.33f, position.y, color, true);
+				vector2d::VECTOR v4(v3.x2, v3.y2, position.x + ch_width, position.y + ch_height, color, true);
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'X')
+			{
+				vector2d::VECTOR v1(position.x, position.y + ch_height, position.x + ch_width, position.y, color, true);
+				vector2d::VECTOR v2(position.x, position.y, position.x + ch_width, position.y + ch_height, color, true);
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'Y')
+			{
+				vector2d::VECTOR v1(position.x, position.y + ch_height, position.x + ch_width / 2.0f, position.y +ch_height / 2.0f, color, true);
+				vector2d::VECTOR v2(v1.x2, v1.y2, position.x + ch_width, position.y + ch_height, color, true);
+				vector2d::VECTOR v3(v1.x2, v1.y2, v1.x2, position.y, color, true);
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == 'Z')
+			{
+				vector2d::VECTOR v1(position.x, position.y + ch_height, position.x + ch_width, position.y + ch_height, color, true);
+				vector2d::VECTOR v2(v1.x2, v1.y2, position.x, position.y, color, true);
+				vector2d::VECTOR v3(v2.x2, v2.y2, position.x + ch_width, position.y, color, true);
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+			if (ch == ' ')
+			{
+				next_pos = new Vector2f(position.x + ch_width, position.y);
+			}
+		}
 	public:
+		const char* text_;
+		Vector2f position;
+		float ch_spacing;
+		float ch_width;
+		float ch_height;
+		unsigned int color;
+		bool visible;
+		text(const char* _text_, float position_x, float position_y, float ch_width_, float ch_height_, float ch_space_, unsigned int color_, bool visible_)
+		{
+			//assign char* to const char*
+			position.x = position_x; position.y = position_y;
+			text_ = _text_;
+			ch_spacing = ch_space_;
+			ch_width = ch_width_;
+			ch_height = ch_height_;
+			color = color_;
+			visible = visible_;
+			next_pos = new Vector2f(position_x, position_y);
+			if (visible)
+			{
+				draw();
+			}
+		}
+		//think about default constructor for text
+		text()
+		{
 
+		}
+		//should be private void
+		void draw()
+		{
+			if (visible)
+			{
+				//draw text
+				Vector2f* offset_pos;
+				for (int i = 0; i < get_text_last_index(text_); i++)
+				{
+					if (i > 0) // because it automatically aadds ch_spacing to the first letter
+					{
+						offset_pos = new Vector2f((next_pos->x + ch_spacing), position.y);
+					}
+					else
+					{
+						offset_pos = new Vector2f(position.x, position.y);
+					}
+					draw_char(text_[i], *offset_pos);
+				}
+			}
+		}
 	};
 }
