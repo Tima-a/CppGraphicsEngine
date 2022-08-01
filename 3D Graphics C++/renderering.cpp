@@ -1,33 +1,35 @@
+#define PIXEL_SIZE_DEF 0.1f
+#define PIXEL_SIZE_TRIANGLE 0.1f
+#define VECTOR_HQ 0.01f
+#define VECTOR_MQ 0.05f
+#define VECTOR_LQ 0.1f
+#define PIXEL_SIZE_STLN 0.1f
+#define MAX_STORAGE_SIZE 5000
+#define pi 3.14f
+#define d_pi 6.28f
+namespace Colors
+{
 #define white 0xffffff
 #define green 0x00ff00
 #define red 0xff0000
 #define blue 0x0000ff
 #define yellow 0xffff00
 #define black 0
-#define PIXEL_SIZE_DEF 0.05f
-#define PIXEL_SIZE_TRIANGLE 0.1f
-#define VECTOR_HQ 0.01f
-#define VECTOR_MQ 0.05f
-#define VECTOR_LQ 0.1f
-#define PIXEL_SIZE_STLN 0.1f
-#define pi 3.14f
-#define d_pi 6.28f
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+}
 static float render_scale = 0.01f;
 static float gravity = -9.81f;
 static float Gravitational_constant = 0.000000000016f;
 //Set window screen color
-inline static void update_screen(unsigned int color) // processing screen visibility. This function is done to place update_screen function to the bottom of the code.
+inline static void update_screen(uint32 color) // processing screen visibility. This function is done to place update_screen function to the bottom of the code.
 {
 	screen.update_screen = true;
 	screen.scr_refresh_color = color;
 }
-inline static void refresh_screen(unsigned int color)
+inline static void refresh_screen(uint32 color)
 {
 	if (screen.update_screen)
 	{
-		unsigned int* pixel = (unsigned int*)render.memory;
+		uint32* pixel = (uint32*)render.memory;
 		for (int y = 0; y < render.height; y++)
 		{
 			for (int x = 0; x < render.width; x++)
@@ -39,15 +41,12 @@ inline static void refresh_screen(unsigned int color)
 	}
 }
 //Draw pixel on x, y positions
-inline static void draw_pixel(float x, float y, unsigned int color)
+inline static void draw_pixel(float x, float y, uint32 color)
 {
-	float x_pixel_size = PIXEL_SIZE_DEF;
-	float y_pixel_size = PIXEL_SIZE_DEF;
+	float x_pixel_size = PIXEL_SIZE_DEF * render.height * render_scale;
+	float y_pixel_size = PIXEL_SIZE_DEF * render_scale * render_scale;
 	x *= render.height * render_scale;
 	y *= render.height * render_scale;
-	x_pixel_size *= render.height * render_scale;
-	y_pixel_size *= render.height * render_scale;
-
 	x += (float)render.width / 2.0f;
 	y += (float)render.height / 2.0f;
 
@@ -57,12 +56,12 @@ inline static void draw_pixel(float x, float y, unsigned int color)
 	int y0 = (int)y - (int)y_pixel_size;
 	int y1 = (int)y + (int)y_pixel_size;
 
-	x0 = clamp(0, x0, render.width);
+	/*x0 = clamp(0, x0, render.width);
 	x1 = clamp(0, x1, render.width);
 	y0 = clamp(0, y0, render.height);
-	y1 = clamp(0, y1, render.height);
+	y1 = clamp(0, y1, render.height);*/
 
-	unsigned int* pixel = (unsigned int*)render.memory + x0 + y0 * render.width;
+	uint32* pixel = (uint32*)render.memory + x0 + y0 * render.width;
 	*pixel++ = color;
 }
 class Vector2f
@@ -79,7 +78,11 @@ public:
 	{
 
 	}
+	~Vector2f()
+	{
 
+
+	}
 	Vector2f(Vector2f& vx)
 	{
 		x = vx.x;
@@ -95,9 +98,9 @@ namespace rectangle
 		float y;
 		float a;
 		float b;
-		unsigned int color;
+		uint32 color;
 		//Draw rectangle
-		RECT(float x_, float y_, float a_, float b_, unsigned int color_, bool visible = true)
+		RECT(float x_, float y_, float a_, float b_, uint32 color_, bool visible = true)
 		{
 			x = x_;
 			y = y_;
@@ -108,6 +111,14 @@ namespace rectangle
 			{
 				draw_rect(x_, y_, a_, b_, color_);
 			}
+		}
+		RECT()
+		{
+
+		}
+		~RECT()
+		{
+
 		}
 		//Calculate rectangle's perimeter
 		float perimeter()
@@ -120,12 +131,12 @@ namespace rectangle
 			return x * y;
 		}
 		//Draw function
-		void draw()
+		inline void draw()
 		{
 			draw_rect(x, y, a, b, color);
 		}
 	private:
-		void draw_rect(float x, float y, float half_size_x, float half_size_y, unsigned int color)
+		inline void draw_rect(float x, float y, float half_size_x, float half_size_y, uint32 color)
 		{
 			x *= render.height * render_scale;
 			y *= render.height * render_scale;
@@ -147,7 +158,7 @@ namespace rectangle
 			y1 = clamp(0, y1, render.height);
 			for (int y = y0; y < y1; y++)
 			{
-				unsigned int* pixel = (unsigned int*)render.memory + x0 + y * render.width;
+				uint32* pixel = (uint32*)render.memory + x0 + y * render.width;
 				for (int x = x0; x < x1; x++)
 				{
 					*pixel++ = color;
@@ -158,10 +169,10 @@ namespace rectangle
 }
 namespace vector2d
 {
-	class VECTOR
+	class fvector
 	{
 	private:
-		void check(float x1, float x2, float y1, float y2, float slope_x_modf, float slope_y_modf, float& slope_x_incr, float& slope_y_incr, bool directions[4])
+		inline void check(float x1, float x2, float y1, float y2, float slope_x_modf, float slope_y_modf, float& slope_x_incr, float& slope_y_incr, bool directions[4])
 		{
 			float differencex = 0.0f;
 			float differencey = 0.0f;
@@ -218,7 +229,7 @@ namespace vector2d
 				slope_y_incr = 0.0f;
 			}
 		}
-		void draw_vector(float x1, float y1, float x2, float y2, float vectorQuality, unsigned int color)
+		inline void draw_vector(float x1, float y1, float x2, float y2, float vectorQuality, uint32 color)
 		{
 			bool x_y_outweight = false, xy_swap = false; // if x2>y2, false, y2>x2, true; if x2&&y2 < x1&&y1 swap them
 			bool straight_line_drawing = false;
@@ -484,12 +495,12 @@ namespace vector2d
 		bool visible;
 		float vectorQuality;
 		bool highlight_vertexes;
-		unsigned int highlightColor;
-		unsigned int color;
+		uint32 highlightColor;
+		uint32 color;
 		int thickness_l = 1; //thickness left
 		int thickness_r = 1; //thickness right
 		//Draw 2d vector.
-		VECTOR(float x1_, float y1_, float x2_, float y2_, unsigned int color_, bool visible_ = true)
+		fvector(float x1_, float y1_, float x2_, float y2_, uint32 color_, bool visible_ = true)
 		{
 			x1 = x1_;
 			y1 = y1_;
@@ -505,11 +516,15 @@ namespace vector2d
 				visible = true;
 			}
 		}
-		VECTOR()
+		fvector()
 		{
 
 		}
-		VECTOR(Vector2f& vx1, Vector2f& vx2, unsigned int color_, bool visible_ = true)
+		~fvector()
+		{
+
+		}
+		fvector(Vector2f& vx1, Vector2f& vx2, uint32 color_, bool visible_ = true)
 		{
 			x1 = vx1.x;
 			y1 = vx1.y;;
@@ -538,14 +553,14 @@ namespace vector2d
 		{
 			return px_quantity;
 		}
-		void add_vector(float x2_, float y2_)
+		inline void add_vector(float x2_, float y2_)
 		{
 			x2 = x2_;
 			y2 = y2_;
 			draw();
 		}
 		//Draw function
-		void draw()
+		inline void draw()
 		{
 			if (visible)
 			{
@@ -564,7 +579,7 @@ namespace vector2d
 			}
 		}
 	};
-	class ANGLED_VECTOR
+	class rvector
 	{
 	private:
 		bool save_pixels_x_;
@@ -609,7 +624,7 @@ namespace vector2d
 			}
 			if (angle == 0.0f)
 			{
-				vector2d::VECTOR v1(x1, y1, 0.0f, y1 + length, color); v1.draw();
+				vector2d::fvector v1(x1, y1, 0.0f, y1 + length, color); v1.draw();
 				if (save_pixels_x == true || save_pixels_y == true)
 				{
 					//angle_vector_array_fill(v1.pixelsposx, v1.pixelsposy, v1.pixelindex, save_pixels_x, save_pixels_y);
@@ -619,7 +634,7 @@ namespace vector2d
 			}
 			if (angle == 45.0f)
 			{
-				vector2d::VECTOR v1(x1, y1, x1 + length, y1 + length, color); v1.draw();
+				vector2d::fvector v1(x1, y1, x1 + length, y1 + length, color); v1.draw();
 				straight_angles = true;
 				if (save_pixels_x == true || save_pixels_y == true)
 				{
@@ -629,7 +644,7 @@ namespace vector2d
 			}
 			if (angle == 90.0f)
 			{
-				vector2d::VECTOR v1(x1, y1, x1 + length, 0.0f, color); v1.draw();
+				vector2d::fvector v1(x1, y1, x1 + length, 0.0f, color); v1.draw();
 				straight_angles = true;
 				if (save_pixels_x == true || save_pixels_y == true)
 				{
@@ -639,7 +654,7 @@ namespace vector2d
 			}
 			if (angle == 135.0f)
 			{
-				vector2d::VECTOR v1(x1, y1, x1 + length, y1 - length, color); v1.draw();
+				vector2d::fvector v1(x1, y1, x1 + length, y1 - length, color); v1.draw();
 				straight_angles = true;
 				if (save_pixels_x == true || save_pixels_y == true)
 				{
@@ -649,7 +664,7 @@ namespace vector2d
 			}
 			if (angle == 180.0f)
 			{
-				vector2d::VECTOR v1(x1, y1, 0.0f, y1 - length, color); v1.draw();
+				vector2d::fvector v1(x1, y1, 0.0f, y1 - length, color); v1.draw();
 				straight_angles = true;
 				if (save_pixels_x == true || save_pixels_y == true)
 				{
@@ -659,7 +674,7 @@ namespace vector2d
 			}
 			if (angle == 225.0f)
 			{
-				vector2d::VECTOR v1(x1, y1, x1 - length, y1 - length, color); v1.draw();
+				vector2d::fvector v1(x1, y1, x1 - length, y1 - length, color); v1.draw();
 				straight_angles = true;
 				if (save_pixels_x == true || save_pixels_y == true)
 				{
@@ -669,7 +684,7 @@ namespace vector2d
 			}
 			if (angle == 270.0f)
 			{
-				vector2d::VECTOR v1(x1, y1, x1 - length, 0.0f, color); v1.draw();
+				vector2d::fvector v1(x1, y1, x1 - length, 0.0f, color); v1.draw();
 				straight_angles = true;
 				if (save_pixels_x == true || save_pixels_y == true)
 				{
@@ -679,7 +694,7 @@ namespace vector2d
 			}
 			if (angle == 315.0f)
 			{
-				vector2d::VECTOR v1(x1, y1, x1 - length, y1 + length, color); v1.draw();
+				vector2d::fvector v1(x1, y1, x1 - length, y1 + length, color); v1.draw();
 				straight_angles = true;
 				if (save_pixels_x == true || save_pixels_y == true)
 				{
@@ -737,7 +752,7 @@ namespace vector2d
 				{
 					y = x / (tan(pi * angle / 180));
 				}
-				vector2d::VECTOR v1(x1, y1, x, y, color); v1.draw();
+				vector2d::fvector v1(x1, y1, x, y, color); v1.draw();
 				if (save_pixels_x == true || save_pixels_y == true)
 				{
 					//angle_vector_array_fill(v1.pixelsposx, v1.pixelsposy, v1.pixelindex, save_pixels_x, save_pixels_y);
@@ -753,9 +768,9 @@ namespace vector2d
 		float length;
 		float x1, y1, x2, y2 = 0.0f;
 		float vectorQuality;
-		unsigned int color;
+		uint32 color;
 		//Angled vector draw function
-		ANGLED_VECTOR(float angle_, float length_, float x1_, float y1_, unsigned int color_, bool visible = true, bool save_pixels_x = false, bool save_pixels_y = false)
+		rvector(float angle_, float length_, float x1_, float y1_, uint32 color_, bool visible = true, bool save_pixels_x = false, bool save_pixels_y = false)
 		{
 			x1 = x1_;
 			y1 = y1_;
@@ -792,10 +807,10 @@ namespace vector2d
 			angle_draw_vector(save_pixels_x_, save_pixels_y_);
 		}
 	};
-	class A_VECTOR
+	class dvector
 	{
 	private:
-		void check(float x1, float x2, float y1, float y2, float slope_x_modf, float slope_y_modf, float& slope_x_incr, float& slope_y_incr, bool directions[4])
+		inline void check(float x1, float x2, float y1, float y2, float slope_x_modf, float slope_y_modf, float& slope_x_incr, float& slope_y_incr, bool directions[4])
 		{
 			float differencex = 0.0f;
 			float differencey = 0.0f;
@@ -853,7 +868,7 @@ namespace vector2d
 			}
 		}
 
-		void draw_vector(float x1, float y1, float x2, float y2, float vectorQuality, unsigned int color, bool save_pixels_matrix, bool save_pixels_matrix_x_cycle, bool save_pixels_matrix_y_cycle)
+		inline void draw_vector(float x1, float y1, float x2, float y2, float vectorQuality, uint32 color, bool save_pixels_matrix, bool save_pixels_matrix_x_cycle, bool save_pixels_matrix_y_cycle)
 		{
 			bool x_y_outweight = false, xy_swap = false; // if x2>y2, false, y2>x2, true; if x2&&y2 < x1&&y1 swap them
 			bool straight_line_drawing = false;
@@ -1242,7 +1257,7 @@ namespace vector2d
 					else if (straight_line_type == 3) //left
 					{
 						float slope_x_incr = PIXEL_SIZE_STLN;
-						draw_pixel(x1 + slope_x_modf, y1,  color);
+						draw_pixel(x1 + slope_x_modf, y1, color);
 						if (save_pixels_matrix == true)
 						{
 							matrix_pixels[g].x = x1 + slope_x_modf;
@@ -1281,7 +1296,7 @@ namespace vector2d
 		float x2;
 		float y2;
 		float vectorQuality;
-		unsigned int color;
+		uint32 color;
 		bool visible;
 		bool save_pixels_position;
 		bool save_pixels_position_x_cycle;
@@ -1291,7 +1306,7 @@ namespace vector2d
 		int thickness_l; //thickness left
 		int thickness_r; //thickness right
 		//Draw 2d vector.
-		A_VECTOR(float x1_, float y1_, float x2_, float y2_, unsigned int color_, bool visible_ = true, int thickness_l_ = 1, int thickness_r_ = 1, bool save_pixels_position_ = false, bool save_pixels_position_x_cycle_ = false, bool save_pixels_position_y_cycle_ = false)
+		dvector(float x1_, float y1_, float x2_, float y2_, uint32 color_, bool visible_ = true, int thickness_l_ = 1, int thickness_r_ = 1, bool save_pixels_position_ = false, bool save_pixels_position_x_cycle_ = false, bool save_pixels_position_y_cycle_ = false)
 		{
 			x1 = x1_;
 			y1 = y1_;
@@ -1310,7 +1325,7 @@ namespace vector2d
 				draw();
 			}
 		}
-		A_VECTOR(Vector2f& vx1, Vector2f& vx2, unsigned int color_, bool visible_ = true, int thickness_l_ = 1, int thickness_r_ = 1, bool save_pixels_position_ = false, bool save_pixels_position_x_cycle_ = false, bool save_pixels_position_y_cycle_ = false)
+		dvector(Vector2f& vx1, Vector2f& vx2, uint32 color_, bool visible_ = true, int thickness_l_ = 1, int thickness_r_ = 1, bool save_pixels_position_ = false, bool save_pixels_position_x_cycle_ = false, bool save_pixels_position_y_cycle_ = false)
 		{
 			x1 = vx1.x;
 			y1 = vx1.y;
@@ -1328,6 +1343,14 @@ namespace vector2d
 			{
 				draw();
 			}
+		}
+		dvector()
+		{
+
+		}
+		~dvector()
+		{
+
 		}
 		float magnitude()
 		{
@@ -1400,33 +1423,33 @@ namespace vector2d
 			//
 			return theta;
 		}
-		void create_projection(bool vh, bool ur, static int color) // vh - false - x, true - y; vh - true, if ur - false - left, ur - true - right; vh - false, if ur - false - bootom, if ur - true - top 
+		inline void create_projection(bool vh, bool ur, static int color) // vh - false - x, true - y; vh - true, if ur - false - left, ur - true - right; vh - false, if ur - false - bootom, if ur - true - top 
 		{
 			if (vh == false)
 			{
 				if (ur == false)
 				{
-					vector2d::VECTOR vprojectionx(x1, y1, x2, y1, color);
+					vector2d::fvector vprojectionx(x1, y1, x2, y1, color);
 				}
 				if (ur == true)
 				{
-					vector2d::VECTOR vprojectionx(x1, y2, x2, y2, color);
+					vector2d::fvector vprojectionx(x1, y2, x2, y2, color);
 				}
 			}
 			if (vh == true)
 			{
 				if (ur == false)
 				{
-					vector2d::VECTOR vprojectiony(x1, y1, x1, y2, color);
+					vector2d::fvector vprojectiony(x1, y1, x1, y2, color);
 				}
 				if (ur == true)
 				{
-					vector2d::VECTOR vprojectiony(x2, y1, x2, y2, color);
+					vector2d::fvector vprojectiony(x2, y1, x2, y2, color);
 				}
 			}
 		}
 		//Draw function
-		void draw()
+		inline void draw()
 		{
 			for (int i = 0; i < thickness_l + thickness_r + 1; i++) // +1 because thickness_l and thickness_r are by default zero and by default normal vector must be build and therefore to start for-loop with 1 loop.
 			{
@@ -1443,10 +1466,10 @@ namespace vector2d
 		}
 	};
 }
-inline static void draw_coordinate_grid(unsigned int color)
+inline static void draw_coordinate_grid(uint32 color)
 {
-	vector2d::VECTOR v1(-150.0f, 0.0f, 150.0f, 0.0f, color, true);
-	vector2d::VECTOR v2(0.0f, -50.0f, 0.0f, 50.0f, color, true);
+	vector2d::fvector v1(-150.0f, 0.0f, 150.0f, 0.0f, color, true);
+	vector2d::fvector v2(0.0f, -50.0f, 0.0f, 50.0f, color, true);
 }
 namespace cube
 {
@@ -1455,18 +1478,18 @@ namespace cube
 	private:
 		void draw_cube(float x, float y, float a, int r, int g, int b) // size of each side of a cube
 		{
-			vector2d::VECTOR v1(x, y, x - (a / 2.0f), y - (a / 2.0f), rgb(r - 10, g - 10, b - 10)); v1.draw(); px_cube += v1.magnitude();
-			vector2d::VECTOR v2(x - (a / 2.0f), y - (a / 2.0f), x + (a / 2.0f), y - (a / 2.0f), rgb(r, g, b)); v2.draw(); px_cube += v2.magnitude();
-			vector2d::VECTOR v3(x - (a / 2.0f), y - (a / 2.0f), x - (a / 2.0f), y + (a / 2.0f), rgb(r, g, b)); v3.draw(); px_cube += v3.magnitude();
-			vector2d::VECTOR v4(x - (a / 2.0f), y + (a / 2.0f), x + (a / 2.0f), y + (a / 2.0f), rgb(r, g, b)); v4.draw(); px_cube += v4.magnitude();
-			vector2d::VECTOR v5(x + (a / 2.0f), y - (a / 2.0f), x + (a / 2.0f), y + (a / 2.0f), rgb(r, g, b)); v5.draw(); px_cube += v5.magnitude();
-			vector2d::VECTOR v6(x, y, x, y + a, rgb(r - 10, g - 10, b - 10)); v6.draw(); px_cube += v6.magnitude();
-			vector2d::VECTOR v7(x, y + a, x + a, y + a, rgb(r, g, b)); v7.draw(); px_cube += v7.magnitude();
-			vector2d::VECTOR v8(x, y + a, x - (a / 2.0f), y + (a / 2.0f), rgb(r, g, b)); v8.draw(); px_cube += v8.magnitude();
-			vector2d::VECTOR v9(x, y, x + a, y, rgb(r - 10, g - 10, b - 10)); v9.draw(); px_cube += v9.magnitude();
-			vector2d::VECTOR v10(x + a, y + a, x + (a / 2.0f), y + (a / 2.0f), rgb(r, g, b)); v10.draw(); px_cube += v10.magnitude();
-			vector2d::VECTOR v11(x + (a / 2.0f), y - (a / 2.0f), x + a, y, rgb(r, g, b)); v11.draw(); px_cube += v11.magnitude();
-			vector2d::VECTOR v12(x + a, y + a, x + a, y, rgb(r, g, b)); v12.draw(); px_cube += v12.magnitude();
+			vector2d::fvector v1(x, y, x - (a / 2.0f), y - (a / 2.0f), rgb(r - 10, g - 10, b - 10)); v1.draw(); px_cube += v1.magnitude();
+			vector2d::fvector v2(x - (a / 2.0f), y - (a / 2.0f), x + (a / 2.0f), y - (a / 2.0f), rgb(r, g, b)); v2.draw(); px_cube += v2.magnitude();
+			vector2d::fvector v3(x - (a / 2.0f), y - (a / 2.0f), x - (a / 2.0f), y + (a / 2.0f), rgb(r, g, b)); v3.draw(); px_cube += v3.magnitude();
+			vector2d::fvector v4(x - (a / 2.0f), y + (a / 2.0f), x + (a / 2.0f), y + (a / 2.0f), rgb(r, g, b)); v4.draw(); px_cube += v4.magnitude();
+			vector2d::fvector v5(x + (a / 2.0f), y - (a / 2.0f), x + (a / 2.0f), y + (a / 2.0f), rgb(r, g, b)); v5.draw(); px_cube += v5.magnitude();
+			vector2d::fvector v6(x, y, x, y + a, rgb(r - 10, g - 10, b - 10)); v6.draw(); px_cube += v6.magnitude();
+			vector2d::fvector v7(x, y + a, x + a, y + a, rgb(r, g, b)); v7.draw(); px_cube += v7.magnitude();
+			vector2d::fvector v8(x, y + a, x - (a / 2.0f), y + (a / 2.0f), rgb(r, g, b)); v8.draw(); px_cube += v8.magnitude();
+			vector2d::fvector v9(x, y, x + a, y, rgb(r - 10, g - 10, b - 10)); v9.draw(); px_cube += v9.magnitude();
+			vector2d::fvector v10(x + a, y + a, x + (a / 2.0f), y + (a / 2.0f), rgb(r, g, b)); v10.draw(); px_cube += v10.magnitude();
+			vector2d::fvector v11(x + (a / 2.0f), y - (a / 2.0f), x + a, y, rgb(r, g, b)); v11.draw(); px_cube += v11.magnitude();
+			vector2d::fvector v12(x + a, y + a, x + a, y, rgb(r, g, b)); v12.draw(); px_cube += v12.magnitude();
 			//fix bug with drawing last line
 		}
 	public:
@@ -1502,14 +1525,14 @@ namespace cube
 }
 namespace triangle2d
 {
-	class TRIANGLE
+	class triangle
 	{
 	private:
-		void draw_triangle(float a, float b, float c, float h_apex, float x, float y, unsigned int color, bool filled)
+		inline void draw_triangle(float a, float b, float c, float h_apex, float x, float y, uint32 color, bool filled)
 		{
-			vector2d::A_VECTOR v1(x - c / 2.0f, y, x + c / 2.0f, y, color, true, 1, 1, true, true, true); //c-line
-			vector2d::A_VECTOR v2(x - c / 2.0f, y, (x - c / 2.0f) + a, y + h_apex, color, false, 1, 1, true, true, true); //a-line
-			vector2d::A_VECTOR v3(x + c / 2.0f, y, v2.x2, v2.y2, color, false, 1, 1, true, true, true); //b-line
+			vector2d::dvector v1(x - c / 2.0f, y, x + c / 2.0f, y, color, true, 1, 1, true, true, true); //c-line
+			vector2d::dvector v2(x - c / 2.0f, y, (x - c / 2.0f) + a, y + h_apex, color, false, 1, 1, true, true, true); //a-line
+			vector2d::dvector v3(x + c / 2.0f, y, v2.x2, v2.y2, color, false, 1, 1, true, true, true); //b-line
 			v2.vectorQuality = VECTOR_LQ;
 			v3.vectorQuality = VECTOR_LQ;
 			int fill_type = 0; //0 - a > c; 1 - b > c; 2 - a and b < c
@@ -1553,14 +1576,14 @@ namespace triangle2d
 						for (int j = 0; j < v2.px_quantity_x_cycle; j++)
 						{
 							float mxp_v1 = v2.matrix_pixels_x_cycle[j].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
-							vector2d::VECTOR v4(mxp_v1, v1y, mxp_v1, v2.matrix_pixels_x_cycle[j].y, color, true);
+							vector2d::fvector v4(mxp_v1, v1y, mxp_v1, v2.matrix_pixels_x_cycle[j].y, color, true);
 							//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
 						}
 						for (int z = v2.px_quantity_x_cycle; z < v2.px_quantity_x_cycle + v3.px_quantity_x_cycle; z++)
 						{
 							int r = v3.px_quantity_x_cycle - (z - v2.px_quantity_x_cycle) - 1;
 							float mxp_v1 = v3.matrix_pixels_x_cycle[r].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
-							vector2d::VECTOR v4(mxp_v1, v1y, mxp_v1, v3.matrix_pixels_x_cycle[r].y, color, true);
+							vector2d::fvector v4(mxp_v1, v1y, mxp_v1, v3.matrix_pixels_x_cycle[r].y, color, true);
 						}
 					}
 					//if (fill_type == 0)
@@ -1713,10 +1736,10 @@ namespace triangle2d
 		float y;
 		char name[20];
 		bool visible;
-		unsigned int color;
+		uint32 color;
 		bool filled;
 		//Draw triangle funciton. Exception: a + b > c && a + c > b && b + c > a and a,b,c,h > 0
-		TRIANGLE(float a_, float b_, float c_, float h_apex_, float x_, float y_, unsigned int color_, bool filled_, bool visible = true)
+		triangle(float a_, float b_, float c_, float h_apex_, float x_, float y_, uint32 color_, bool filled_, bool visible = true)
 		{
 			a = a_;
 			b = b_;
@@ -1731,7 +1754,11 @@ namespace triangle2d
 				draw_triangle(a_, b_, c_, h_apex_, x_, y_, color_, filled_);
 			}
 		}
-		TRIANGLE()
+		triangle()
+		{
+
+		}
+		~triangle()
 		{
 
 		}
@@ -1745,7 +1772,7 @@ namespace triangle2d
 		{
 			return (h_apex * b) / 2.0f;
 		}
-		void draw()
+		inline void draw()
 		{
 			if (visible)
 			{
@@ -1759,7 +1786,7 @@ namespace ellipse2d
 	class ELLIPSE
 	{
 	private:
-		void draw_ellipse(float x, float y, float ra, float rb, unsigned int color, bool filled)
+		inline void draw_ellipse(float x, float y, float ra, float rb, uint32 color, bool filled)
 		{
 			float angle = 0.0f;
 			float j = rb; //temp_j is pre-cycle y value to check if y to place vectors is changed; j is by default is the highest point of the circle
@@ -1777,17 +1804,17 @@ namespace ellipse2d
 					float y2 = 0.0f;
 					//if (i <= 1800)
 					//{
-						float circle_trigonometric_var = angle * pi / 180.0f;
-						x2 = ra * fast_sin(circle_trigonometric_var);
-						y2 = rb * fast_cos(circle_trigonometric_var);
-						//px_right_half_matrix[i].x = x2;
-						//px_right_half_matrix[i].y = y2;
-					//}
-					//if (i > 1800)
-					//{
-					//	x2 = x - px_right_half_matrix[i - 1801].x;
-					//	y2 = y - px_right_half_matrix[i - 1801].y;
-					//}
+					float circle_trigonometric_var = angle * pi / 180.0f;
+					x2 = ra * fast_sin(circle_trigonometric_var);
+					y2 = rb * fast_cos(circle_trigonometric_var);
+					//px_right_half_matrix[i].x = x2;
+					//px_right_half_matrix[i].y = y2;
+				//}
+				//if (i > 1800)
+				//{
+				//	x2 = x - px_right_half_matrix[i - 1801].x;
+				//	y2 = y - px_right_half_matrix[i - 1801].y;
+				//}
 					if (filled == true)
 					{
 						fx2 = fast_trunc_ellipse_function(fabs(x2)); //rounds to tenths(because of coordinate unit and pixel proportion which is 0.1f) here to place certain number of pixels for every line to fill circle
@@ -1810,7 +1837,7 @@ namespace ellipse2d
 							// bug with lack of pixels in center
 							if (i >= 900 && i <= 1000)
 							{
-								vector2d::VECTOR v1(fx2 + x, y, x - fx2, y, color, true);
+								vector2d::fvector v1(fx2 + x, y, x - fx2, y, color, true);
 								draw_pixel(v1.x2, v1.y1, color);
 								draw_pixel(v1.x2, v1.y1 + 0.3f, color);
 								draw_pixel(v1.x2, v1.y1 + 0.2f, color);
@@ -1821,7 +1848,7 @@ namespace ellipse2d
 							}
 							if (i <= 1800)
 							{
-								vector2d::VECTOR v1(fx2 + x, y + y2, x - fx2, y + y2, color, true);
+								vector2d::fvector v1(fx2 + x, y + y2, x - fx2, y + y2, color, true);
 							}
 							//matrix_pixels_pos[i].x = x2 + x;
 							//matrix_pixels_pos[i].y = y2 + y;
@@ -1848,9 +1875,9 @@ namespace ellipse2d
 					float y2 = 0.0f;
 					//if (i >= 1800)
 					//{
-						float circle_trigonometric_var = angle * pi / 180.0f;
-						x2 = ra * fast_sin(circle_trigonometric_var);
-						y2 = rb * fast_cos(circle_trigonometric_var);
+					float circle_trigonometric_var = angle * pi / 180.0f;
+					x2 = ra * fast_sin(circle_trigonometric_var);
+					y2 = rb * fast_cos(circle_trigonometric_var);
 					//	px_right_half_matrix[abs(i-3600)].x = x2;
 					//	px_right_half_matrix[abs(i-3600)].y = y2;
 					//}
@@ -1881,7 +1908,7 @@ namespace ellipse2d
 							// bug with lack of pixels in center
 							if (i >= 900 && i <= 1000)
 							{
-								vector2d::VECTOR v1(fx2 + x, y, x - fx2, y, color, true);
+								vector2d::fvector v1(fx2 + x, y, x - fx2, y, color, true);
 								draw_pixel(v1.x2, v1.y1, color);
 								draw_pixel(v1.x2, v1.y1 + 0.3f, color);
 								draw_pixel(v1.x2, v1.y1 + 0.2f, color);
@@ -1892,7 +1919,7 @@ namespace ellipse2d
 							}
 							if (i <= 1800)
 							{
-								vector2d::VECTOR v1(fx2 + x, y + y2, x - fx2, y + y2, color, true);
+								vector2d::fvector v1(fx2 + x, y + y2, x - fx2, y + y2, color, true);
 							}
 							matrix_pixels_pos[i].x = x2 + x;
 							matrix_pixels_pos[i].y = y2 + y;
@@ -1916,12 +1943,12 @@ namespace ellipse2d
 		Vector2f matrix_pixels_pos[1];
 		bool filled;
 		bool get_ellipse_pixel_matrix;
-		unsigned int color;
+		uint32 color;
 		int px_circum_ = 0;
 		int px_area = 0;
 		int start_circum;
 		int end_circum;
-		ELLIPSE(float x_, float y_, float radiusa_, float radiusb_, unsigned int color_, int start_circum_, int end_circum_, bool filled_, bool visible = true)
+		ELLIPSE(float x_, float y_, float radiusa_, float radiusb_, uint32 color_, int start_circum_, int end_circum_, bool filled_, bool visible = true)
 		{
 			x = x_;
 			y = y_;
@@ -1941,6 +1968,10 @@ namespace ellipse2d
 		{
 
 		}
+		~ELLIPSE()
+		{
+
+		}
 		//Calculate circle's size
 		int circumference_px()
 		{
@@ -1950,7 +1981,7 @@ namespace ellipse2d
 		{
 			return px_area;
 		}
-		void draw()
+		inline void draw()
 		{
 			if (visible)
 			{
@@ -1959,106 +1990,150 @@ namespace ellipse2d
 		}
 	};
 }
+class Texture
+{
+public:
+	const char* path;
+	float x;
+	float y;
+	bool visible;
+	int img_width;
+	int img_height;
+	int rgb_channels;
+	Texture(const char* path_, float x_, float y_)
+	{
+		path = path_;
+		visible = true;
+		x = x_;
+		y = y_;
+	}
+	Texture()
+	{
+
+	}
+	void show_image()
+	{
+		unsigned char* data = stbi_load(path, &img_width, &img_height, &rgb_channels, 0);
+		// ... process data if not NULL ..
+		int index = 0;
+		float y_ = y + (img_height / 2.0f) * 0.1f; // to achieve the center pivot of the picture
+		float x_ = x - (img_width / 2.0f) * 0.1f; // to achieve the center pivot of the picture
+		if (data != nullptr && img_height > 0 && img_width > 0)
+		{
+			for (int i = 0; i < img_height; i++)
+			{
+				for (int j = 0; j < img_width; j++)
+				{
+					draw_pixel(x_ + j * 0.1f, y_ - i * 0.1f, rgb(static_cast<int>(data[index]), static_cast<int>(data[index + 1]), static_cast<int>(data[index + 2])));
+					index += 3;
+					//std::cout << index << " pixel: RGB " << static_cast<int>(data[index]) << " " << static_cast<int>(data[index + 1]) << " " << static_cast<int>(data[index + 2]) << std::endl;
+				}
+			}
+		}
+		stbi_image_free(data);
+	}
+};
+
 namespace text2d
 {
 	class text
 	{
 	private:
 		Vector2f* next_pos;
-		void draw_char(const char ch, Vector2f& position)
+		inline void draw_char(const char ch, Vector2f& position)
 		{
 			if (ch == 'A')
 			{
-				vector2d::A_VECTOR v1(position.x, position.y, position.x + ch_width / 2.0f, position.y + ch_height, color, true, 1, 1, true, true, true); // left line
-				vector2d::A_VECTOR v2(position.x + ch_width, position.y, v1.x2, v1.y2, color, true, 1, 1, true, true, true); // right line
-				vector2d::VECTOR v3(v1.matrix_pixels_y_cycle[int(v1.px_quantity_y_cycle/2.0f)-2].x, v1.matrix_pixels_y_cycle[int(v1.px_quantity_y_cycle / 2.0f)-1].y, v2.matrix_pixels_y_cycle[int(v2.px_quantity_y_cycle / 2.0f)-1].x, v1.matrix_pixels_y_cycle[int(v1.px_quantity_y_cycle / 2.0f)-1].y, color, true); // middle line
+				vector2d::dvector v1(position.x, position.y, position.x + ch_width / 2.0f, position.y + ch_height, color, true, 1, 1, true, true, true); // left line
+				vector2d::dvector v2(position.x + ch_width, position.y, v1.x2, v1.y2, color, true, 1, 1, true, true, true); // right line
+				vector2d::fvector v3(v1.matrix_pixels_y_cycle[int(v1.px_quantity_y_cycle / 2.0f) - 2].x, v1.matrix_pixels_y_cycle[int(v1.px_quantity_y_cycle / 2.0f) - 1].y, v2.matrix_pixels_y_cycle[int(v2.px_quantity_y_cycle / 2.0f) - 1].x, v1.matrix_pixels_y_cycle[int(v1.px_quantity_y_cycle / 2.0f) - 1].y, color, true); // middle line
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'B')
 			{
-				vector2d::A_VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true, 1, 1, true, true, true); // straight line
+				vector2d::dvector v1(position.x, position.y, position.x, position.y + ch_height, color, true, 1, 1, true, true, true); // straight line
 				ellipse2d::ELLIPSE e1(position.x, position.y + (ch_height / 4.0f), ch_width, ch_height / 4.0f, color, 0, 1800, false, true); // bottom ellipse
 				ellipse2d::ELLIPSE e2(position.x, position.y + (ch_height / 1.33f), ch_width, ch_height / 4.0f, color, 0, 1800, false, true); // top ellipse
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'C')
 			{
-				ellipse2d::ELLIPSE e1(position.x+ch_width / 2.0f, position.y+ch_height / 2.0f, ch_width / 2.0f, ch_height / 2.0f, color, 1400, 3600, false, true);
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 2.0f, position.y + ch_height / 2.0f, ch_width / 2.0f, ch_height / 2.0f, color, 1400, 3600, false, true);
 				ellipse2d::ELLIPSE e2(position.x + ch_width / 2.0f, position.y + ch_height / 2.0f, ch_width / 2.0f, ch_height / 2.0f, color, 0, 400, false, true);
 				next_pos = new Vector2f(position.x + ch_width / 1.23f, position.y + ch_height / 2.0f);
 			}
 			if (ch == 'D')
 			{
-				vector2d::A_VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true, 1, 1, true, true, true); // straight line
+				vector2d::dvector v1(position.x, position.y, position.x, position.y + ch_height, color, true, 1, 1, true, true, true); // straight line
 				ellipse2d::ELLIPSE e1(position.x, position.y + ch_height / 2.0f, ch_width, ch_height / 2.0f, color, 0, 1800, false, true);
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'E')
 			{
-				vector2d::VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true); // straight line
-				vector2d::VECTOR v2(position.x, position.y + ch_height, position.x + ch_width, position.y + ch_height, color, true); // top line
-				vector2d::VECTOR v3(position.x, position.y + ch_height / 2.0f, position.x + ch_width, position.y + ch_height / 2.0f, color, true); // middle line
-				vector2d::VECTOR v4(position.x, position.y, position.x + ch_width, position.y , color, true); // bottom line
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height, color, true); // straight line
+				vector2d::fvector v2(position.x, position.y + ch_height, position.x + ch_width, position.y + ch_height, color, true); // top line
+				vector2d::fvector v3(position.x, position.y + ch_height / 2.0f, position.x + ch_width, position.y + ch_height / 2.0f, color, true); // middle line
+				vector2d::fvector v4(position.x, position.y, position.x + ch_width, position.y, color, true); // bottom line
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'F')
 			{
-				vector2d::VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true); // straight line
-				vector2d::VECTOR v2(position.x, position.y + ch_height, position.x + ch_width, position.y + ch_height, color, true); // top line
-				vector2d::VECTOR v3(position.x, position.y + ch_height / 1.5f, position.x + ch_width, position.y + ch_height / 1.5f, color, true); // middle line
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height, color, true); // straight line
+				vector2d::fvector v2(position.x, position.y + ch_height, position.x + ch_width, position.y + ch_height, color, true); // top line
+				vector2d::fvector v3(position.x, position.y + ch_height / 1.5f, position.x + ch_width, position.y + ch_height / 1.5f, color, true); // middle line
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'G')
 			{
 				ellipse2d::ELLIPSE e1(position.x + ch_width, position.y + ch_height / 2.0f, ch_width, ch_height / 2.0f, color, 1800, 3600, false, true);
-				vector2d::VECTOR v1(position.x + ch_width, position.y, position.x + ch_width, position.y + ch_height / 2.0f, color, true);
-				vector2d::VECTOR v2(v1.x2, v1.y2, position.x + ch_width / 2.0f, position.y + ch_height / 2.0f, color, true);
+				vector2d::fvector v1(position.x + ch_width, position.y, position.x + ch_width, position.y + ch_height / 2.0f, color, true);
+				vector2d::fvector v2(v1.x2, v1.y2, position.x + ch_width / 2.0f, position.y + ch_height / 2.0f, color, true);
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'H')
 			{
-				vector2d::VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true);
-				vector2d::VECTOR v2(position.x+ch_width, position.y, position.x+ch_width, position.y + ch_height, color, true);
-				vector2d::VECTOR v3(position.x, position.y + ch_height / 2.0f, position.x + ch_width, position.y + ch_height / 2.0f, color, true);
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height, color, true);
+				vector2d::fvector v2(position.x + ch_width, position.y, position.x + ch_width, position.y + ch_height, color, true);
+				vector2d::fvector v3(position.x, position.y + ch_height / 2.0f, position.x + ch_width, position.y + ch_height / 2.0f, color, true);
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'I') // Remember about the bug with I
 			{
-				vector2d::VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true);
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height, color, true);
 				next_pos = new Vector2f(position.x + ch_width / 6.0f, position.y);
 			}
 			if (ch == 'J')
 			{
 				ellipse2d::ELLIPSE e1(position.x + ch_width / 2.0f, position.y + ch_height / 2.0f, ch_width / 2.0f, ch_height / 2.0f, color, 1100, 2500, false, true);
-				vector2d::VECTOR v1(position.x + ch_width, position.y + ch_height / 2.5f, position.x + ch_width, position.y + ch_height / 0.9f, color, true);
+				vector2d::fvector v1(position.x + ch_width, position.y + ch_height / 2.5f, position.x + ch_width, position.y + ch_height / 0.9f, color, true);
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'K')
 			{
-				vector2d::VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true);
-				vector2d::VECTOR v2(position.x, position.y+ch_height/2.0f, position.x+ch_width, position.y + ch_height, color, true);
-				vector2d::VECTOR v3(position.x, position.y + ch_height / 2.0f, position.x + ch_width, position.y, color, true);
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height, color, true);
+				vector2d::fvector v2(position.x, position.y + ch_height / 2.0f, position.x + ch_width, position.y + ch_height, color, true);
+				vector2d::fvector v3(position.x, position.y + ch_height / 2.0f, position.x + ch_width, position.y, color, true);
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'L')
 			{
-				vector2d::VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true);
-				vector2d::VECTOR v2(position.x, position.y, position.x + ch_width, position.y, color, true);
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height, color, true);
+				vector2d::fvector v2(position.x, position.y, position.x + ch_width, position.y, color, true);
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'M')
 			{
-				vector2d::VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true);
-				vector2d::VECTOR v2(position.x, position.y + ch_height, position.x + ch_width / 2.0f, position.y, color, true);
-				vector2d::VECTOR v3(v2.x2, v2.y2, position.x + ch_width, position.y + ch_height, color, true);
-				vector2d::VECTOR v4(position.x + ch_width, position.y, position.x + ch_width, position.y + ch_height, color, true);
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height, color, true);
+				vector2d::fvector v2(position.x, position.y + ch_height, position.x + ch_width / 2.0f, position.y, color, true);
+				vector2d::fvector v3(v2.x2, v2.y2, position.x + ch_width, position.y + ch_height, color, true);
+				vector2d::fvector v4(position.x + ch_width, position.y, position.x + ch_width, position.y + ch_height, color, true);
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'N')
 			{
-				vector2d::VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true);
-				vector2d::VECTOR v2(position.x, position.y + ch_height, position.x + ch_width, position.y, color, true);
-				vector2d::VECTOR v4(position.x + ch_width, position.y, position.x + ch_width, position.y + ch_height, color, true);
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height, color, true);
+				vector2d::fvector v2(position.x, position.y + ch_height, position.x + ch_width, position.y, color, true);
+				vector2d::fvector v4(position.x + ch_width, position.y, position.x + ch_width, position.y + ch_height, color, true);
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'O')
@@ -2068,39 +2143,39 @@ namespace text2d
 			}
 			if (ch == 'P')
 			{
-				vector2d::VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true); // straight line
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height, color, true); // straight line
 				ellipse2d::ELLIPSE e2(position.x, position.y + (ch_height / 1.33f), ch_width, ch_height / 4.0f, color, 0, 1800, false, true); // top ellipse
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'P')
 			{
-				vector2d::VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true); // straight line
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height, color, true); // straight line
 				ellipse2d::ELLIPSE e2(position.x, position.y + (ch_height / 1.33f), ch_width, ch_height / 4.0f, color, 0, 1800, false, true); // top ellipse
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'Q')
 			{
 				ellipse2d::ELLIPSE e1(position.x + ch_width / 2.0f, position.y + ch_height / 2.0f, ch_width / 2.0f, ch_height / 2.0f, color, 0, 3600, false, true);
-				vector2d::VECTOR v1(position.x + ch_width / 2.0f, position.y, position.x + ch_width / 1.6f, position.y - ch_height / 6.0f, color, true);
+				vector2d::fvector v1(position.x + ch_width / 2.0f, position.y, position.x + ch_width / 1.6f, position.y - ch_height / 6.0f, color, true);
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'R')
 			{
-				vector2d::VECTOR v1(position.x, position.y, position.x, position.y + ch_height, color, true); // straight line
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height, color, true); // straight line
 				ellipse2d::ELLIPSE e2(position.x, position.y + (ch_height / 1.33f), ch_width, ch_height / 4.0f, color, 0, 1800, false, true); // top ellipse
-				vector2d::VECTOR v2(position.x, position.y + ch_height / 2.0f, position.x + ch_width, position.y, color, true); // straight line
+				vector2d::fvector v2(position.x, position.y + ch_height / 2.0f, position.x + ch_width, position.y, color, true); // straight line
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'S')
 			{
 				ellipse2d::ELLIPSE e1(position.x, position.y + ch_height / 4.0f, ch_width, ch_height / 4.0f, color, 300, 1800, false, true); // bottom ellipse
-			    ellipse2d::ELLIPSE e2(position.x + ch_width, position.y + ch_height / 1.33f, ch_width, ch_height / 4.0f, color, 2100, 3600, false, true); // top ellipse
+				ellipse2d::ELLIPSE e2(position.x + ch_width, position.y + ch_height / 1.33f, ch_width, ch_height / 4.0f, color, 2100, 3600, false, true); // top ellipse
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'T')
 			{
-				vector2d::VECTOR v1(position.x + ch_width / 2.0f, position.y, position.x + ch_width / 2.0f, position.y + ch_height, color, true);
-				vector2d::VECTOR v2(position.x - ch_width / 8.0f, position.y + ch_height, position.x + ch_width + ch_width / 8.0f, position.y + ch_height, color, true);
+				vector2d::fvector v1(position.x + ch_width / 2.0f, position.y, position.x + ch_width / 2.0f, position.y + ch_height, color, true);
+				vector2d::fvector v2(position.x - ch_width / 8.0f, position.y + ch_height, position.x + ch_width + ch_width / 8.0f, position.y + ch_height, color, true);
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'U')
@@ -2110,36 +2185,36 @@ namespace text2d
 			}
 			if (ch == 'V')
 			{
-				vector2d::VECTOR v1(position.x, position.y + ch_height, position.x + ch_width / 2.0f, position.y, color, true);
-				vector2d::VECTOR v2(v1.x2, v1.y2, position.x + ch_width, position.y + ch_height, color, true);
+				vector2d::fvector v1(position.x, position.y + ch_height, position.x + ch_width / 2.0f, position.y, color, true);
+				vector2d::fvector v2(v1.x2, v1.y2, position.x + ch_width, position.y + ch_height, color, true);
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'W')
 			{
-				vector2d::VECTOR v1(position.x, position.y + ch_height, position.x + ch_width / 4.0f, position.y, color, true);
-				vector2d::VECTOR v2(v1.x2, v1.y2, position.x + ch_width/ 2.0f, position.y + ch_height, color, true);
-				vector2d::VECTOR v3(v2.x2, v2.y2, position.x + ch_width / 1.33f, position.y, color, true);
-				vector2d::VECTOR v4(v3.x2, v3.y2, position.x + ch_width, position.y + ch_height, color, true);
+				vector2d::fvector v1(position.x, position.y + ch_height, position.x + ch_width / 4.0f, position.y, color, true);
+				vector2d::fvector v2(v1.x2, v1.y2, position.x + ch_width / 2.0f, position.y + ch_height, color, true);
+				vector2d::fvector v3(v2.x2, v2.y2, position.x + ch_width / 1.33f, position.y, color, true);
+				vector2d::fvector v4(v3.x2, v3.y2, position.x + ch_width, position.y + ch_height, color, true);
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'X')
 			{
-				vector2d::VECTOR v1(position.x, position.y + ch_height, position.x + ch_width, position.y, color, true);
-				vector2d::VECTOR v2(position.x, position.y, position.x + ch_width, position.y + ch_height, color, true);
+				vector2d::fvector v1(position.x, position.y + ch_height, position.x + ch_width, position.y, color, true);
+				vector2d::fvector v2(position.x, position.y, position.x + ch_width, position.y + ch_height, color, true);
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'Y')
 			{
-				vector2d::VECTOR v1(position.x, position.y + ch_height, position.x + ch_width / 2.0f, position.y +ch_height / 2.0f, color, true);
-				vector2d::VECTOR v2(v1.x2, v1.y2, position.x + ch_width, position.y + ch_height, color, true);
-				vector2d::VECTOR v3(v1.x2, v1.y2, v1.x2, position.y, color, true);
+				vector2d::fvector v1(position.x, position.y + ch_height, position.x + ch_width / 2.0f, position.y + ch_height / 2.0f, color, true);
+				vector2d::fvector v2(v1.x2, v1.y2, position.x + ch_width, position.y + ch_height, color, true);
+				vector2d::fvector v3(v1.x2, v1.y2, v1.x2, position.y, color, true);
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'Z')
 			{
-				vector2d::VECTOR v1(position.x, position.y + ch_height, position.x + ch_width, position.y + ch_height, color, true);
-				vector2d::VECTOR v2(v1.x2, v1.y2, position.x, position.y, color, true);
-				vector2d::VECTOR v3(v2.x2, v2.y2, position.x + ch_width, position.y, color, true);
+				vector2d::fvector v1(position.x, position.y + ch_height, position.x + ch_width, position.y + ch_height, color, true);
+				vector2d::fvector v2(v1.x2, v1.y2, position.x, position.y, color, true);
+				vector2d::fvector v3(v2.x2, v2.y2, position.x + ch_width, position.y, color, true);
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == ' ')
@@ -2153,9 +2228,9 @@ namespace text2d
 		float ch_spacing;
 		float ch_width;
 		float ch_height;
-		unsigned int color;
+		uint32 color;
 		bool visible;
-		text(const char* _text_, float position_x, float position_y, float ch_width_, float ch_height_, float ch_space_, unsigned int color_, bool visible_)
+		text(const char* _text_, float position_x, float position_y, float ch_width_, float ch_height_, float ch_space_, uint32 color_, bool visible_)
 		{
 			//assign char* to const char*
 			position.x = position_x; position.y = position_y;
@@ -2176,8 +2251,12 @@ namespace text2d
 		{
 
 		}
+		~text()
+		{
+
+		}
 		//should be private void
-		void draw()
+		inline void draw()
 		{
 			if (visible)
 			{
