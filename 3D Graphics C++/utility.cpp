@@ -7,7 +7,7 @@ const float SIN_CURVE_A = 0.04f;
 const float SIN_CURVE_B = 0.0f;
 #define MAX_TEXT_SIZE 1000
 
-float fast_cos(std::complex <float> z)
+static inline float fast_cos(std::complex <float> z)
 {
 	float cs;
 	std::complex <float> value;
@@ -23,7 +23,7 @@ float fast_cos(std::complex <float> z)
 
 	return std::real(value);
 }
-float fast_sin(std::complex <float> z)
+static inline float fast_sin(std::complex <float> z)
 {
 	float sn;
 	std::complex <float> value;
@@ -39,7 +39,7 @@ float fast_sin(std::complex <float> z)
 
 	return std::real(value);
 }
-static float clamp(float min, float val, float max)
+inline static float clamp(float min, float val, float max)
 {
 	if (val < min)
 	{
@@ -51,12 +51,12 @@ static float clamp(float min, float val, float max)
 	}
 	return val;
 }
-static unsigned int rgb(unsigned int r, unsigned int g, unsigned int b)
+inline static uint32 rgb(uint32 r, uint32 g, uint32 b)
 {
-	unsigned int rgbnumber = (r << 16) + (g << 8) + b;
+	uint32 rgbnumber = (r << 16) + (g << 8) + b;
 	return rgbnumber;
 }
-static bool neg_or_pos_num(float num)
+inline static bool neg_or_pos_num(float num)
 {
 	//neg - false, pos - true
 	if (num >= 0.0f)
@@ -68,7 +68,7 @@ static bool neg_or_pos_num(float num)
 		return false;
 	}
 }
-static int random(int low, int high)
+inline static int random(int low, int high)
 {
 	time_t rawtime;
 	struct tm* timeinfo;
@@ -108,11 +108,11 @@ static inline long long int GetTicks()
 	}
 	return ticks.QuadPart;
 }
-float fast_trunc_ellipse_function(float num)
+static inline float fast_trunc_ellipse_function(float num)
 {
 	return int(num * 10.0f) / 10.0f;
 }
-float truncA(float num, int digit)
+static inline float truncA(float num, int digit)
 {
 	float numa = num;
 	float numb = 1.0f;
@@ -134,7 +134,7 @@ float truncA(float num, int digit)
 	numra = int(numa); numrfa = float(numra) / numb;
 	return numrfa;
 }
-static int get_quantity_of_digits(float a, bool after_dot)
+static inline int get_quantity_of_digits(float a, bool after_dot)
 {
 	int digits_num_after_dot = 0;
 	int digits_num_before_dot = 0;
@@ -167,7 +167,7 @@ static int get_quantity_of_digits(float a, bool after_dot)
 		return digits_num_after_dot;
 	}
 }
-static bool float_is_infinite(float a)
+static inline bool float_is_infinite(float a)
 {
 	if (get_quantity_of_digits(a, true) >= 39)
 	{
@@ -178,7 +178,7 @@ static bool float_is_infinite(float a)
 		return false;
 	}
 }
-static float make_float_divisible(float a, float b) //makes 1.66666666666666666666667 to 1.67(so it only takes two digits after dot)
+static inline float make_float_divisible(float a, float b) //makes 1.66666666666666666666667 to 1.67(so it only takes two digits after dot)
 { // function works by adding from 0.1f to 0.9f until result would give not infinite fraction (Ex.: 5/3=1.6666666666667; 5.01/3=1.67)
 	if (float_is_infinite(a / b))
 	{
@@ -196,7 +196,7 @@ static float make_float_divisible(float a, float b) //makes 1.666666666666666666
 		return a / b;
 	}
 }
-static int get_text_last_index(const char* txt_)
+static inline int get_text_last_index(const char* txt_)
 {
 	for (int s = 0; s < MAX_TEXT_SIZE; s++)
 	{
@@ -208,7 +208,7 @@ static int get_text_last_index(const char* txt_)
 	}
 }
 
-static bool check_number_type(float num)
+static inline bool check_number_type(float num)
 {
 	// if decimal - true, fractional - false
 	if (num == round(num))
@@ -220,7 +220,7 @@ static bool check_number_type(float num)
 		return false; // false
 	}
 }
-int combine_ints(int a, int b) //function works by multiplying the bigger number by 10 in power of the quantity of digits of lesser number and adding the lesser number to given result
+static inline int combine_ints(int a, int b) //function works by multiplying the bigger number by 10 in power of the quantity of digits of lesser number and adding the lesser number to given result
 { //Ex:combine_ints(932,124) = 932 * 10^3 + 124 = 932000+124=932124
 	int j = get_quantity_of_digits(b, false);
 	int d = b;
@@ -234,27 +234,27 @@ int combine_ints(int a, int b) //function works by multiplying the bigger number
 	}
 	return a * pow(10, j) + d;
 }
-static float convert_pixels_to_metres(int px)
+static inline float convert_pixels_to_metres(int px)
 {
 	return float(px) / 10000.0f;
 }
-static float convert_metres_to_pixels(float metres)
+static inline float convert_metres_to_pixels(float metres)
 {
 	return float(metres) * 10000.0f;
 }
-static void swap(int& a, int& b)
+static inline void swap(int& a, int& b)
 {
 	a = a + b;
 	b = a - b;
 	a = a - b;
 }
-static void swap(float& a, float& b)
+static inline void swap(float& a, float& b)
 {
 	a = a + b;
 	b = a - b;
 	a = a - b;
 }
-static void Break()
+static inline  void Break()
 {
 	int number = 0;
 	int number2 = 5 / number;
