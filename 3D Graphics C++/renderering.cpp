@@ -2505,6 +2505,37 @@ namespace text2d
 				ellipse2d::ELLIPSE e2(position.x, position.y + ch_height / 1.33f, ch_width / 4.0f, ch_height / 4.0f, color, 3300, 3600, false, true);
 				next_pos = new Vector2f(position.x + ch_width / 4.0f, position.y);
 			}
+			if (ch == '/')
+			{
+				vector2d::fvector v1(position.x, position.y, position.x + ch_width /2.0f, position.y + ch_height, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 2.0f, position.y);
+			}
+			if (ch == '|')
+			{
+		     	vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height, color, true);
+				next_pos = new Vector2f(position.x + 0.1f, position.y);
+			}
+			if (ch == '(')
+			{
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 4.0f, position.y + ch_height / 2.0f, ch_width / 4.0f, ch_height / 2.0f, color, 1800, 3600, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 2.0f, position.y);
+			}
+			if (ch == ')')
+			{
+				ellipse2d::ELLIPSE e1(position.x, position.y + ch_height / 2.0f, ch_width / 4.0f, ch_height / 2.0f, color, 0, 1800, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 2.0f, position.y);
+			}
+			if (ch == '_')
+			{
+				vector2d::fvector v1(position.x, position.y, position.x + ch_width / 1.5f, position.y, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 1.5f, position.y);
+			}
+			if (ch == ':')
+			{
+				ellipse2d::ELLIPSE e1(position.x, position.y + ch_height / 1.7f, ch_width / 32.0f, ch_height / 32.0f, color, 0, 3600, true, true);
+				ellipse2d::ELLIPSE e2(position.x, position.y + ch_height / 7.0f, ch_width / 32.0f, ch_height / 32.0f, color, 0, 3600, true, true);
+				next_pos = new Vector2f(position.x + ch_width / 32.0f, position.y);
+			}
 			ch_width = temp_ch_width;
 			ch_height = temp_ch_height;
 		}
