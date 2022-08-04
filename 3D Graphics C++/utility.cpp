@@ -5,6 +5,7 @@ const float HALF_PI = 1.5f;
 const float DOUBLE_PI = 6.2f;
 const float SIN_CURVE_A = 0.04f;
 const float SIN_CURVE_B = 0.0f;
+typedef unsigned int uint32;
 #define MAX_TEXT_SIZE 1000
 
 static inline float fast_cos(std::complex <float> z)
@@ -45,13 +46,13 @@ inline static float clamp(float min, float val, float max)
 	{
 		return min;
 	}
-	if (val > max)
+	else if (val > max)
 	{
 		return max;
 	}
 	return val;
 }
-inline static uint32 rgb(uint32 r, uint32 g, uint32 b)
+static uint32 rgb(uint32 r, uint32 g, uint32 b)
 {
 	uint32 rgbnumber = (r << 16) + (g << 8) + b;
 	return rgbnumber;
