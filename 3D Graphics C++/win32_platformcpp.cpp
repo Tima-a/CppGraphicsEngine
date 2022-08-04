@@ -4,12 +4,11 @@
 #include "utility.cpp"
 #include <cmath>
 #define delta_time_equalization 1000000
-typedef unsigned int uint32;
 static bool running = true;
 struct Screen
 {
 	bool update_screen = false;
-	unsigned int scr_refresh_color = 0;
+	uint32 scr_refresh_color = 0;
 };
 Screen screen;
 struct Render
@@ -29,10 +28,10 @@ gTime gtime;
 //#include <vector>
 //template <class T>
 //std::vector<T> name;
-#include "rendering.cpp"
+#include "renderering.cpp"
 #include <time.h>
 #include "game.cpp"
-
+typedef unsigned int uint32;
 LRESULT CALLBACK Window_callback(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	//This is function which sends a message when something important is happened(input, minimize, maximize, size changed
@@ -51,7 +50,7 @@ LRESULT CALLBACK Window_callback(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 		GetClientRect(hwnd, &rect);
 		render.width = rect.right - rect.left;
 		render.height = rect.bottom - rect.top;
-		int size = render.width * render.height * sizeof(unsigned int);
+		int size = render.width * render.height * sizeof(uint32);
 		if (render.memory)
 		{
 			VirtualFree(render.memory, 0, MEM_RELEASE);
