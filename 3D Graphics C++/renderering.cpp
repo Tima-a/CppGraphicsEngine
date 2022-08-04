@@ -1,4 +1,4 @@
-#define PIXEL_SIZE_DEF 0.1f
+#define PIXEL_SIZE_DEF 0.01f
 #define PIXEL_SIZE_TRIANGLE 0.1f
 #define VECTOR_HQ 0.01f
 #define VECTOR_MQ 0.05f
@@ -7,6 +7,8 @@
 #define MAX_STORAGE_SIZE 5000
 #define pi 3.14f
 #define d_pi 6.28f
+typedef unsigned int uint32;
+
 namespace Colors
 {
 #define white 0xffffff
@@ -56,10 +58,10 @@ inline static void draw_pixel(float x, float y, uint32 color)
 	int y0 = (int)y - (int)y_pixel_size;
 	int y1 = (int)y + (int)y_pixel_size;
 
-	/*x0 = clamp(0, x0, render.width);
+	x0 = clamp(0, x0, render.width);
 	x1 = clamp(0, x1, render.width);
 	y0 = clamp(0, y0, render.height);
-	y1 = clamp(0, y1, render.height);*/
+	y1 = clamp(0, y1, render.height);
 
 	uint32* pixel = (uint32*)render.memory + x0 + y0 * render.width;
 	*pixel++ = color;
@@ -113,10 +115,6 @@ namespace rectangle
 			}
 		}
 		RECT()
-		{
-
-		}
-		~RECT()
 		{
 
 		}
@@ -287,7 +285,15 @@ namespace vector2d
 			float adx = fabs(x2 - x1);
 			float ady = fabs(y2 - y1);
 			float slope_x_modf = 0.0f, slope_y_modf = 0.0f;
-
+			if (highlight_vertexes)
+			{
+				for (int i = 0; i < 5; i++)
+				{
+					draw_pixel(x1, y1 + i, highlightColor);
+					draw_pixel(x2, y2 + i, highlightColor);
+				}
+				draw_pixel(0.0f, 0.0f, highlightColor);
+			}
 			if (straight_line_drawing == false && draw_one_pixel == false)
 			{
 				//fabs(x1) > fabs(x2) && fabs(y1) > fabs(y2) ? xy_swap = true : xy_swap = false;
@@ -310,15 +316,6 @@ namespace vector2d
 				dx < 0.0f && dy > 0.0f ? directions[1] = true : directions[1] = false;
 				dx > 0.0f && dy < 0.0f ? directions[2] = true : directions[2] = false;
 				dx < 0.0f && dy < 0.0f ? directions[3] = true : directions[3] = false;
-				if (highlight_vertexes)
-				{
-					for (int i = 0; i < 5; i++)
-					{
-						draw_pixel(x1, y1 + i, highlightColor);
-						draw_pixel(x2, y2 + i, highlightColor);
-					}
-					draw_pixel(0.0f, 0.0f, highlightColor);
-				}
 				float slope_x = 1.0f, slope_y = 1.0f;
 				int start_x = 0, start_y = 0;
 				adx > ady ? slope_x = make_float_divisible(fabs(adx), fabs(ady)) * 2.0f : slope_y = make_float_divisible(fabs(ady), fabs(adx)) * 2.0f;
@@ -486,17 +483,17 @@ namespace vector2d
 			}
 		}
 	public:
-		int px_quantity;
+		int px_quantity = 0;
 		char name[20];
-		float x1;
-		float y1;
-		float x2;
-		float y2;
-		bool visible;
-		float vectorQuality;
-		bool highlight_vertexes;
-		uint32 highlightColor;
-		uint32 color;
+		float x1 = 0.0f;
+		float y1 = 0.0f;
+		float x2 = 0.0f;
+		float y2 = 0.0f;
+		bool visible = true;
+		float vectorQuality = PIXEL_SIZE_DEF;
+		bool highlight_vertexes = false;
+		uint32 highlightColor = yellow;
+		uint32 color = red;
 		int thickness_l = 1; //thickness left
 		int thickness_r = 1; //thickness right
 		//Draw 2d vector.
@@ -517,10 +514,6 @@ namespace vector2d
 			}
 		}
 		fvector()
-		{
-
-		}
-		~fvector()
 		{
 
 		}
@@ -1285,26 +1278,26 @@ namespace vector2d
 			px_quantity = p + q;
 		}
 	public:
-		int px_quantity;
-		int px_quantity_x_cycle;
-		int px_quantity_y_cycle;
+		int px_quantity = 0;
+		int px_quantity_x_cycle = 0;
+		int px_quantity_y_cycle = 0;
 		Vector2f matrix_pixels[MAX_STORAGE_SIZE];
 		Vector2f matrix_pixels_x_cycle[MAX_STORAGE_SIZE];
 		Vector2f matrix_pixels_y_cycle[MAX_STORAGE_SIZE];
-		float x1;
-		float y1;
-		float x2;
-		float y2;
-		float vectorQuality;
-		uint32 color;
-		bool visible;
-		bool save_pixels_position;
-		bool save_pixels_position_x_cycle;
-		bool save_pixels_position_y_cycle;
-		int px_quantity_x_cycle_each;
-		int px_quantity_y_cycle_each;
-		int thickness_l; //thickness left
-		int thickness_r; //thickness right
+		float x1 = 0.0f;
+		float y1 = 0.0f;
+		float x2 = 0.0f;
+		float y2 = 0.0f;
+		float vectorQuality = PIXEL_SIZE_DEF;
+		uint32 color = red;
+		bool visible = true;
+		bool save_pixels_position = false;
+		bool save_pixels_position_x_cycle = false;
+		bool save_pixels_position_y_cycle = false;
+		int px_quantity_x_cycle_each = 0;
+		int px_quantity_y_cycle_each = 0;
+		int thickness_l = 1; //thickness left
+		int thickness_r = 1; //thickness right
 		//Draw 2d vector.
 		dvector(float x1_, float y1_, float x2_, float y2_, uint32 color_, bool visible_ = true, int thickness_l_ = 1, int thickness_r_ = 1, bool save_pixels_position_ = false, bool save_pixels_position_x_cycle_ = false, bool save_pixels_position_y_cycle_ = false)
 		{
@@ -1493,13 +1486,13 @@ namespace cube
 			//fix bug with drawing last line
 		}
 	public:
-		float x;
-		float y;
-		float a;
-		float r;
-		float g;
-		float b;
-		int px_cube;
+		float x = 0.0f;
+		float y = 0.0f;
+		float a = 0.0f;
+		float r = 0.0f;
+		float g = 0.0f;
+		float b = 0.0f;
+		int px_cube = 0;
 		CUBE(float x_, float y_, float a_, float r_, float g_, float b_, bool visible = true)
 		{
 			x = x_;
@@ -1512,6 +1505,10 @@ namespace cube
 			{
 				draw_cube(x_, y_, a_, r_, g_, b_);
 			}
+		}
+		CUBE()
+		{
+
 		}
 		float perimeter()
 		{
@@ -1728,16 +1725,16 @@ namespace triangle2d
 			}
 		}
 	public:
-		float a;
-		float b;
-		float c;
-		float h_apex;
-		float x;
-		float y;
+		float a = 0.0f;
+		float b = 0.0f;
+		float c = 0.0f;
+		float h_apex = 0.0f;
+		float x = 0.0f;
+		float y = 0.0f;
 		char name[20];
-		bool visible;
-		uint32 color;
-		bool filled;
+		bool visible = true;
+		uint32 color = red;
+		bool filled = false;
 		//Draw triangle funciton. Exception: a + b > c && a + c > b && b + c > a and a,b,c,h > 0
 		triangle(float a_, float b_, float c_, float h_apex_, float x_, float y_, uint32 color_, bool filled_, bool visible = true)
 		{
@@ -1755,10 +1752,6 @@ namespace triangle2d
 			}
 		}
 		triangle()
-		{
-
-		}
-		~triangle()
 		{
 
 		}
@@ -1935,19 +1928,19 @@ namespace ellipse2d
 		}
 	public:
 		//Vector2f px_right_half_matrix[1800];
-		float x;
-		float y;
-		float radiusa;
-		float radiusb;
-		bool visible;
+		float x = 0.0f;
+		float y = 0.0f;
+		float radiusa = 0.0f;
+		float radiusb = 0.0f;
+		bool visible = true;
 		Vector2f matrix_pixels_pos[1];
-		bool filled;
-		bool get_ellipse_pixel_matrix;
-		uint32 color;
+		bool filled = false;
+		bool get_ellipse_pixel_matrix = false;
+		uint32 color = red;
 		int px_circum_ = 0;
 		int px_area = 0;
-		int start_circum;
-		int end_circum;
+		int start_circum = 0;
+		int end_circum = 3600;
 		ELLIPSE(float x_, float y_, float radiusa_, float radiusb_, uint32 color_, int start_circum_, int end_circum_, bool filled_, bool visible = true)
 		{
 			x = x_;
@@ -1965,10 +1958,6 @@ namespace ellipse2d
 			}
 		}
 		ELLIPSE()
-		{
-
-		}
-		~ELLIPSE()
 		{
 
 		}
@@ -1993,13 +1982,13 @@ namespace ellipse2d
 class Texture
 {
 public:
-	const char* path;
-	float x;
-	float y;
-	bool visible;
-	int img_width;
-	int img_height;
-	int rgb_channels;
+	const char* path = "";
+	float x = 0.0f;
+	float y = 0.0f;
+	bool visible = true;
+	int img_width = 0;
+	int img_height = 0;
+	int rgb_channels = 3;
 	Texture(const char* path_, float x_, float y_)
 	{
 		path = path_;
@@ -2042,6 +2031,13 @@ namespace text2d
 		Vector2f* next_pos;
 		inline void draw_char(const char ch, Vector2f& position)
 		{
+			float temp_ch_width = ch_width;
+			float temp_ch_height = ch_height;
+			if (ch == 'a' || ch == 'b' || ch == 'c' || ch == 'd' || ch == 'e' || ch == 'f' || ch == 'g' || ch == 'h' || ch == 'i' || ch == 'j' || ch == 'k' || ch == 'l' || ch == 'm' || ch == 'n' || ch == 'o' || ch == 'p' || ch == 'q' || ch == 'r' || ch == 's' || ch == 't' || ch == 'u' || ch == 'v' || ch == 'w' || ch == 'x' || ch == 'y' || ch == 'z')
+			{ // change width of small characters variable
+				ch_width /= 0.6f;
+				ch_height /= 0.6f;
+			}
 			if (ch == 'A')
 			{
 				vector2d::dvector v1(position.x, position.y, position.x + ch_width / 2.0f, position.y + ch_height, color, true, 1, 1, true, true, true); // left line
@@ -2052,9 +2048,9 @@ namespace text2d
 			if (ch == 'B')
 			{
 				vector2d::dvector v1(position.x, position.y, position.x, position.y + ch_height, color, true, 1, 1, true, true, true); // straight line
-				ellipse2d::ELLIPSE e1(position.x, position.y + (ch_height / 4.0f), ch_width, ch_height / 4.0f, color, 0, 1800, false, true); // bottom ellipse
-				ellipse2d::ELLIPSE e2(position.x, position.y + (ch_height / 1.33f), ch_width, ch_height / 4.0f, color, 0, 1800, false, true); // top ellipse
-				next_pos = new Vector2f(position.x + ch_width, position.y);
+				ellipse2d::ELLIPSE e1(position.x, position.y + (ch_height / 4.0f), ch_width / 1.5f, ch_height / 4.0f, color, 0, 1800, false, true); // bottom ellipse
+				ellipse2d::ELLIPSE e2(position.x, position.y + (ch_height / 1.33f), ch_width / 1.5f, ch_height / 4.0f, color, 0, 1800, false, true); // top ellipse
+				next_pos = new Vector2f(position.x + ch_width / 1.5f, position.y);
 			}
 			if (ch == 'C')
 			{
@@ -2065,8 +2061,8 @@ namespace text2d
 			if (ch == 'D')
 			{
 				vector2d::dvector v1(position.x, position.y, position.x, position.y + ch_height, color, true, 1, 1, true, true, true); // straight line
-				ellipse2d::ELLIPSE e1(position.x, position.y + ch_height / 2.0f, ch_width, ch_height / 2.0f, color, 0, 1800, false, true);
-				next_pos = new Vector2f(position.x + ch_width, position.y);
+				ellipse2d::ELLIPSE e1(position.x, position.y + ch_height / 2.0f, ch_width / 1.5f, ch_height / 2.0f, color, 0, 1800, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 1.5f, position.y);
 			}
 			if (ch == 'E')
 			{
@@ -2100,13 +2096,13 @@ namespace text2d
 			if (ch == 'I') // Remember about the bug with I
 			{
 				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height, color, true);
-				next_pos = new Vector2f(position.x + ch_width / 6.0f, position.y);
+				next_pos = new Vector2f(position.x + 0.1f, position.y);
 			}
 			if (ch == 'J')
 			{
 				ellipse2d::ELLIPSE e1(position.x + ch_width / 2.0f, position.y + ch_height / 2.0f, ch_width / 2.0f, ch_height / 2.0f, color, 1100, 2500, false, true);
-				vector2d::fvector v1(position.x + ch_width, position.y + ch_height / 2.5f, position.x + ch_width, position.y + ch_height / 0.9f, color, true);
-				next_pos = new Vector2f(position.x + ch_width, position.y);
+				vector2d::fvector v1(position.x + ch_width - 0.1f, position.y + ch_height / 2.9f, position.x + ch_width-0.1f, position.y + ch_height / 1.0f, color, true);
+				next_pos = new Vector2f(position.x + ch_width/2.0f, position.y);
 			}
 			if (ch == 'K')
 			{
@@ -2144,14 +2140,8 @@ namespace text2d
 			if (ch == 'P')
 			{
 				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height, color, true); // straight line
-				ellipse2d::ELLIPSE e2(position.x, position.y + (ch_height / 1.33f), ch_width, ch_height / 4.0f, color, 0, 1800, false, true); // top ellipse
-				next_pos = new Vector2f(position.x + ch_width, position.y);
-			}
-			if (ch == 'P')
-			{
-				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height, color, true); // straight line
-				ellipse2d::ELLIPSE e2(position.x, position.y + (ch_height / 1.33f), ch_width, ch_height / 4.0f, color, 0, 1800, false, true); // top ellipse
-				next_pos = new Vector2f(position.x + ch_width, position.y);
+				ellipse2d::ELLIPSE e2(position.x, position.y + (ch_height / 1.33f), ch_width / 1.5f, ch_height / 4.0f, color, 0, 1800, false, true); // top ellipse
+				next_pos = new Vector2f(position.x + ch_width / 1.5f, position.y);
 			}
 			if (ch == 'Q')
 			{
@@ -2219,28 +2209,327 @@ namespace text2d
 			}
 			if (ch == ' ')
 			{
-				next_pos = new Vector2f(position.x + ch_width, position.y);
+				next_pos = new Vector2f(position.x + space_width, position.y);
 			}
+			if (ch == 'a')
+			{
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 8.0f, position.y + ch_height / 5.0f, ch_width / 5.0f, ch_height / 5.0f, color, 0, 3600, false, true);
+				ellipse2d::ELLIPSE e2(position.x + (ch_width / 4.5f) + (ch_width / 2.0f), position.y + ch_height / 4.0f, ch_width / 2.4f, ch_height / 4.0f, color, 2900, 2100, false, true);
+				next_pos = new Vector2f(position.x + (ch_width / 4.5f) + (ch_width / 5.0f), position.y);
+			}
+			if (ch == 'b')
+			{
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height / 2.5f, color); // straight line
+				ellipse2d::ELLIPSE e1(position.x, position.y + (ch_height / 8.0f), ch_width / 3.0f, ch_height / 8.0f, color, 0, 1800, false, true); // bottom ellipse
+				next_pos = new Vector2f(position.x + ch_width / 3.0f, position.y);
+			}
+			if (ch == 'c')
+			{
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 5.0f, position.y + ch_height / 5.0f, ch_width / 5.0f, ch_height / 5.0f, color, 1400, 3600, false, true);
+				ellipse2d::ELLIPSE e2(position.x + ch_width / 5.0f, position.y + ch_height / 5.0f, ch_width / 5.0f, ch_height / 5.0f, color, 0, 400, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 5.0f + ch_width * 0.05f, position.y);
+			}
+			if (ch == 'd')
+			{
+				vector2d::fvector v1(position.x + ch_width / 6.0f, position.y, position.x + ch_width / 6.0f, position.y + ch_height / 2.2f, color); // straight line
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 6.0f, position.y + (ch_height / 8.0f), ch_width / 4.0f, ch_height / 8.0f, color, 1800, 3600, false, true); // bottom ellipse
+				next_pos = new Vector2f(position.x + ch_width / 6.0f, position.y);
+			}
+			if (ch == 'e')
+			{
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 5.0f, position.y + (ch_height / 5.0f), ch_width / 5.0f, ch_height / 5.0f, color, 1500, 3600, false, true); // bottom ellipse
+				ellipse2d::ELLIPSE e2(position.x + ch_width / 5.0f, position.y + (ch_height / 5.0f), ch_width / 5.0f, ch_height / 5.0f, color, 0, 700, false, true); // second ellipse
+				vector2d::fvector v1(position.x + ch_width / 5.0f + ch_width / 5.0f * fast_sin(69.9f * pi / 180.0f), position.y + (ch_height / 5.0f) + ch_height / 5.0f * fast_cos(69.9f * pi / 180.0f), position.x + ch_width / 5.0f + ch_width / 5.0f * fast_sin(300.0f * pi / 180.0f), position.y + (ch_height / 5.0f) + ch_height / 5.0f * fast_cos(69.9f * pi / 180.0f), color, true);
+				next_pos = new Vector2f(position.x + ch_width / 2.5f, position.y);
+			}
+			if (ch == 'f')
+			{
+				float avg = (position.x + ch_width / 4.0f) - position.x;
+				vector2d::fvector v1(position.x + ch_width / 12.0f, position.y, position.x + ch_width / 12.0f, position.y + ch_height / 3.5f, color, true); // straight line
+				vector2d::fvector v2(position.x, position.y + ch_height / 3.5f, position.x + ch_width / 4.0f, position.y + ch_height / 3.5f, color, true); // top line
+				ellipse2d::ELLIPSE e1(position.x + avg*1.5f, position.y + ch_height / 3.5f, ch_width / 4.0f, ch_height / 8.0f, color, 2700, 3500, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 8.0f, position.y);
+			}
+			if (ch == 'g')
+			{
+				vector2d::fvector v1(position.x + ch_width / 5.0f+ch_width/5.3f, position.y, position.x + ch_width / 5.0f + ch_width / 4.3f, position.y + ch_height / 2.5f, color, true);
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 5.535f, position.y + ch_height / 4.5f, ch_width / 5.4f, ch_height / 6.5f, color, 0, 3600, false, true);
+				ellipse2d::ELLIPSE e2(position.x + ch_width / 7.47f, position.y, ch_width / 4.05f, ch_height / 5.25f, color, 700, 1900, false, true);
+				//tail -- ellipse2d::ELLIPSE e3(position.x + ch_width+ch_width/7.4f, position.y + ch_height / 2.4f, ch_width / 4.0f, ch_height / 5.0f, color, 2700, 3600, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 5.0f + ch_width / 5.3f, position.y);
+			}
+			if (ch == 'h')
+			{
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height / 1.6f, color, true);
+				vector2d::fvector v2(position.x + ch_width / 4.0f - 0.1f, position.y, position.x + ch_width / 4.0f - 0.1f, position.y + ch_height / 4.0f, color, true);
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 8.0f, position.y + ch_height / 8.0f, ch_width / 8.0f, ch_height / 4.0f, color, 3000, 3600, false, true);
+				ellipse2d::ELLIPSE e2(position.x + ch_width / 8.0f, position.y + ch_height / 8.0f, ch_width / 8.0f, ch_height / 4.0f, color, 0, 600, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 3.0f - 0.1f, position.y);
+			}
+			if (ch == 'i')
+			{
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height / 3.0f, color, true);
+				draw_pixel(position.x, position.y + ch_height / 2.4f, color);
+				next_pos = new Vector2f(position.x + 0.1f, position.y);
+			}
+			if (ch == 'j')
+			{
+				ellipse2d::ELLIPSE e1(position.x-ch_width/4.0f, position.y + ch_height / 3.0f, ch_width / 3.0f, ch_height / 1.5f, color, 900, 1700, false, true);
+				//vector2d::fvector v1(position.x + ch_width / 8.0f-0.2f, position.y + ch_height / 8.0f - 0.8f, position.x + ch_width / 4.0f-0.2f, position.y + ch_height / 1.8f, color, true);
+				draw_pixel(position.x+ch_width/8.0f-0.3f, position.y + ch_height / 2.0f, color);
+				next_pos = new Vector2f(position.x + ch_width / 8.0f-0.3f, position.y);
+			}
+			if (ch == 'k')
+			{
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height / 2.5f, color, true);
+				vector2d::fvector v2(position.x, position.y + ch_height / 4.0f, position.x + ch_width/4.0f, position.y + ch_height/2.5f, color, true);
+				vector2d::fvector v3(position.x, position.y + ch_height / 4.0f, position.x + ch_width/3.0f, position.y, color, true);
+				next_pos = new Vector2f(position.x + ch_width/3.0f, position.y);
+			}
+			if (ch == 'l')
+			{
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height / 2.0f, color, true);
+				next_pos = new Vector2f(position.x + 0.2f, position.y);
+			}
+			if (ch == 'm')
+			{
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height / 2.5f, color, true);
+				vector2d::fvector v2(position.x + ch_width / 4.0f, position.y, position.x + ch_width / 4.0f - 0.1f, position.y + ch_height / 4.0f, color, true);
+				vector2d::fvector v3(position.x + ch_width / 2.0f - 0.1f, position.y, position.x + ch_width / 2.0f - 0.1f, position.y + ch_height / 4.0f, color, true);
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 8.2f, position.y + ch_height / 8.0f, ch_width / 8.0f, ch_height / 4.0f, color, 3000, 3600, false, true);
+				ellipse2d::ELLIPSE e2(position.x + ch_width / 8.2f, position.y + ch_height / 8.0f, ch_width / 8.0f, ch_height / 4.0f, color, 0, 600, false, true);
+				ellipse2d::ELLIPSE e3(position.x + ch_width / 2.76f, position.y + ch_height / 8.0f, ch_width / 8.0f, ch_height / 4.0f, color, 3000, 3600, false, true);
+				ellipse2d::ELLIPSE e4(position.x + ch_width / 2.76f, position.y + ch_height / 8.0f, ch_width / 7.8f, ch_height / 4.0f, color, 0, 600, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 1.8f - 0.1f, position.y);
+			}
+			if (ch == 'n')
+			{
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height / 2.5f, color, true);
+				vector2d::fvector v2(position.x + ch_width / 4.0f - 0.1f, position.y, position.x + ch_width / 4.0f - 0.1f, position.y + ch_height / 4.0f, color, true);
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 8.0f, position.y + ch_height / 8.0f, ch_width / 8.0f, ch_height / 4.0f, color, 3000, 3600, false, true);
+				ellipse2d::ELLIPSE e2(position.x + ch_width / 8.0f, position.y + ch_height / 8.0f, ch_width / 8.0f, ch_height / 4.0f, color, 0, 600, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 3.0f - 0.1f, position.y);
+			}
+			if (ch == 'o')
+			{
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 5.0f, position.y + ch_height / 5.0f, ch_width / 5.0f, ch_height / 5.0f, color, 0, 3600, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 2.5f, position.y);
+			}
+			if (ch == 'p')
+			{
+				vector2d::fvector v1(position.x, position.y-ch_height/4.0f, position.x, position.y + ch_height/2.0f, color, true); // straight line
+				ellipse2d::ELLIPSE e1(position.x, position.y + (ch_height / 4.0f), ch_width / 3.0f, ch_height / 8.0f, color, 0, 1800, false, true); // bottom ellipse
+				next_pos = new Vector2f(position.x + ch_width/2.0f, position.y);
+			}
+			if (ch == 'q')
+			{
+				vector2d::fvector v1(position.x+ch_width/2.0f, position.y - ch_height / 4.0f, position.x+ch_width/2.0f, position.y + ch_height / 2.0f, color, true); // straight line
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 2.0f, position.y + (ch_height / 4.0f), ch_width / 2.0f, ch_height / 8.0f, color, 1800, 3600, false, true); // bottom ellipse
+				next_pos = new Vector2f(position.x + ch_width / 2.0f, position.y);
+			}
+			if (ch == 'r')
+			{
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height / 2.5f, color, true);
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 6.0f, position.y + ch_height / 8.0f, ch_width / 6.0f, ch_height / 4.0f, color, 3000, 3600, false, true);
+				ellipse2d::ELLIPSE e2(position.x + ch_width / 6.0f, position.y + ch_height / 8.0f, ch_width / 6.0f, ch_height / 4.0f, color, 0, 600, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 4.0f, position.y);
+			}
+			if (ch == 's')
+			{
+				ellipse2d::ELLIPSE e1(position.x, position.y + ch_height / 12.0f, ch_width / 3.0f, ch_height / 12.0f, color, 300, 1800, false, true); // bottom ellipse
+				ellipse2d::ELLIPSE e2(position.x + ch_width / 3.0f, position.y + ch_height / 3.99f, ch_width / 3.0f, ch_height / 12.0f, color, 2100, 3600, false, true); // top ellipse
+				next_pos = new Vector2f(position.x + ch_width / 3.0f, position.y);
+			}
+			if (ch == 't')
+			{
+				float avg = (position.x + ch_width / 4.0f) - position.x;
+				vector2d::fvector v1(position.x + ch_width / 11.0f, position.y + ch_height / 9.14f, position.x + ch_width / 12.0f, position.y + ch_height / 2.0f, color, true); // straight line
+				vector2d::fvector v2(position.x, position.y + ch_height / 4.0f, position.x + ch_width / 4.0f, position.y + ch_height / 3.5f, color, true); // top line
+				ellipse2d::ELLIPSE e1(position.x + avg * 1.5f, position.y + ch_height / 10.0f, ch_width / 4.0f, ch_height / 8.0f, color, 2700, 2100, false, true);
+				//vector2d::fvector v3(position.x, position.y + ch_height / 1.5f, position.x + ch_width, position.y + ch_height / 1.5f, color, true); // middle line
+				next_pos = new Vector2f(position.x + ch_width / 4.0f, position.y);
+			}
+			if (ch == 'u')
+			{
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 6.0f, position.y + ch_height / 4.8f, ch_width / 6.0f, ch_height / 4.8f, color, 3000, 600, false, true);
+				ellipse2d::ELLIPSE e2(position.x + (ch_width / 4.5f) + (ch_width / 1.8f), position.y + ch_height / 4.0f, ch_width / 2.4f, ch_height / 4.0f, color, 2700, 2200, false, true);
+				next_pos = new Vector2f(position.x + (ch_width / 4.5f) + (ch_width / 4.5f), position.y);
+			}
+			if (ch == 'v')
+			{
+				vector2d::fvector v1(position.x, position.y + ch_height / 3.0f, position.x + ch_width / 4.0f, position.y, color, true);
+				vector2d::fvector v2(v1.x2, v1.y2, position.x + ch_width / 2.0f, position.y + ch_height / 3.0f, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 2.0f, position.y);
+			}
+			if (ch == 'w')
+			{
+				vector2d::fvector v1(position.x, position.y + ch_height / 3.0f, position.x + ch_width / 8.0f, position.y, color, true);
+				vector2d::fvector v2(v1.x2, v1.y2, position.x + ch_width / 4.0f, position.y + ch_height / 3.0f, color, true);
+				vector2d::fvector v3(v2.x2, v2.y2, position.x + ch_width / 2.66f, position.y, color, true);
+				vector2d::fvector v4(v3.x2, v3.y2, position.x + ch_width / 2.0f, position.y + ch_height / 3.0f, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 2.0f, position.y);
+			}
+			if (ch == 'x')
+			{
+				vector2d::fvector v1(position.x, position.y + ch_height / 3.0f, position.x + ch_width / 2.0f, position.y, color, true);
+				vector2d::fvector v2(position.x, position.y, position.x + ch_width / 2.0f, position.y + ch_height / 3.0f, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 2.0f, position.y);
+			}
+			if (ch == 'y')
+			{
+				vector2d::fvector v1(position.x, position.y + ch_height / 3.0f, position.x + ch_width / 4.0f, position.y, color, true);
+				vector2d::fvector v2(v1.x2, v1.y2, position.x + ch_width / 2.0f, position.y + ch_height / 3.0f, color, true);
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 14.0f, position.y + ch_height / 3.0f, ch_width / 4.0f, ch_height / 1.5f, color, 1200, 1800, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 2.0f, position.y);
+			}
+			if (ch == 'z')
+			{
+				vector2d::fvector v1(position.x, position.y + ch_height / 3.0f, position.x + ch_width / 3.0f, position.y + ch_height / 3.0f, color, true);
+				vector2d::fvector v2(v1.x2, v1.y2, position.x, position.y, color, true);
+				vector2d::fvector v3(v2.x2, v2.y2, position.x + ch_width / 3.0f, position.y, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 3.0f, position.y);
+			}
+			if (ch == '1')
+			{
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height, color, true);
+				vector2d::fvector v2(position.x - ch_width / 7.0f, position.y + ch_height / 1.3f, position.x, position.y + ch_height, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 7.0f, position.y);
+			}
+			if (ch == '2')
+			{
+				ellipse2d::ELLIPSE e1(position.x, position.y  + ch_height / 1.9f, ch_width / 2.0f, ch_height / 2.0f, color, 0, 1800, false, true);
+				vector2d::fvector v1(position.x, position.y, position.x + ch_width / 1.2f, position.y, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 1.2f, position.y);
+			}
+			if (ch == '3')
+			{
+				ellipse2d::ELLIPSE e1(position.x, position.y + ch_height / 1.3f, ch_width / 2.0f, ch_height / 4.0f, color, 0, 1800, false, true);
+				ellipse2d::ELLIPSE e2(position.x, position.y + ch_height / 3.5f, ch_width / 2.0f, ch_height / 4.0f, color, 0, 1800, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 2.0f, position.y);
+			}
+			if (ch == '4')
+			{
+				vector2d::fvector v1(position.x, position.y + ch_height / 2.9f, position.x + ch_width / 1.5f, position.y + ch_height, color, true);
+				vector2d::fvector v2(position.x, position.y + ch_height / 2.9f, position.x + ch_width / 1.5f, position.y + ch_height / 2.9f, color, true);
+				vector2d::fvector v3(position.x + ch_width / 1.5f, position.y, position.x + ch_width / 1.5f, position.y + ch_height, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 1.3f, position.y);
+			}
+			if (ch == '5')
+			{
+				vector2d::fvector v1(position.x, position.y + ch_height / 3.5f + ch_height / 4.0f, position.x, position.y + ch_height, color, true);
+				vector2d::fvector v2(position.x, position.y + ch_height, position.x+ch_width/2.0f, position.y + ch_height, color, true);
+				ellipse2d::ELLIPSE e1(position.x, position.y + ch_height / 3.5f, ch_width / 2.0f, ch_height / 4.0f, color, 0, 1800, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 2.0f, position.y);
+			}
+			if (ch == '6')
+			{
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 4.0f, position.y + ch_height / 4.0f, ch_width / 4.0f, ch_height / 3.5f, color, 0, 3600, false, true);
+				ellipse2d::ELLIPSE e2(position.x + ch_width / 4.0f, position.y + ch_height / 3.0f, ch_width / 4.0f, ch_height / 1.5f, color, 0, 400, false, true);
+				ellipse2d::ELLIPSE e3(position.x + ch_width / 4.0f, position.y + ch_height / 3.0f, ch_width / 4.0f, ch_height / 1.5f, color, 2700, 3600, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 1.5f, position.y);
+			}
+			if (ch == '7')
+			{
+				vector2d::fvector v1(position.x, position.y + ch_height, position.x + ch_width / 2.0f, position.y + ch_height, color, true);
+				vector2d::fvector v2(position.x, position.y, position.x + ch_width / 2.0f, position.y + ch_height, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 2.0f, position.y);
+			}
+			if (ch == '8')
+			{
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 4.0f, position.y + ch_height / 1.3f, ch_width / 3.75f, ch_height / 3.75f, color, 0, 3600, false, true);
+				ellipse2d::ELLIPSE e2(position.x + ch_width / 4.0f, position.y + ch_height / 4.0f, ch_width / 3.75f, ch_height / 3.75f, color, 0, 3600, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 2.0f, position.y);
+			}
+			if (ch == '9')
+			{
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 4.0f, position.y + ch_height / 1.3f, ch_width / 3.5f, ch_height / 3.5f, color, 0, 3600, false, true);
+				ellipse2d::ELLIPSE e2(position.x + ch_width / 4.0f, position.y + ch_height / 1.5f, ch_width / 3.5f, ch_height / 1.5f, color, 900, 1800, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 2.0f, position.y);
+			}
+			if (ch == '0')
+			{
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 5.0f, position.y + ch_height / 2.0f, ch_width / 3.0f, ch_height / 2.0f, color, 0, 3600, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 1.6f, position.y);
+			}
+			if (ch == '.')
+			{
+				ellipse2d::ELLIPSE e1(position.x - ch_width / 36.0f, position.y + ch_width / 10.0f, ch_width / 24.0f, ch_height / 24.0f, color, 0, 3600, true, true);
+				next_pos = new Vector2f(position.x + ch_width / 24.0f, position.y);
+			}
+			if (ch == '-')
+			{
+				vector2d::fvector v1(position.x, position.y + ch_height / 2.0f, position.x + ch_width / 1.5f, position.y + ch_height / 2.0f, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 1.3f, position.y);
+			}
+			if (ch == '+')
+			{
+				vector2d::fvector v1(position.x, position.y + ch_height / 2.0f, position.x + ch_width / 1.5f, position.y + ch_height / 2.0f, color, true);
+				vector2d::fvector v2(position.x + ch_width / 2.0f, position.y + ch_height, position.x + ch_width / 2.0f, position.y, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 1.3f, position.y);
+			}
+			if (ch == '=')
+			{
+				vector2d::fvector v1(position.x, position.y + ch_height / 1.5f, position.x + ch_width / 1.5f, position.y + ch_height / 1.5f, color, true);
+				vector2d::fvector v2(position.x, position.y + ch_height / 3.0f, position.x + ch_width / 1.5f, position.y + ch_height / 3.0f, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 1.4f, position.y);
+			}
+			if (ch == '!')
+			{
+				draw_pixel(position.x, position.y, color);
+				vector2d::fvector v1(position.x, position.y + ch_height / 4.0f, position.x, position.y + ch_height, color, true);
+				next_pos = new Vector2f(position.x + 0.1f, position.y);
+			}
+			if (ch == '<')
+			{
+				vector2d::fvector v1(position.x, position.y + ch_height / 2.0f, position.x+ch_width/1.5f, position.y + ch_height, color, true);
+				vector2d::fvector v2(position.x, position.y + ch_height / 2.0f, position.x + ch_width / 1.5f, position.y, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 1.4f, position.y);
+			}
+			if (ch == '>')
+			{
+				vector2d::fvector v1(position.x, position.y + ch_height, position.x + ch_width / 1.5f, position.y + ch_height / 2.0f, color, true);
+				vector2d::fvector v2(position.x, position.y, position.x + ch_width / 1.5f, position.y + ch_height / 2.0f, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 1.4f, position.y);
+			}
+			if (ch == ',')
+			{
+				ellipse2d::ELLIPSE e1(position.x - ch_width / 36.0f, position.y + ch_width / 10.0f, ch_width / 24.0f, ch_height / 24.0f, color, 0, 3600, true, true);
+				ellipse2d::ELLIPSE e2(position.x - ch_width / 36.0f, position.y + ch_height / 20.0f, ch_width / 24.0f, ch_height / 12.0f, color, 0, 1500, true, true);
+				next_pos = new Vector2f(position.x + ch_width / 24.0f, position.y);
+			}
+			if (ch == '?')
+			{
+				draw_pixel(position.x, position.y, color);
+				vector2d::fvector v1(position.x, position.y + ch_height / 3.5f, position.x, position.y + ch_height / 2.0f, color, true);
+				ellipse2d::ELLIPSE e1(position.x, position.y + ch_height / 1.33f, ch_width / 4.0f, ch_height / 4.0f, color, 0, 1800, false, true);
+				ellipse2d::ELLIPSE e2(position.x, position.y + ch_height / 1.33f, ch_width / 4.0f, ch_height / 4.0f, color, 3300, 3600, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 4.0f, position.y);
+			}
+			ch_width = temp_ch_width;
+			ch_height = temp_ch_height;
 		}
 	public:
-		const char* text_;
-		Vector2f position;
-		float ch_spacing;
-		float ch_width;
-		float ch_height;
-		uint32 color;
-		bool visible;
-		text(const char* _text_, float position_x, float position_y, float ch_width_, float ch_height_, float ch_space_, uint32 color_, bool visible_)
+		const char* text_ = "";
+		float x;
+		float y;
+		float ch_spacing = 0.0f;
+		float ch_width = 0.0f;
+		float ch_height = 0.0f;
+		float space_width = 0.0f;
+		uint32 color = red;
+		bool visible = true;
+		text(const char* _text_, float x_, float y_, float ch_width_, float ch_height_, float ch_space_, uint32 color_, bool visible_)
 		{
 			//assign char* to const char*
-			position.x = position_x; position.y = position_y;
+			x = x_; y = y_;
 			text_ = _text_;
 			ch_spacing = ch_space_;
 			ch_width = ch_width_;
 			ch_height = ch_height_;
+			space_width = ch_width / 3.0f;
 			color = color_;
 			visible = visible_;
-			next_pos = new Vector2f(position_x, position_y);
+			next_pos = new Vector2f(x_, y_);
 			if (visible)
 			{
 				draw();
@@ -2248,10 +2537,6 @@ namespace text2d
 		}
 		//think about default constructor for text
 		text()
-		{
-
-		}
-		~text()
 		{
 
 		}
@@ -2266,11 +2551,11 @@ namespace text2d
 				{
 					if (i > 0) // because it automatically aadds ch_spacing to the first letter
 					{
-						offset_pos = new Vector2f((next_pos->x + ch_spacing), position.y);
+						offset_pos = new Vector2f((next_pos->x + ch_spacing), y);
 					}
 					else
 					{
-						offset_pos = new Vector2f(position.x, position.y);
+						offset_pos = new Vector2f(x, y);
 					}
 					draw_char(text_[i], *offset_pos);
 				}
