@@ -2449,7 +2449,7 @@ namespace text2d
 			if (ch == '0')
 			{
 				ellipse2d::ELLIPSE e1(position.x + ch_width / 5.0f, position.y + ch_height / 2.0f, ch_width / 3.0f, ch_height / 2.0f, color, 0, 3600, false, true);
-				next_pos = new Vector2f(position.x + ch_width / 1.6f, position.y);
+				next_pos = new Vector2f(position.x + ch_width / 2.1f, position.y);
 			}
 			if (ch == '.')
 			{
@@ -2535,6 +2535,20 @@ namespace text2d
 				ellipse2d::ELLIPSE e1(position.x, position.y + ch_height / 1.7f, ch_width / 32.0f, ch_height / 32.0f, color, 0, 3600, true, true);
 				ellipse2d::ELLIPSE e2(position.x, position.y + ch_height / 7.0f, ch_width / 32.0f, ch_height / 32.0f, color, 0, 3600, true, true);
 				next_pos = new Vector2f(position.x + ch_width / 32.0f, position.y);
+			}
+			if (ch == '[')
+			{
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height, color, true);
+				vector2d::fvector v2(position.x, position.y+ch_height, position.x+ch_width/3.0f, position.y + ch_height, color, true);
+				vector2d::fvector v3(position.x, position.y, position.x + ch_width / 3.0f, position.y, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 3.0f, position.y);
+			}
+			if (ch == ']')
+			{
+				vector2d::fvector v1(position.x + ch_width / 3.0f, position.y, position.x + ch_width / 3.0f, position.y + ch_height, color, true);
+				vector2d::fvector v2(position.x, position.y + ch_height, position.x + ch_width / 3.0f, position.y + ch_height, color, true);
+				vector2d::fvector v3(position.x, position.y, position.x + ch_width / 3.0f, position.y, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 3.0f, position.y);
 			}
 			ch_width = temp_ch_width;
 			ch_height = temp_ch_height;
