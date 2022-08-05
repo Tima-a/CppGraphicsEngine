@@ -1,4 +1,6 @@
-#define PIXEL_SIZE_DEF 0.01f
+#define PIXEL_SIZE_DEF 0.05f
+#define PIXEL_SIZE_MAX 0.1f
+#define PIXEL_SIZE_MIN 0.01f
 #define PIXEL_SIZE_TRIANGLE 0.1f
 #define VECTOR_HQ 0.01f
 #define VECTOR_MQ 0.05f
@@ -96,25 +98,44 @@ namespace rectangle
 	class RECT
 	{
 	public:
-		float x;
-		float y;
-		float a;
-		float b;
-		uint32 color;
+		float x = 0.0f;
+		float y = 0.0f;
+		float a = 0.0f;
+		float b = 0.0f;
+		uint32 color = red;
+		bool visible = true;
 		//Draw rectangle
-		RECT(float x_, float y_, float a_, float b_, uint32 color_, bool visible = true)
+		RECT(float x_, float y_, float a_, float b_, uint32 color_, bool visible_ = true)
 		{
 			x = x_;
 			y = y_;
 			a = a_;
 			b = b_;
 			color = color_;
-			if (visible == true)
+			if (visible_)
 			{
+				visible = true;
 				draw_rect(x_, y_, a_, b_, color_);
 			}
 		}
+		RECT(Vector2f& pos_, float a_, float b_, uint32 color_, bool visible_ = true)
+		{
+			x = pos_.x;
+			y = pos_.y;
+			a = a_;
+			b = b_;
+			color = color_;
+			if (visible_)
+			{
+				visible = true;
+				draw_rect(pos_.x, pos_.y, a_, b_, color_);
+			}
+		}
 		RECT()
+		{
+
+		}
+		~RECT()
 		{
 
 		}
@@ -514,6 +535,10 @@ namespace vector2d
 			}
 		}
 		fvector()
+		{
+
+		}
+		~fvector()
 		{
 
 		}
@@ -1510,6 +1535,10 @@ namespace cube
 		{
 
 		}
+		~CUBE()
+		{
+
+		}
 		float perimeter()
 		{
 			return px_cube;
@@ -1755,6 +1784,10 @@ namespace triangle2d
 		{
 
 		}
+		~triangle()
+		{
+
+		}
 		//Calculate triangle's perimeter
 		int perimeter()
 		{
@@ -1779,6 +1812,10 @@ namespace ellipse2d
 	class ELLIPSE
 	{
 	private:
+		inline float fast_trunc_ellipse_function(float num)
+		{
+			return int(num * 10.0f) / 10.0f;
+		}
 		inline void draw_ellipse(float x, float y, float ra, float rb, uint32 color, bool filled)
 		{
 			float angle = 0.0f;
@@ -1961,6 +1998,10 @@ namespace ellipse2d
 		{
 
 		}
+		~ELLIPSE()
+		{
+
+		}
 		//Calculate circle's size
 		int circumference_px()
 		{
@@ -1983,52 +2024,31 @@ class Texture
 {
 public:
 	const char* path = "";
-	float x = 0.0f;
-	float y = 0.0f;
 	bool visible = true;
-	int img_width = 0;
-	int img_height = 0;
+	int sprite_width = 0;
+	int sprite_height = 0;
 	int rgb_channels = 3;
-	Texture(const char* path_, float x_, float y_)
+	Texture(const char* path_)
 	{
 		path = path_;
 		visible = true;
-		x = x_;
-		y = y_;
 	}
 	Texture()
 	{
 
 	}
-	void show_image()
+	~Texture()
 	{
-		unsigned char* data = stbi_load(path, &img_width, &img_height, &rgb_channels, 0);
-		// ... process data if not NULL ..
-		int index = 0;
-		float y_ = y + (img_height / 2.0f) * 0.1f; // to achieve the center pivot of the picture
-		float x_ = x - (img_width / 2.0f) * 0.1f; // to achieve the center pivot of the picture
-		if (data != nullptr && img_height > 0 && img_width > 0)
-		{
-			for (int i = 0; i < img_height; i++)
-			{
-				for (int j = 0; j < img_width; j++)
-				{
-					draw_pixel(x_ + j * 0.1f, y_ - i * 0.1f, rgb(static_cast<int>(data[index]), static_cast<int>(data[index + 1]), static_cast<int>(data[index + 2])));
-					index += 3;
-					//std::cout << index << " pixel: RGB " << static_cast<int>(data[index]) << " " << static_cast<int>(data[index + 1]) << " " << static_cast<int>(data[index + 2]) << std::endl;
-				}
-			}
-		}
-		stbi_image_free(data);
+
 	}
 };
-
 namespace text2d
 {
 	class text
 	{
 	private:
-		Vector2f* next_pos;
+		int text_number = 0;
+		Vector2f* next_pos = new Vector2f(0.0f, 0.0f);
 		inline void draw_char(const char ch, Vector2f& position)
 		{
 			float temp_ch_width = ch_width;
@@ -2089,9 +2109,9 @@ namespace text2d
 			if (ch == 'H')
 			{
 				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height, color, true);
-				vector2d::fvector v2(position.x + ch_width, position.y, position.x + ch_width, position.y + ch_height, color, true);
-				vector2d::fvector v3(position.x, position.y + ch_height / 2.0f, position.x + ch_width, position.y + ch_height / 2.0f, color, true);
-				next_pos = new Vector2f(position.x + ch_width, position.y);
+				vector2d::fvector v2(position.x + ch_width / 1.5f, position.y, position.x + ch_width / 1.5f, position.y + ch_height, color, true);
+				vector2d::fvector v3(position.x, position.y + ch_height / 2.0f, position.x + ch_width / 1.5f, position.y + ch_height / 2.0f, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 1.5f, position.y);
 			}
 			if (ch == 'I') // Remember about the bug with I
 			{
@@ -2114,8 +2134,8 @@ namespace text2d
 			if (ch == 'L')
 			{
 				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height, color, true);
-				vector2d::fvector v2(position.x, position.y, position.x + ch_width, position.y, color, true);
-				next_pos = new Vector2f(position.x + ch_width, position.y);
+				vector2d::fvector v2(position.x, position.y, position.x + ch_width / 1.2f, position.y, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 1.5f, position.y);
 			}
 			if (ch == 'M')
 			{
@@ -2128,9 +2148,9 @@ namespace text2d
 			if (ch == 'N')
 			{
 				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height, color, true);
-				vector2d::fvector v2(position.x, position.y + ch_height, position.x + ch_width, position.y, color, true);
-				vector2d::fvector v4(position.x + ch_width, position.y, position.x + ch_width, position.y + ch_height, color, true);
-				next_pos = new Vector2f(position.x + ch_width, position.y);
+				vector2d::fvector v2(position.x, position.y + ch_height, position.x + ch_width / 1.5f, position.y, color, true);
+				vector2d::fvector v4(position.x + ch_width / 1.5f, position.y, position.x + ch_width / 1.5f, position.y + ch_height, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 1.5f, position.y);
 			}
 			if (ch == 'O')
 			{
@@ -2170,8 +2190,8 @@ namespace text2d
 			}
 			if (ch == 'U')
 			{
-				ellipse2d::ELLIPSE e1(position.x + ch_width / 2.0f, position.y + ch_height / 1.6f, ch_width / 2.0f, ch_height / 1.6f, color, 3000, 600, false, true);
-				next_pos = new Vector2f(position.x + ch_width, position.y);
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 2.0f, position.y + ch_height / 1.6f, ch_width / 3.0f, ch_height / 1.6f, color, 3000, 600, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 1.2f, position.y);
 			}
 			if (ch == 'V')
 			{
@@ -2252,9 +2272,9 @@ namespace text2d
 			}
 			if (ch == 'g')
 			{
-				vector2d::fvector v1(position.x + ch_width / 5.0f+ch_width/5.3f, position.y, position.x + ch_width / 5.0f + ch_width / 4.3f, position.y + ch_height / 2.5f, color, true);
-				ellipse2d::ELLIPSE e1(position.x + ch_width / 5.535f, position.y + ch_height / 4.5f, ch_width / 5.4f, ch_height / 6.5f, color, 0, 3600, false, true);
-				ellipse2d::ELLIPSE e2(position.x + ch_width / 7.47f, position.y, ch_width / 4.05f, ch_height / 5.25f, color, 700, 1900, false, true);
+				vector2d::fvector v1(position.x + ch_width / 8.0f+ch_width/5.3f, position.y, position.x + ch_width / 8.0f + ch_width / 6.3f, position.y + ch_height / 2.5f, color, true);
+				ellipse2d::ELLIPSE e1(position.x + ch_width / (7.535f*1.2f), position.y + ch_height / 4.5f, ch_width / 5.4f, ch_height / 6.5f, color, 0, 3600, false, true);
+				ellipse2d::ELLIPSE e2(position.x + ch_width / (7.47f * 1.2f), position.y + ch_height / 25.0f, ch_width / 4.05f, ch_height / 4.75f, color, 700, 2100, false, true);
 				//tail -- ellipse2d::ELLIPSE e3(position.x + ch_width+ch_width/7.4f, position.y + ch_height / 2.4f, ch_width / 4.0f, ch_height / 5.0f, color, 2700, 3600, false, true);
 				next_pos = new Vector2f(position.x + ch_width / 5.0f + ch_width / 5.3f, position.y);
 			}
@@ -2493,8 +2513,7 @@ namespace text2d
 			}
 			if (ch == ',')
 			{
-				ellipse2d::ELLIPSE e1(position.x - ch_width / 36.0f, position.y + ch_width / 10.0f, ch_width / 24.0f, ch_height / 24.0f, color, 0, 3600, true, true);
-				ellipse2d::ELLIPSE e2(position.x - ch_width / 36.0f, position.y + ch_height / 20.0f, ch_width / 24.0f, ch_height / 12.0f, color, 0, 1500, true, true);
+				ellipse2d::ELLIPSE e1(position.x - ch_width / 36.0f, position.y - ch_width / 30.0f, ch_width / 24.0f, ch_height / 4.0f, color, 0, 2100, false, true);
 				next_pos = new Vector2f(position.x + ch_width / 24.0f, position.y);
 			}
 			if (ch == '?')
@@ -2555,8 +2574,8 @@ namespace text2d
 		}
 	public:
 		const char* text_ = "";
-		float x;
-		float y;
+		float x = 0.0f;
+		float y = 0.0f;
 		float ch_spacing = 0.0f;
 		float ch_width = 0.0f;
 		float ch_height = 0.0f;
@@ -2565,7 +2584,6 @@ namespace text2d
 		bool visible = true;
 		text(const char* _text_, float x_, float y_, float ch_width_, float ch_height_, float ch_space_, uint32 color_, bool visible_)
 		{
-			//assign char* to const char*
 			x = x_; y = y_;
 			text_ = _text_;
 			ch_spacing = ch_space_;
@@ -2580,8 +2598,28 @@ namespace text2d
 				draw();
 			}
 		}
+		text(int num_, float x_, float y_, float ch_width_, float ch_height_, float ch_space_, uint32 color_, bool visible_)
+		{
+			x = x_; y = y_;
+			text_number = num_;
+			ch_spacing = ch_space_;
+			ch_width = ch_width_;
+			ch_height = ch_height_;
+			space_width = ch_width / 3.0f;
+			color = color_;
+			visible = visible_;
+			next_pos = new Vector2f(x_, y_);
+			if (visible)
+			{
+				draw();
+			}
+		}
 		//think about default constructor for text
 		text()
+		{
+
+		}
+		~text()
 		{
 
 		}
@@ -2608,3 +2646,71 @@ namespace text2d
 		}
 	};
 }
+class Sprite
+{
+public:
+	const char* texture_path = "";
+	float x = 0.0f;
+	float y = 0.0f;
+	bool visible = true;
+	int texture_original_width = 0;
+	int texture_original_height = 0;
+	float sprite_width = 0.0f;
+	float sprite_height = 0.0f;
+	int rgb_channels = 3;
+	Sprite(Texture& texture_, float x_, float y_, float img_width_, float img_height_, bool visible_)
+	{
+		texture_path = texture_.path;
+		x = x_;
+		y = y_;
+		sprite_width = img_width_;
+		sprite_height = img_height_;
+		if (visible_)
+		{
+			visible = true;
+			draw_sprite();
+		}
+	}
+	Sprite(const char* path_, float x_, float y_, float img_width_, float img_height_, bool visible_)
+	{
+		texture_path = path_;
+		x = x_;
+		y = y_;
+		sprite_width = img_width_;
+		sprite_height = img_height_;
+		if (visible_)
+		{
+			visible = true;
+			draw_sprite();
+		}
+	}
+	Sprite()
+	{
+
+	}
+	~Sprite()
+	{
+
+	}
+	void draw_sprite()
+	{
+		unsigned char* data = stbi_load(texture_path, &texture_original_width, &texture_original_height, &rgb_channels, 0);
+		// ... process data if not NULL ..
+		int index = 0;
+		float y_ = y + (texture_original_height / 2.0f) * PIXEL_SIZE_MAX*sprite_height; // to achieve the center pivot of the picture
+		float x_ = x - (texture_original_width / 2.0f) * PIXEL_SIZE_MAX*sprite_width; // to achieve the center pivot of the picture
+		if (data != nullptr && texture_original_height > 0 && texture_original_width > 0)
+		{
+			for (int i = 0; i < texture_original_height; i++)
+			{
+				for (int j = 0; j < texture_original_width; j++)
+				{
+					draw_pixel(x_ + j * PIXEL_SIZE_MAX * sprite_width, y_ - i * PIXEL_SIZE_MAX * sprite_height, rgb(static_cast<int>(data[index]), static_cast<int>(data[index + 1]), static_cast<int>(data[index + 2])));
+					index += 3;
+					//std::cout << index << " pixel: RGB " << static_cast<int>(data[index]) << " " << static_cast<int>(data[index + 1]) << " " << static_cast<int>(data[index + 2]) << std::endl;
+				}
+			}
+		}
+		stbi_image_free(data);
+	}
+};
