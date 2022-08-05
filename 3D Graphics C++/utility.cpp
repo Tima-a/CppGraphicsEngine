@@ -57,7 +57,7 @@ static uint32 rgb(uint32 r, uint32 g, uint32 b)
 	uint32 rgbnumber = (r << 16) + (g << 8) + b;
 	return rgbnumber;
 }
-inline static bool neg_or_pos_num(float num)
+inline static bool neg_or_pos_num(float num) // remove this stupid function
 {
 	//neg - false, pos - true
 	if (num >= 0.0f)
@@ -108,10 +108,6 @@ static inline long long int GetTicks()
 		return -1;
 	}
 	return ticks.QuadPart;
-}
-static inline float fast_trunc_ellipse_function(float num)
-{
-	return int(num * 10.0f) / 10.0f;
 }
 static inline float truncA(float num, int digit)
 {
@@ -220,6 +216,71 @@ static inline bool check_number_type(float num)
 	{
 		return false; // false
 	}
+}
+static inline const char* ToString(int num_)
+{
+	const char* str_ = "";
+	int temp_i = num_;
+	int temp_ch = 0;
+	for (int i = get_quantity_of_digits(num_, false); i > 0; i--)
+	{
+		int ch_i = 0;
+		if (i == get_quantity_of_digits(num_, false))
+		{
+			ch_i = int(floor(num_ / pow(10, i - 1)));
+			temp_ch = ch_i;
+		}
+		//5914 -- 91
+		else
+		{
+			float f = temp_i - (temp_ch * pow(10, (get_quantity_of_digits(num_, false)-(get_quantity_of_digits(num_, false)-i))));
+			float g = pow(10, get_quantity_of_digits(f, false)-1);
+			ch_i = int(floor(f / g));
+			temp_i = f;
+			temp_ch = ch_i;
+		}
+		if (ch_i == 1)
+		{
+			str_ += '1';
+		}
+		if (ch_i == 2)
+		{
+			str_ += '2';
+		}
+		if (ch_i == 3)
+		{
+			str_ += '3';
+		}
+		if (ch_i == 4)
+		{
+			str_ += '4';
+		}
+		if (ch_i == 5)
+		{
+			str_ += '5';
+		}
+		if (ch_i == 6)
+		{
+			str_ += '6';
+		}
+		if (ch_i == 7)
+		{
+			str_ += '7';
+		}
+		if (ch_i == 8)
+		{
+			str_ += '8';
+		}
+		if (ch_i == 9)
+		{
+			str_ += '9';
+		}
+		if (ch_i == 0)
+		{
+			str_ += '0';
+		}
+	}
+	return str_;
 }
 static inline int combine_ints(int a, int b) //function works by multiplying the bigger number by 10 in power of the quantity of digits of lesser number and adding the lesser number to given result
 { //Ex:combine_ints(932,124) = 932 * 10^3 + 124 = 932000+124=932124
