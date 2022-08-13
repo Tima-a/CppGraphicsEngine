@@ -1,28 +1,34 @@
-#define PIXEL_SIZE_DEF 0.05f
-#define PIXEL_SIZE_MAX 0.1f
-#define PIXEL_SIZE_MIN 0.01f
-#define PIXEL_SIZE_TRIANGLE 0.1f
-#define VECTOR_HQ 0.01f
-#define VECTOR_MQ 0.05f
-#define VECTOR_LQ 0.1f
-#define PIXEL_SIZE_STLN 0.1f
-#define MAX_STORAGE_SIZE 5000
-#define pi 3.14f
-#define d_pi 6.28f
 typedef unsigned int uint32;
-
-namespace Colors
-{
-#define white 0xffffff
-#define green 0x00ff00
-#define red 0xff0000
-#define blue 0x0000ff
-#define yellow 0xffff00
-#define black 0
-}
-static float render_scale = 0.01f;
+static double render_scale = 0.001f;
 static float gravity = -9.81f;
 static float Gravitational_constant = 0.000000000016f;
+float pi = 3.14f;
+float d_pi = 6.28f;
+const int MAX_STORAGE_SIZE = 5000;
+struct PixelSizePresets
+{
+	float PIXEL_SIZE_DEF = 1.0f; // 1 coordinate unit equals one pixel
+	float PIXEL_SIZE_MAX = 1.0f;
+	float PIXEL_SIZE_MIN = 0.1f;
+	float PIXEL_SIZE_TRIANGLE = 1.0f;
+	float VECTOR_HQ = 0.1f; // 1 coordinate unit equals ten pixel
+	float VECTOR_MQ = 0.5f; // 1 coordinate unit equals five pixel
+	float VECTOR_LQ = 1.0f; // 1 coordinate unit equals one pixel
+	float PIXEL_SIZE_STLN = 1.0f;
+};
+PixelSizePresets pixelsizepresets;
+struct Colors
+{
+	uint32 white = 0xffffff;
+	uint32 green = 0x00ff00;
+	uint32 red = 0xff0000;
+	uint32 blue = 0x0000ff;
+	uint32 yellow = 0xffff00;
+	uint32 black = 0;
+};
+Colors colors;
+static enum TextureFilter { neutral, grayscale, red, blue, green };
+enum RenderScale { defaultrenderscale, fixedrenderscale, imagerenderscale };
 //Set window screen color
 inline static void update_screen(uint32 color) // processing screen visibility. This function is done to place update_screen function to the bottom of the code.
 {
@@ -47,8 +53,8 @@ inline static void refresh_screen(uint32 color)
 //Draw pixel on x, y positions
 inline static void draw_pixel(float x, float y, uint32 color)
 {
-	float x_pixel_size = PIXEL_SIZE_DEF * render.height * render_scale;
-	float y_pixel_size = PIXEL_SIZE_DEF * render_scale * render_scale;
+	float x_pixel_size = pixelsizepresets.PIXEL_SIZE_DEF * render.height * render_scale;
+	float y_pixel_size = pixelsizepresets.PIXEL_SIZE_DEF * render_scale * render_scale;
 	x *= render.height * render_scale;
 	y *= render.height * render_scale;
 	x += (float)render.width / 2.0f;
@@ -93,6 +99,31 @@ public:
 		y = vx.y;
 	}
 };
+class Vector2i
+{
+public:
+	int x;
+	int y;
+	Vector2i(int x_, int y_)
+	{
+		x = x_;
+		y = y_;
+	}
+	Vector2i()
+	{
+
+	}
+	~Vector2i()
+	{
+
+
+	}
+	Vector2i(Vector2i& vx)
+	{
+		x = vx.x;
+		y = vx.y;
+	}
+};
 namespace rectangle
 {
 	class RECT
@@ -102,7 +133,7 @@ namespace rectangle
 		float y = 0.0f;
 		float a = 0.0f;
 		float b = 0.0f;
-		uint32 color = red;
+		uint32 color = colors.red;
 		bool visible = true;
 		//Draw rectangle
 		RECT(float x_, float y_, float a_, float b_, uint32 color_, bool visible_ = true)
@@ -310,10 +341,9 @@ namespace vector2d
 			{
 				for (int i = 0; i < 5; i++)
 				{
-					draw_pixel(x1, y1 + i, highlightColor);
-					draw_pixel(x2, y2 + i, highlightColor);
+					draw_pixel(x1, y1 + i*10.0f, highlightColor);
+					draw_pixel(x2, y2 + i*10.0f, highlightColor);
 				}
-				draw_pixel(0.0f, 0.0f, highlightColor);
 			}
 			if (straight_line_drawing == false && draw_one_pixel == false)
 			{
@@ -373,15 +403,15 @@ namespace vector2d
 				int max_pixels = 0;
 				if (adx > ady)
 				{
-					max_pixels = adx * 100.0f;
+					max_pixels = adx * 10.0f;
 				}
 				else if (ady > adx)
 				{
-					max_pixels = ady * 100.0f;
+					max_pixels = ady * 10.0f;
 				}
 				else if (adx == ady)
 				{
-					max_pixels = ady * 100.0f; // or max_pixels = ((y2 - y1) * 100) - 1; there is no matter
+					max_pixels = ady * 10.0f; // or max_pixels = ((y2 - y1) * 100) - 1; there is no matter
 				}
 
 				for (int i = 0; i < int(max_pixels); i++)
@@ -467,35 +497,35 @@ namespace vector2d
 				int max_pixels = 0;
 				if (straight_line_type == 0 || straight_line_type == 1)
 				{
-					max_pixels = ady * 10.0f;
+					max_pixels = ady;
 				}
 				else if (straight_line_type == 2 || straight_line_type == 3)
 				{
-					max_pixels = adx * 10.0f;
+					max_pixels = adx;
 				}
 				for (int x = 0; x < max_pixels; x++)
 				{
 					if (straight_line_type == 0) //down
 					{
-						float slope_y_incr = PIXEL_SIZE_STLN; float slope_x_incr = PIXEL_SIZE_STLN;
+						float slope_y_incr = pixelsizepresets.PIXEL_SIZE_STLN; float slope_x_incr = pixelsizepresets.PIXEL_SIZE_STLN;
 						draw_pixel(x1, y1 + slope_y_modf, color);
 						slope_y_modf += slope_y_incr;
 					}
 					else if (straight_line_type == 1) //up
 					{
-						float slope_y_incr = PIXEL_SIZE_STLN; float slope_x_incr = PIXEL_SIZE_STLN;
+						float slope_y_incr = pixelsizepresets.PIXEL_SIZE_STLN; float slope_x_incr = pixelsizepresets.PIXEL_SIZE_STLN;
 						draw_pixel(x1, y1 + slope_y_modf, color);
 						slope_y_modf -= slope_y_incr;
 					}
 					else if (straight_line_type == 2) //right
 					{
-						float slope_y_incr = PIXEL_SIZE_STLN; float slope_x_incr = PIXEL_SIZE_STLN;
+						float slope_y_incr = pixelsizepresets.PIXEL_SIZE_STLN; float slope_x_incr = pixelsizepresets.PIXEL_SIZE_STLN;
 						draw_pixel(x1 + slope_x_modf, y1, color);
 						slope_x_modf += slope_x_incr;
 					}
 					else if (straight_line_type == 3) //left
 					{
-						float slope_y_incr = PIXEL_SIZE_STLN; float slope_x_incr = PIXEL_SIZE_STLN;
+						float slope_y_incr = pixelsizepresets.PIXEL_SIZE_STLN; float slope_x_incr = pixelsizepresets.PIXEL_SIZE_STLN;
 						draw_pixel(x1 + slope_x_modf, y1, color);
 						slope_x_modf -= slope_x_incr;
 					}
@@ -511,10 +541,10 @@ namespace vector2d
 		float x2 = 0.0f;
 		float y2 = 0.0f;
 		bool visible = true;
-		float vectorQuality = PIXEL_SIZE_DEF;
+		float vectorQuality = pixelsizepresets.PIXEL_SIZE_DEF;
 		bool highlight_vertexes = false;
-		uint32 highlightColor = yellow;
-		uint32 color = red;
+		uint32 highlightColor = colors.yellow;
+		uint32 color = colors.red;
 		int thickness_l = 1; //thickness left
 		int thickness_r = 1; //thickness right
 		//Draw 2d vector.
@@ -525,9 +555,9 @@ namespace vector2d
 			x2 = x2_;
 			y2 = y2_;
 			color = color_;
-			vectorQuality = PIXEL_SIZE_DEF;
+			vectorQuality = pixelsizepresets.PIXEL_SIZE_DEF;
 			highlight_vertexes = false;
-			highlightColor = white;
+			highlightColor = colors.white;
 			if (visible_ == true)
 			{
 				draw();
@@ -549,7 +579,7 @@ namespace vector2d
 			x2 = vx2.x;
 			y2 = vx2.y;
 			color = color_;
-			vectorQuality = PIXEL_SIZE_DEF;
+			vectorQuality = pixelsizepresets.PIXEL_SIZE_DEF;
 			if (visible_ == true)
 			{
 				draw();
@@ -1214,7 +1244,7 @@ namespace vector2d
 				{
 					if (straight_line_type == 0) //down
 					{
-						float slope_y_incr = PIXEL_SIZE_STLN;
+						float slope_y_incr = pixelsizepresets.PIXEL_SIZE_STLN;
 						draw_pixel(x1, y1 + slope_y_modf, color);
 						if (save_pixels_matrix == true)
 						{
@@ -1232,7 +1262,7 @@ namespace vector2d
 					}
 					else if (straight_line_type == 1) //up
 					{
-						float slope_y_incr = PIXEL_SIZE_STLN;
+						float slope_y_incr = pixelsizepresets.PIXEL_SIZE_STLN;
 						draw_pixel(x1, y1 + slope_y_modf, color);
 						if (save_pixels_matrix == true)
 						{
@@ -1250,7 +1280,7 @@ namespace vector2d
 					}
 					else if (straight_line_type == 2) //right
 					{
-						float slope_x_incr = PIXEL_SIZE_STLN;
+						float slope_x_incr = pixelsizepresets.PIXEL_SIZE_STLN;
 						draw_pixel(x1 + slope_x_modf, y1, color);
 						if (save_pixels_matrix == true)
 						{
@@ -1274,7 +1304,7 @@ namespace vector2d
 					}
 					else if (straight_line_type == 3) //left
 					{
-						float slope_x_incr = PIXEL_SIZE_STLN;
+						float slope_x_incr = pixelsizepresets.PIXEL_SIZE_STLN;
 						draw_pixel(x1 + slope_x_modf, y1, color);
 						if (save_pixels_matrix == true)
 						{
@@ -1313,8 +1343,8 @@ namespace vector2d
 		float y1 = 0.0f;
 		float x2 = 0.0f;
 		float y2 = 0.0f;
-		float vectorQuality = PIXEL_SIZE_DEF;
-		uint32 color = red;
+		float vectorQuality = pixelsizepresets.PIXEL_SIZE_DEF;
+		uint32 color = colors.red;
 		bool visible = true;
 		bool save_pixels_position = false;
 		bool save_pixels_position_x_cycle = false;
@@ -1336,7 +1366,7 @@ namespace vector2d
 			save_pixels_position_y_cycle = save_pixels_position_y_cycle_;
 			thickness_l = thickness_l_;
 			thickness_r = thickness_r_;
-			vectorQuality = PIXEL_SIZE_DEF;
+			vectorQuality = pixelsizepresets.PIXEL_SIZE_DEF;
 			visible = visible_;
 			if (visible_ == true)
 			{
@@ -1355,7 +1385,7 @@ namespace vector2d
 			save_pixels_position_y_cycle = save_pixels_position_y_cycle_;
 			thickness_l = thickness_l_;
 			thickness_r = thickness_r_;
-			vectorQuality = PIXEL_SIZE_DEF;
+			vectorQuality = pixelsizepresets.PIXEL_SIZE_DEF;
 			visible = visible_;
 			if (visible_ == true)
 			{
@@ -1559,8 +1589,8 @@ namespace triangle2d
 			vector2d::dvector v1(x - c / 2.0f, y, x + c / 2.0f, y, color, true, 1, 1, true, true, true); //c-line
 			vector2d::dvector v2(x - c / 2.0f, y, (x - c / 2.0f) + a, y + h_apex, color, false, 1, 1, true, true, true); //a-line
 			vector2d::dvector v3(x + c / 2.0f, y, v2.x2, v2.y2, color, false, 1, 1, true, true, true); //b-line
-			v2.vectorQuality = VECTOR_LQ;
-			v3.vectorQuality = VECTOR_LQ;
+			v2.vectorQuality = pixelsizepresets.VECTOR_LQ;
+			v3.vectorQuality = pixelsizepresets.VECTOR_LQ;
 			int fill_type = 0; //0 - a > c; 1 - b > c; 2 - a and b < c
 			if (a >= b && a < c && b < c)
 			{
@@ -1762,7 +1792,7 @@ namespace triangle2d
 		float y = 0.0f;
 		char name[20];
 		bool visible = true;
-		uint32 color = red;
+		uint32 color = colors.red;
 		bool filled = false;
 		//Draw triangle funciton. Exception: a + b > c && a + c > b && b + c > a and a,b,c,h > 0
 		triangle(float a_, float b_, float c_, float h_apex_, float x_, float y_, uint32 color_, bool filled_, bool visible = true)
@@ -1936,17 +1966,17 @@ namespace ellipse2d
 						{
 							j = fast_trunc_ellipse_function(temp_j);
 							// bug with lack of pixels in center
-							if (i >= 900 && i <= 1000)
-							{
-								vector2d::fvector v1(fx2 + x, y, x - fx2, y, color, true);
-								draw_pixel(v1.x2, v1.y1, color);
-								draw_pixel(v1.x2, v1.y1 + 0.3f, color);
-								draw_pixel(v1.x2, v1.y1 + 0.2f, color);
-								draw_pixel(v1.x2, v1.y1 + 0.1f, color);
-								draw_pixel(v1.x2, v1.y1 - 0.1f, color);
-								draw_pixel(v1.x2, v1.y1 - 0.2f, color);
-								draw_pixel(v1.x2, v1.y1 - 0.3f, color);
-							}
+							//if (i >= 900 && i <= 1000)
+							//{
+							//	vector2d::fvector v1(fx2 + x, y, x - fx2, y, color, true);
+							//	draw_pixel(v1.x2, v1.y1, color);
+							//	draw_pixel(v1.x2, v1.y1 + 0.3f, color);
+							//	draw_pixel(v1.x2, v1.y1 + 0.2f, color);
+							//	draw_pixel(v1.x2, v1.y1 + 0.1f, color);
+							//	draw_pixel(v1.x2, v1.y1 - 0.1f, color);
+							//	draw_pixel(v1.x2, v1.y1 - 0.2f, color);
+							//	draw_pixel(v1.x2, v1.y1 - 0.3f, color);
+							//}
 							if (i <= 1800)
 							{
 								vector2d::fvector v1(fx2 + x, y + y2, x - fx2, y + y2, color, true);
@@ -1973,7 +2003,7 @@ namespace ellipse2d
 		Vector2f matrix_pixels_pos[1];
 		bool filled = false;
 		bool get_ellipse_pixel_matrix = false;
-		uint32 color = red;
+		uint32 color = colors.red;
 		int px_circum_ = 0;
 		int px_area = 0;
 		int start_circum = 0;
@@ -2025,13 +2055,15 @@ class Texture
 public:
 	const char* path = "";
 	bool visible = true;
-	int sprite_width = 0;
-	int sprite_height = 0;
+	int texture_width = 0;
+	int texture_height = 0;
 	int rgb_channels = 3;
+	TextureFilter texturefilter = neutral;
 	Texture(const char* path_)
 	{
 		path = path_;
 		visible = true;
+		stbi_load(path, &texture_width, &texture_height, &rgb_channels, 0);
 	}
 	Texture()
 	{
@@ -2121,8 +2153,8 @@ namespace text2d
 			if (ch == 'J')
 			{
 				ellipse2d::ELLIPSE e1(position.x + ch_width / 2.0f, position.y + ch_height / 2.0f, ch_width / 2.0f, ch_height / 2.0f, color, 1100, 2500, false, true);
-				vector2d::fvector v1(position.x + ch_width - 0.1f, position.y + ch_height / 2.9f, position.x + ch_width-0.1f, position.y + ch_height / 1.0f, color, true);
-				next_pos = new Vector2f(position.x + ch_width/2.0f, position.y);
+				vector2d::fvector v1(position.x + ch_width - 0.1f, position.y + ch_height / 2.9f, position.x + ch_width - 0.1f, position.y + ch_height / 1.0f, color, true);
+				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'K')
 			{
@@ -2267,13 +2299,13 @@ namespace text2d
 				float avg = (position.x + ch_width / 4.0f) - position.x;
 				vector2d::fvector v1(position.x + ch_width / 12.0f, position.y, position.x + ch_width / 12.0f, position.y + ch_height / 3.5f, color, true); // straight line
 				vector2d::fvector v2(position.x, position.y + ch_height / 3.5f, position.x + ch_width / 4.0f, position.y + ch_height / 3.5f, color, true); // top line
-				ellipse2d::ELLIPSE e1(position.x + avg*1.5f, position.y + ch_height / 3.5f, ch_width / 4.0f, ch_height / 8.0f, color, 2700, 3500, false, true);
+				ellipse2d::ELLIPSE e1(position.x + avg * 1.5f, position.y + ch_height / 3.5f, ch_width / 4.0f, ch_height / 8.0f, color, 2700, 3500, false, true);
 				next_pos = new Vector2f(position.x + ch_width / 8.0f, position.y);
 			}
 			if (ch == 'g')
 			{
-				vector2d::fvector v1(position.x + ch_width / 8.0f+ch_width/5.3f, position.y, position.x + ch_width / 8.0f + ch_width / 6.3f, position.y + ch_height / 2.5f, color, true);
-				ellipse2d::ELLIPSE e1(position.x + ch_width / (7.535f*1.2f), position.y + ch_height / 4.5f, ch_width / 5.4f, ch_height / 6.5f, color, 0, 3600, false, true);
+				vector2d::fvector v1(position.x + ch_width / 8.0f + ch_width / 5.3f, position.y, position.x + ch_width / 8.0f + ch_width / 6.3f, position.y + ch_height / 2.5f, color, true);
+				ellipse2d::ELLIPSE e1(position.x + ch_width / (7.535f * 1.2f), position.y + ch_height / 4.5f, ch_width / 5.4f, ch_height / 6.5f, color, 0, 3600, false, true);
 				ellipse2d::ELLIPSE e2(position.x + ch_width / (7.47f * 1.2f), position.y + ch_height / 25.0f, ch_width / 4.05f, ch_height / 4.75f, color, 700, 2100, false, true);
 				//tail -- ellipse2d::ELLIPSE e3(position.x + ch_width+ch_width/7.4f, position.y + ch_height / 2.4f, ch_width / 4.0f, ch_height / 5.0f, color, 2700, 3600, false, true);
 				next_pos = new Vector2f(position.x + ch_width / 5.0f + ch_width / 5.3f, position.y);
@@ -2294,17 +2326,17 @@ namespace text2d
 			}
 			if (ch == 'j')
 			{
-				ellipse2d::ELLIPSE e1(position.x-ch_width/4.0f, position.y + ch_height / 3.0f, ch_width / 3.0f, ch_height / 1.5f, color, 900, 1700, false, true);
+				ellipse2d::ELLIPSE e1(position.x - ch_width / 4.0f, position.y + ch_height / 3.0f, ch_width / 3.0f, ch_height / 1.5f, color, 900, 1700, false, true);
 				//vector2d::fvector v1(position.x + ch_width / 8.0f-0.2f, position.y + ch_height / 8.0f - 0.8f, position.x + ch_width / 4.0f-0.2f, position.y + ch_height / 1.8f, color, true);
-				draw_pixel(position.x+ch_width/8.0f-0.3f, position.y + ch_height / 2.0f, color);
-				next_pos = new Vector2f(position.x + ch_width / 8.0f-0.3f, position.y);
+				draw_pixel(position.x + ch_width / 8.0f - 0.3f, position.y + ch_height / 2.0f, color);
+				next_pos = new Vector2f(position.x + ch_width / 8.0f - 0.3f, position.y);
 			}
 			if (ch == 'k')
 			{
 				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height / 2.5f, color, true);
-				vector2d::fvector v2(position.x, position.y + ch_height / 4.0f, position.x + ch_width/4.0f, position.y + ch_height/2.5f, color, true);
-				vector2d::fvector v3(position.x, position.y + ch_height / 4.0f, position.x + ch_width/3.0f, position.y, color, true);
-				next_pos = new Vector2f(position.x + ch_width/3.0f, position.y);
+				vector2d::fvector v2(position.x, position.y + ch_height / 4.0f, position.x + ch_width / 4.0f, position.y + ch_height / 2.5f, color, true);
+				vector2d::fvector v3(position.x, position.y + ch_height / 4.0f, position.x + ch_width / 3.0f, position.y, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 3.0f, position.y);
 			}
 			if (ch == 'l')
 			{
@@ -2337,13 +2369,13 @@ namespace text2d
 			}
 			if (ch == 'p')
 			{
-				vector2d::fvector v1(position.x, position.y-ch_height/4.0f, position.x, position.y + ch_height/2.0f, color, true); // straight line
+				vector2d::fvector v1(position.x, position.y - ch_height / 4.0f, position.x, position.y + ch_height / 2.0f, color, true); // straight line
 				ellipse2d::ELLIPSE e1(position.x, position.y + (ch_height / 4.0f), ch_width / 3.0f, ch_height / 8.0f, color, 0, 1800, false, true); // bottom ellipse
-				next_pos = new Vector2f(position.x + ch_width/2.0f, position.y);
+				next_pos = new Vector2f(position.x + ch_width / 2.0f, position.y);
 			}
 			if (ch == 'q')
 			{
-				vector2d::fvector v1(position.x+ch_width/2.0f, position.y - ch_height / 4.0f, position.x+ch_width/2.0f, position.y + ch_height / 2.0f, color, true); // straight line
+				vector2d::fvector v1(position.x + ch_width / 2.0f, position.y - ch_height / 4.0f, position.x + ch_width / 2.0f, position.y + ch_height / 2.0f, color, true); // straight line
 				ellipse2d::ELLIPSE e1(position.x + ch_width / 2.0f, position.y + (ch_height / 4.0f), ch_width / 2.0f, ch_height / 8.0f, color, 1800, 3600, false, true); // bottom ellipse
 				next_pos = new Vector2f(position.x + ch_width / 2.0f, position.y);
 			}
@@ -2417,7 +2449,7 @@ namespace text2d
 			}
 			if (ch == '2')
 			{
-				ellipse2d::ELLIPSE e1(position.x, position.y  + ch_height / 1.9f, ch_width / 2.0f, ch_height / 2.0f, color, 0, 1800, false, true);
+				ellipse2d::ELLIPSE e1(position.x, position.y + ch_height / 1.9f, ch_width / 2.0f, ch_height / 2.0f, color, 0, 1800, false, true);
 				vector2d::fvector v1(position.x, position.y, position.x + ch_width / 1.2f, position.y, color, true);
 				next_pos = new Vector2f(position.x + ch_width / 1.2f, position.y);
 			}
@@ -2437,7 +2469,7 @@ namespace text2d
 			if (ch == '5')
 			{
 				vector2d::fvector v1(position.x, position.y + ch_height / 3.5f + ch_height / 4.0f, position.x, position.y + ch_height, color, true);
-				vector2d::fvector v2(position.x, position.y + ch_height, position.x+ch_width/2.0f, position.y + ch_height, color, true);
+				vector2d::fvector v2(position.x, position.y + ch_height, position.x + ch_width / 2.0f, position.y + ch_height, color, true);
 				ellipse2d::ELLIPSE e1(position.x, position.y + ch_height / 3.5f, ch_width / 2.0f, ch_height / 4.0f, color, 0, 1800, false, true);
 				next_pos = new Vector2f(position.x + ch_width / 2.0f, position.y);
 			}
@@ -2490,6 +2522,225 @@ namespace text2d
 			if (ch == '=')
 			{
 				vector2d::fvector v1(position.x, position.y + ch_height / 1.5f, position.x + ch_width / 1.5f, position.y + ch_height / 1.5f, color, true);
+				vector2d::fvector v2(position.x, position.y + ch_height / 3.0f, position.x + ch_width / 1.5f, position.y + ch_height / 3.0f, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 1.4f, position.y);
+			}
+			if (ch == '!')
+			{
+				draw_pixel(position.x, position.y, color);
+				vector2d::fvector v1(position.x, position.y + ch_height / 4.0f, position.x, position.y + ch_height, color, true);
+				next_pos = new Vector2f(position.x + 0.1f, position.y);
+			}
+			if (ch == '<')
+			{
+				vector2d::fvector v1(position.x, position.y + ch_height / 2.0f, position.x + ch_width / 1.5f, position.y + ch_height, color, true);
+				vector2d::fvector v2(position.x, position.y + ch_height / 2.0f, position.x + ch_width / 1.5f, position.y, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 1.4f, position.y);
+			}
+			if (ch == '>')
+			{
+				vector2d::fvector v1(position.x, position.y + ch_height, position.x + ch_width / 1.5f, position.y + ch_height / 2.0f, color, true);
+				vector2d::fvector v2(position.x, position.y, position.x + ch_width / 1.5f, position.y + ch_height / 2.0f, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 1.4f, position.y);
+			}
+			if (ch == ',')
+			{
+				ellipse2d::ELLIPSE e1(position.x - ch_width / 36.0f, position.y - ch_width / 30.0f, ch_width / 24.0f, ch_height / 4.0f, color, 0, 2100, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 24.0f, position.y);
+			}
+			if (ch == '?')
+			{
+				draw_pixel(position.x, position.y, color);
+				vector2d::fvector v1(position.x, position.y + ch_height / 3.5f, position.x, position.y + ch_height / 2.0f, color, true);
+				ellipse2d::ELLIPSE e1(position.x, position.y + ch_height / 1.33f, ch_width / 4.0f, ch_height / 4.0f, color, 0, 1800, false, true);
+				ellipse2d::ELLIPSE e2(position.x, position.y + ch_height / 1.33f, ch_width / 4.0f, ch_height / 4.0f, color, 3300, 3600, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 4.0f, position.y);
+			}
+			if (ch == '/')
+			{
+				vector2d::fvector v1(position.x, position.y, position.x + ch_width / 2.0f, position.y + ch_height, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 2.0f, position.y);
+			}
+			if (ch == '|')
+			{
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height, color, true);
+				next_pos = new Vector2f(position.x + 0.1f, position.y);
+			}
+			if (ch == '(')
+			{
+				ellipse2d::ELLIPSE e1(position.x + ch_width / 4.0f, position.y + ch_height / 2.0f, ch_width / 4.0f, ch_height / 2.0f, color, 1800, 3600, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 2.0f, position.y);
+			}
+			if (ch == ')')
+			{
+				ellipse2d::ELLIPSE e1(position.x, position.y + ch_height / 2.0f, ch_width / 4.0f, ch_height / 2.0f, color, 0, 1800, false, true);
+				next_pos = new Vector2f(position.x + ch_width / 2.0f, position.y);
+			}
+			if (ch == '_')
+			{
+				vector2d::fvector v1(position.x, position.y, position.x + ch_width / 1.5f, position.y, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 1.5f, position.y);
+			}
+			if (ch == ':')
+			{
+				ellipse2d::ELLIPSE e1(position.x, position.y + ch_height / 1.7f, ch_width / 32.0f, ch_height / 32.0f, color, 0, 3600, true, true);
+				ellipse2d::ELLIPSE e2(position.x, position.y + ch_height / 7.0f, ch_width / 32.0f, ch_height / 32.0f, color, 0, 3600, true, true);
+				next_pos = new Vector2f(position.x + ch_width / 32.0f, position.y);
+			}
+			if (ch == '[')
+			{
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height, color, true);
+				vector2d::fvector v2(position.x, position.y + ch_height, position.x + ch_width / 3.0f, position.y + ch_height, color, true);
+				vector2d::fvector v3(position.x, position.y, position.x + ch_width / 3.0f, position.y, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 3.0f, position.y);
+			}
+			if (ch == ']')
+			{
+				vector2d::fvector v1(position.x + ch_width / 3.0f, position.y, position.x + ch_width / 3.0f, position.y + ch_height, color, true);
+				vector2d::fvector v2(position.x, position.y + ch_height, position.x + ch_width / 3.0f, position.y + ch_height, color, true);
+				vector2d::fvector v3(position.x, position.y, position.x + ch_width / 3.0f, position.y, color, true);
+				next_pos = new Vector2f(position.x + ch_width / 3.0f, position.y);
+			}
+			ch_width = temp_ch_width;
+			ch_height = temp_ch_height;
+		}
+	public:
+		const char* content = "";
+		float x = 0.0f;
+		float y = 0.0f;
+		float ch_spacing = 0.0f;
+		float ch_width = 0.0f;
+		float ch_height = 0.0f;
+		float space_width = 0.0f;
+		uint32 color = colors.red;
+		bool visible = true;
+		text(const char* txt, float x_, float y_, float ch_width_, float ch_height_, float ch_space_, uint32 color_, bool visible_)
+		{
+			x = x_; y = y_;
+			content = txt;
+			ch_spacing = ch_space_;
+			ch_width = ch_width_;
+			ch_height = ch_height_;
+			space_width = ch_width / 3.0f;
+			color = color_;
+			visible = visible_;
+			next_pos = new Vector2f(x_, y_);
+			if (visible)
+			{
+				draw(content);
+			}
+		}
+		//think about default constructor for text
+		text()
+		{
+
+		}
+		//should be private void
+		inline void draw(const char* text)
+		{
+			if (visible)
+			{
+				//draw text
+				Vector2f* offset_pos;
+				for (int i = 0; i < get_text_last_index(text); i++)
+				{
+					if (i > 0) // because it automatically aadds ch_spacing to the first letter
+					{
+						offset_pos = new Vector2f((next_pos->x + ch_spacing), y);
+					}
+					else
+					{
+						offset_pos = new Vector2f(x, y);
+					}
+					draw_char(text[i], *offset_pos);
+				}
+			}
+		}
+	};
+}
+class Sprite
+{
+public:
+	const char* texture_path = "";
+	float x = 0.0f;
+	float y = 0.0f;
+	bool visible = true;
+	int texture_original_width = 0;
+	int texture_original_height = 0;
+	float texture_width = 0.0f;
+	float texture_height = 0.0f;
+	TextureFilter texturefilter = neutral;
+	int rgb_channels = 3;
+	Sprite(Texture& texture_, float x_, float y_, float img_width_, float img_height_, bool visible_)
+	{
+		texture_path = texture_.path;
+		texturefilter = texture_.texturefilter;
+		x = x_;
+		y = y_;
+		texture_width = img_width_;
+		texture_height = img_height_;
+		if (visible_)
+		{
+			visible = true;
+			draw_sprite();
+		}
+	}
+	Sprite(const char* path_, float x_, float y_, float img_width_, float img_height_, bool visible_)
+	{
+		texture_path = path_;
+		x = x_;
+		y = y_;
+		texture_width = img_width_;
+		texture_height = img_height_;
+		if (visible_)
+		{
+			visible = true;
+			draw_sprite();
+		}
+	}
+	Sprite()
+	{
+
+	}
+	~Sprite()
+	{
+
+	}
+	void draw_sprite()
+	{
+		unsigned char* data = stbi_load(texture_path, &texture_original_width, &texture_original_height, &rgb_channels, 0);
+		// ... process data if not NULL ..
+		int ipx = 0;
+		float y_ = y + (texture_original_height / 2.0f) * pixelsizepresets.PIXEL_SIZE_MAX * texture_height; // to achieve the center pivot of the picture
+		float x_ = x - (texture_original_width / 2.0f) * pixelsizepresets.PIXEL_SIZE_MAX * texture_width; // to achieve the center pivot of the picture
+		if (data != nullptr && texture_original_height > 0 && texture_original_width > 0)
+		{
+			for (int i = 0; i < texture_original_height; i++)
+			{
+				for (int j = 0; j < texture_original_width; j++)
+				{
+					unsigned int r1 = static_cast<int>(data[ipx]);
+					unsigned int g1 = static_cast<int>(data[ipx + 1]);
+					unsigned int b1 = static_cast<int>(data[ipx + 2]);
+					uint32 col = 0;
+					if (texturefilter == neutral)
+					{
+						col = rgb(r1, g1, b1);
+					}
+					else if (texturefilter == grayscale)
+					{
+						col = rgb((r1 + b1 + g1) / 3, (r1 + b1 + g1) / 3, (r1 + b1 + g1) / 3);
+					}
+					draw_pixel(x_ + j * pixelsizepresets.PIXEL_SIZE_MAX * texture_width, y_ - i * pixelsizepresets.PIXEL_SIZE_MAX * texture_height, col);
+					ipx += 3;
+					//std::cout << index << " pixel: RGB " << static_cast<int>(data[index]) << " " << static_cast<int>(data[index + 1]) << " " << static_cast<int>(data[index + 2]) << std::endl;
+				}
+			}
+		}
+		stbi_image_free(data);
+	}
+};
+ + ch_height / 1.5f, color, true);
 				vector2d::fvector v2(position.x, position.y + ch_height / 3.0f, position.x + ch_width / 1.5f, position.y + ch_height / 3.0f, color, true);
 				next_pos = new Vector2f(position.x + ch_width / 1.4f, position.y);
 			}
