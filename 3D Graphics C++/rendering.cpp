@@ -27,6 +27,7 @@ struct Colors
 };
 Colors colors;
 static enum TextureFilter { neutral, grayscale, redfilter, bluefilter, greenfilter };
+static enum pivot { center, startpos, endpos };
 //Set window screen color
 inline static void update_screen(uint32 color) // processing screen visibility. This function is done to place update_screen function to the bottom of the code.
 {
@@ -974,7 +975,10 @@ namespace vector2d
 									break;
 								}
 								slope_x_modf += slope_x_incr;
-								draw_pixel(x1 + slope_x_modf, y1 + slope_y_modf, color);
+								if (visible)
+								{
+									draw_pixel(x1 + slope_x_modf, y1 + slope_y_modf, color);
+								}
 							}
 						}
 						else if (x_y_outweight == true)
@@ -982,7 +986,10 @@ namespace vector2d
 							for (int x = 0; x < 2; x++)
 							{
 								float slope_x_incr = vectorQuality * direction_modifier_x, slope_y_incr = vectorQuality * direction_modifier_y;
-								draw_pixel(x1 + slope_x_modf, y1 + slope_y_modf, color);
+								if (visible)
+								{
+									draw_pixel(x1 + slope_x_modf, y1 + slope_y_modf, color);
+								}
 								check(x1, x2, y1, y2, slope_x_modf, slope_y_modf, slope_x_incr, slope_y_incr, directions);
 								//p += fabs(slope_x_incr);
 								//g += fabs(slope_x_incr);
@@ -1028,7 +1035,10 @@ namespace vector2d
 								slope_y_modf += slope_y_incr;
 								q++;
 								g++;
-								draw_pixel(x1 + slope_x_modf, y1 + slope_y_modf, color);
+								if (visible)
+								{
+									draw_pixel(x1 + slope_x_modf, y1 + slope_y_modf, color);
+								}
 							}
 						}
 						else if (x_y_outweight == false)
@@ -1036,7 +1046,10 @@ namespace vector2d
 							for (int x = 0; x < 2; x++) //+2 because of < sign in for, and because when the first pixel generates at y1+slope_y_modf it will not be counted in for
 							{
 								float slope_x_incr = vectorQuality * direction_modifier_y, slope_y_incr = vectorQuality * direction_modifier_y;
-								draw_pixel(x1 + slope_x_modf, y1 + slope_y_modf, color);
+								if (visible)
+								{
+									draw_pixel(x1 + slope_x_modf, y1 + slope_y_modf, color);
+								}
 								check(x1, x2, y1, y2, slope_x_modf, slope_y_modf, slope_x_incr, slope_y_incr, directions);
 								q += fabs(slope_y_incr);
 								g += fabs(slope_y_incr);
@@ -1076,28 +1089,40 @@ namespace vector2d
 					if (straight_line_type == 0) //down
 					{
 						float slope_y_incr = PIXEL_SIZE_STLN; float slope_x_incr = PIXEL_SIZE_STLN;
-						draw_pixel(x1, y1 + slope_y_modf, color);
+						if (visible)
+						{
+							draw_pixel(x1, y1 + slope_y_modf, color);
+						}
 						slope_y_modf += slope_y_incr;
 						q = max_pixels;
 					}
 					else if (straight_line_type == 1) //up
 					{
 						float slope_y_incr = PIXEL_SIZE_STLN; float slope_x_incr = PIXEL_SIZE_STLN;
-						draw_pixel(x1, y1 + slope_y_modf, color);
+						if (visible)
+						{
+							draw_pixel(x1, y1 + slope_y_modf, color);
+						}
 						slope_y_modf -= slope_y_incr;
 						q = max_pixels;
 					}
 					else if (straight_line_type == 2) //right
 					{
 						float slope_y_incr = PIXEL_SIZE_STLN; float slope_x_incr = PIXEL_SIZE_STLN;
-						draw_pixel(x1 + slope_x_modf, y1, color);
+						if (visible)
+						{
+							draw_pixel(x1 + slope_x_modf, y1, color);
+						}
 						slope_x_modf += slope_x_incr;
 						p = max_pixels;
 					}
 					else if (straight_line_type == 3) //left
 					{
 						float slope_y_incr = PIXEL_SIZE_STLN; float slope_x_incr = PIXEL_SIZE_STLN;
-						draw_pixel(x1 + slope_x_modf, y1, color);
+						if (visible)
+						{
+							draw_pixel(x1 + slope_x_modf, y1, color);
+						}
 						slope_x_modf -= slope_x_incr;
 						p = max_pixels;
 					}
@@ -1223,19 +1248,16 @@ namespace vector2d
 		//Draw function
 		inline void draw()
 		{
-			if (visible)
+			for (int i = 0; i < thickness_l + thickness_r + 1; i++) // +1 because thickness_l and thickness_r are by default zero and by default normal vector must be build and therefore to start for-loop with 1 loop.
 			{
-				for (int i = 0; i < thickness_l + thickness_r + 1; i++) // +1 because thickness_l and thickness_r are by default zero and by default normal vector must be build and therefore to start for-loop with 1 loop.
+				//this if-statements are to merge two expected for-loops(one for-loop is for left thickness and the second for-loop is for right thickness) to one for-loop
+				if (i < thickness_l) //this is to draw left thickness
 				{
-					//this if-statements are to merge two expected for-loops(one for-loop is for left thickness and the second for-loop is for right thickness) to one for-loop
-					if (i < thickness_l) //this is to draw left thickness
-					{
-						draw_vector(x1 - (0.1f * i), y1 + (0.1f * i), x2 - (0.1f * i), y2 + (0.1f * i), color);
-					}
-					if (i > thickness_l && i < thickness_r + thickness_r)
-					{
-						draw_vector(x1 + (0.1f * (i - thickness_l)), y1 - (0.1f * (i - thickness_l)), x2 + (0.1f * (i - thickness_l)), y2 - (0.1f * (i - thickness_l)), color);
-					}
+					draw_vector(x1 - (0.1f * i), y1 + (0.1f * i), x2 - (0.1f * i), y2 + (0.1f * i), color);
+				}
+				if (i > thickness_l && i < thickness_r + thickness_r)
+				{
+					draw_vector(x1 + (0.1f * (i - thickness_l)), y1 - (0.1f * (i - thickness_l)), x2 + (0.1f * (i - thickness_l)), y2 - (0.1f * (i - thickness_l)), color);
 				}
 			}
 		}
@@ -1243,16 +1265,23 @@ namespace vector2d
 	class dvector
 	{
 	private:
-		inline void get_rotation_radius()
+		inline void get_rotation_radius(pivot pivot_)
 		{
 			//Compute angle
 			/*Firstly, algorithm works by drawing an ellipse with |x2-x1| and |y2-y1| radiuses. Then algorithm finds in ellipse's pixel matrix vertex with same x as x2(last not changed vector's pixel.x). Followingly,
 			When algorithm found that vertex, it substracts vertex's y from |y2-y1| to get the difference between them. Then, it uplifts the |y2-y1| by the difference and then it checks if new ellipse's pixel
 			matrix x and y are equal to x2 and y2 of new vector's x2 and y2.*/
-			float dx = x2 - x1;
-			float dy = y2 - y1;
-			float adx = fabs(x2 - x1);
-			float ady = fabs(y2 - y1);
+			float x1_ = x1;
+			float y1_ = y1;
+			if (pivot_ == center)
+			{
+				x1_ = (x1 + x2) / 2.0f;
+				y1_ = (y1 + y2) / 2.0f;
+			}
+			float dx = x2 - x1_;
+			float dy = y2 - y1_;
+			float adx = fabs(x2 - x1_);
+			float ady = fabs(y2 - y1_);
 			float alpha = atan2(ady, adx); alpha *= 180.0f / pi;
 			alpha = fabs(alpha);
 			bool directions[4]
@@ -1297,8 +1326,8 @@ namespace vector2d
 				}
 			}
 			angle = alpha;
-			float ra = fabs(x2 - x1);
-			float rb = fabs(y2 - y1);
+			float ra = fabs(x2 - x1_);
+			float rb = fabs(y2 - y1_);
 			float r = ra + rb;
 			float error_distance = 9.5f;
 			float range_x = 150.0f;
@@ -1306,21 +1335,21 @@ namespace vector2d
 			float error_distance_bug_fixer = 1.0f;
 			float rdiv = 0.0f;
 			float rmodf = 0.0f;
-			ellipse2d::ellipsed e1(x1, y1, r, r, colors.red, 0, 3600, false, false); e1.draw();
-			float x2_ = 0.0f;
-			float y2_ = 0.0f;
+			ellipse2d::ellipsed e1(x1_, y1_, r, r, colors.red, 0, 3600, false, false); e1.draw();
+			float x2__ = 0.0f;
+			float y2__ = 0.0f;
 			if (rb >= ra)
 			{
-				x2_ = e1.matrix_pixels_pos[0].x;
-				y2_ = e1.matrix_pixels_pos[0].y;
+				x2__ = e1.matrix_pixels_pos[0].x;
+				y2__ = e1.matrix_pixels_pos[0].y;
 			}
 			else
 			{
-				x2_ = e1.matrix_pixels_pos[900].x;
-				y2_ = 0.0f;
+				x2__ = e1.matrix_pixels_pos[900].x;
+				y2__ = 0.0f;
 			}
-			vector2d::fvector v2(x1, y1, x2_, y2_, colors.blue, false); v2.vectorQuality = VECTOR_LQ; v2.draw();
-			vector2d::fvector d1(x1, y1, x2, y2, colors.white, false); d1.vectorQuality = VECTOR_LQ; d1.draw();
+			vector2d::fvector v2(x1_, y1_, x2__, y2__, colors.blue, false); v2.vectorQuality = VECTOR_LQ; v2.draw();
+			vector2d::fvector d1(x1_, y1_, x2, y2, colors.white, false); d1.vectorQuality = VECTOR_LQ; d1.draw();
 			if (ra == rb)
 			{
 				error_distance_bug_fixer = 1.5f;
@@ -1368,7 +1397,7 @@ namespace vector2d
 				{
 					range_y = 3600 - (angle * 10);
 				}
-				ellipse2d::ellipsed e2(x1, y1, r, r, colors.white, (angle * 10) - range_x, (angle * 10) + range_y, false, false); e2.draw();
+				ellipse2d::ellipsed e2(x1_, y1_, r, r, colors.white, (angle * 10) - range_x, (angle * 10) + range_y, false, false); e2.draw();
 				for (int k = (angle * 10) - range_x; k < (angle * 10) + range_y; k++)
 				{
 					bool x_range = in_range(e2.matrix_pixels_pos[k].x, x2, error_distance / 2.0f);
@@ -1910,10 +1939,11 @@ namespace vector2d
 		int px_quantity_x_cycle_each = 0;
 		int px_quantity_y_cycle_each = 0;
 		float rotation_radius = 0.0f;
+		pivot pivot_rotation = center;
 		int thickness_l = 1; //thickness left
 		int thickness_r = 1; //thickness right
 		//Draw 2d vector.
-		dvector(float x1_, float y1_, float x2_, float y2_, uint32 color_, bool visible_ = true, int thickness_l_ = 1, int thickness_r_ = 1, bool save_pixels_position_ = false, bool save_pixels_position_x_cycle_ = false, bool save_pixels_position_y_cycle_ = false)
+		dvector(float x1_, float y1_, float x2_, float y2_, uint32 color_, bool visible_ = true, int thickness_l_ = 1, int thickness_r_ = 1, bool save_pixels_position_ = false, bool save_pixels_position_x_cycle_ = false, bool save_pixels_position_y_cycle_ = false, pivot rpivot = center)
 		{
 			x1 = x1_;
 			y1 = y1_;
@@ -1927,9 +1957,10 @@ namespace vector2d
 			thickness_l = thickness_l_;
 			thickness_r = thickness_r_;
 			visible = visible_;
-			get_rotation_radius();
+			pivot_rotation = rpivot;
+			get_rotation_radius(rpivot);
 		}
-		dvector(Vector2f& vx1, Vector2f& vx2, uint32 color_, bool visible_ = true, int thickness_l_ = 1, int thickness_r_ = 1, bool save_pixels_position_ = false, bool save_pixels_position_x_cycle_ = false, bool save_pixels_position_y_cycle_ = false)
+		dvector(Vector2f& vx1, Vector2f& vx2, uint32 color_, bool visible_ = true, int thickness_l_ = 1, int thickness_r_ = 1, bool save_pixels_position_ = false, bool save_pixels_position_x_cycle_ = false, bool save_pixels_position_y_cycle_ = false, pivot rpivot = center)
 		{
 			x1 = vx1.x;
 			y1 = vx1.y;
@@ -1943,7 +1974,8 @@ namespace vector2d
 			thickness_l = thickness_l_;
 			thickness_r = thickness_r_;
 			visible = visible_;
-			get_rotation_radius();
+			pivot_rotation = rpivot;
+			get_rotation_radius(rpivot);
 		}
 		dvector()
 		{
@@ -1960,19 +1992,42 @@ namespace vector2d
 		inline void Rotate(float angle_)
 		{
 			int m = angle_ / 360.0f;
-			if (angle_ >= 360.0f*(m))
+			if (angle_ >= 360.0f * (m))
 			{
-				angle_ = (angle_ - (360.0f*m));
+				angle_ = (angle_ - (360.0f * m));
 			}
-			else if (angle_ < 0.0f+(360*(m-1)))
+			else if (angle_ < 0.0f + (360 * (m - 1)))
 			{
-				angle_ = (360.0f*m) - fabs(angle_);
+				angle_ = (360.0f * m) - fabs(angle_);
 			}
-			ellipse2d::ellipsed rotation_ellipse(x1, y1, rotation_radius, rotation_radius, colors.green, angle_*10.0f, angle_*10.0f+1, false, true);
-			rotation_ellipse.draw();
-			x2 = rotation_ellipse.matrix_pixels_pos[(int)angle_ * 10].x;
-			y2 = rotation_ellipse.matrix_pixels_pos[(int)angle_ * 10].y;
-			angle = angle_;
+			if (pivot_rotation == center)
+			{
+				int i = 0;
+				if (((int)angle_ * 10) >= 1800)
+				{
+					i = angle_ * 10.0f - 1800;
+				}
+				else
+				{
+					i = 1800 + angle_ * 10.0f;
+				}
+				ellipse2d::ellipsed rotation_ellipse1((x1 + x2) / 2.0f, (y1 + y2) / 2.0f, rotation_radius, rotation_radius, colors.green, (int)angle_ * 10, (int)angle_ * 10 + 1, false, false);
+				rotation_ellipse1.draw();
+				ellipse2d::ellipsed rotation_ellipse2((x1 + x2) / 2.0f, (y1 + y2) / 2.0f, rotation_radius, rotation_radius, colors.green, i, i + 1, false, false);
+				rotation_ellipse2.draw();
+				x1 = rotation_ellipse2.matrix_pixels_pos[i].x;
+				y1 = rotation_ellipse2.matrix_pixels_pos[i].y;
+				x2 = rotation_ellipse1.matrix_pixels_pos[(int)angle_ * 10].x;
+				y2 = rotation_ellipse1.matrix_pixels_pos[(int)angle_ * 10].y;
+			}
+			else if (pivot_rotation == startpos)
+			{
+				ellipse2d::ellipsed rotation_ellipse(x1, y1, rotation_radius, rotation_radius, colors.green, (int)angle_ * 10, (int)angle_ * 10 + 1, false, true);
+				rotation_ellipse.draw();
+				x2 = rotation_ellipse.matrix_pixels_pos[(int)angle_ * 10].x;
+				y2 = rotation_ellipse.matrix_pixels_pos[(int)angle_ * 10].y;
+				angle = angle_;
+			}
 		}
 		//Calculate Vector's angle
 		float get_angle()
