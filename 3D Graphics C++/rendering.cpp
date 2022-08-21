@@ -6,7 +6,8 @@ float pi = 3.14f;
 float d_pi = 6.28f;
 const int MAX_STORAGE_SIZE = 5000;
 //Pixel size presets
-const float PIXEL_SIZE_DEF = 0.1f; // 1 coordinate unit equals one pixel
+const float SUB_PIXEL_SIZE = 0.1f; // 1 coordinate unit equals one ten pixels
+const float PIXEL_SIZE_DEF = 1.0f; // 1 coordinate unit equals one pixel
 const float PIXEL_SIZE_MAX = 1.0f;
 const float PIXEL_SIZE_MIN = 0.1f;
 const float PIXEL_SIZE_TRIANGLE = 1.0f;
@@ -274,7 +275,7 @@ namespace ellipse2d
 							int k = abs(1800 - end_circum); // if end_circum is 2100 and ellipse must be filled it must fill right part of the circle only the when i > 1800 - |1800-end_circum| and i < 1800.
 							if (start_circum > 1800 && i < 1800 + k && i > 1800 - (start_circum - 1800))
 							{
-								for (int q = 0; q < fabs(fx2 - x) * 2; q++)
+								for (int q = 0; q < fabs(fx2); q++)
 								{
 									if (visible)
 									{
@@ -285,7 +286,7 @@ namespace ellipse2d
 							}
 							else if (i >= 1800)
 							{
-								for (int q = 0; q < fabs(x - fx2); q++)
+								for (int q = 0; q < fabs(fx2); q++)
 								{
 									if (visible)
 									{
@@ -296,7 +297,7 @@ namespace ellipse2d
 							}
 							else if (i <= 1800)
 							{
-								for (int q = 0; q < fabs(fx2 + x); q++)
+								for (int q = 0; q < fabs(fx2); q++)
 								{
 									if (visible)
 									{
@@ -362,35 +363,35 @@ namespace ellipse2d
 							int k = abs(1800 - end_circum); // if end_circum is 2100 and ellipse must be filled it must fill right part of the circle only the when i > 1800 - |1800-end_circum| and i < 1800.
 							if (start_circum > 1800 && i < 1800 + k && i > 1800 - (start_circum - 1800))
 							{
-								for (int q = 0; q < fabs(fx2 - x) * 2; q++)
+								for (int q = 0; q < fabs(fx2); q++)
 								{
 									if (visible)
 									{
 										draw_pixel((fx2 - x) - q, y + y2, color);
-										//vector2d::fvector v1(fx2 - x, y + y2, x - fx2, y + y2, color, true); v1.draw();
 									}
+									//vector2d::fvector v1(fx2 - x, y + y2, x - fx2, y + y2, color, true); v1.draw();
 								}
 							}
 							else if (i >= 1800)
 							{
-								for (int q = 0; q < fabs(x - fx2); q++)
+								for (int q = 0; q < fabs(fx2); q++)
 								{
 									if (visible)
 									{
 										draw_pixel((x - fx2) + q, y + y2, color);
-										//vector2d::fvector v1(x - fx2, y + y2, x, y + y2, color, true); v1.draw();
 									}
+									//vector2d::fvector v1(x - fx2, y + y2, x, y + y2, color, true); v1.draw();
 								}
 							}
 							else if (i <= 1800)
 							{
-								for (int q = 0; q < fabs(fx2 + x); q++)
+								for (int q = 0; q < fabs(fx2); q++)
 								{
 									if (visible)
 									{
 										draw_pixel((fx2 + x) - q, y + y2, color);
-										//vector2d::fvector v1(x + fx2, y + y2, x, y + y2, color, true); v1.draw();
 									}
+									//vector2d::fvector v1(x + fx2, y + y2, x, y + y2, color, true); v1.draw();
 								}
 							}
 						}
@@ -491,8 +492,8 @@ namespace ellipse2d
 						{
 							draw_pixel(x2 + x, y2 + y, color);
 						}
-							matrix_pixels_pos[i].x = x2 + x;
-							matrix_pixels_pos[i].y = y2 + y;
+						matrix_pixels_pos[i].x = x2 + x;
+						matrix_pixels_pos[i].y = y2 + y;
 					}
 					if (filled == true)
 					{
@@ -514,7 +515,7 @@ namespace ellipse2d
 							int k = abs(1800 - end_circum); // if end_circum is 2100 and ellipse must be filled it must fill right part of the circle only the when i > 1800 - |1800-end_circum| and i < 1800.
 							if (start_circum > 1800 && i < 1800 + k && i > 1800 - (start_circum - 1800))
 							{
-								for (int q = 0; q < fabs(fx2 - x) * 2; q++)
+								for (int q = 0; q < fabs(fx2); q++)
 								{
 									if (visible)
 									{
@@ -525,7 +526,7 @@ namespace ellipse2d
 							}
 							else if (i >= 1800)
 							{
-								for (int q = 0; q < fabs(x - fx2); q++)
+								for (int q = 0; q < fabs(fx2); q++)
 								{
 									if (visible)
 									{
@@ -536,7 +537,7 @@ namespace ellipse2d
 							}
 							else if (i <= 1800)
 							{
-								for (int q = 0; q < fabs(fx2 + x); q++)
+								for (int q = 0; q < fabs(fx2); q++)
 								{
 									if (visible)
 									{
@@ -608,7 +609,7 @@ namespace ellipse2d
 							int k = abs(1800 - end_circum); // if end_circum is 2100 and ellipse must be filled it must fill right part of the circle only the when i > 1800 - |1800-end_circum| and i < 1800.
 							if (start_circum > 1800 && i < 1800 + k && i > 1800 - (start_circum - 1800))
 							{
-								for (int q = 0; q < fabs(fx2 - x) * 2; q++)
+								for (int q = 0; q < fabs(fx2); q++)
 								{
 									if (visible)
 									{
@@ -619,7 +620,7 @@ namespace ellipse2d
 							}
 							else if (i >= 1800)
 							{
-								for (int q = 0; q < fabs(x - fx2); q++)
+								for (int q = 0; q < fabs(fx2); q++)
 								{
 									if (visible)
 									{
@@ -630,7 +631,7 @@ namespace ellipse2d
 							}
 							else if (i <= 1800)
 							{
-								for (int q = 0; q < fabs(fx2 + x); q++)
+								for (int q = 0; q < fabs(fx2); q++)
 								{
 									if (visible)
 									{
@@ -709,7 +710,7 @@ namespace vector2d
 	class fvector
 	{
 	private:
-		inline void get_angle_()
+		inline void get_rotation_radius()
 		{
 			//Compute angle
 			/*Firstly, algorithm works by drawing an ellipse with |x2-x1| and |y2-y1| radiuses. Then algorithm finds in ellipse's pixel matrix vertex with same x as x2(last not changed vector's pixel.x). Followingly,
@@ -805,6 +806,9 @@ namespace vector2d
 			bool straight_line_drawing = false;
 			bool draw_one_pixel = false;
 			int straight_line_type = -1;
+			float g = 0.0f;
+			float p = 0.0f;
+			float q = 0.0f;
 			//0 - up
 			//1 - down
 			//2 - right
@@ -933,14 +937,12 @@ namespace vector2d
 				{
 					max_pixels = ady * 10.0f; // or max_pixels = ((y2 - y1) * 100) - 1; there is no matter
 				}
-				int ipx = 0;
 				for (int i = 0; i < int(max_pixels); i++)
 				{
 					if (break_loop) { break; px_quantity = i; }
 					bool x_cycle = false, y_cycle = false;
 					i % 2 == start_y ? x_cycle = true : x_cycle = false;
 					i % 2 == start_x ? y_cycle = true : y_cycle = false;
-					ipx = i;
 					if (x_cycle == true)
 					{
 						if (x_y_outweight == false)
@@ -948,25 +950,26 @@ namespace vector2d
 							for (int x = 0; x < cl_x_add; x++)
 							{
 								float slope_x_incr = vectorQuality * direction_modifier_x, slope_y_incr = vectorQuality * direction_modifier_y;
-								if (check_number_type(slope_x) == false)// floor(fabs(slope_y)) will detect the last loop and that's why there is ceil in for-i loop statement.
+								if (check_if_float_has_digits((double)slope_x) == false)// floor(fabs(slope_y)) will detect the last loop and that's why there is ceil in for-i loop statement.
 								{ //if statement checks the last loop of for-i loop because only last pixel's size must be changed in x_cycle or y_cycle
 									if (x == floor(fabs(slope_x)))
 									{
 										slope_x_incr = (fabs(slope_x) - floor(fabs(slope_x))) * vectorQuality * direction_modifier_x;
+										//p += fabs(slope_x_incr);
+										//g += fabs(slope_x_incr);
 									}
 									else if (x != floor(fabs(slope_x)))// if the loop is not the last then it doesn't change pixels' size.
 									{
 										slope_x_incr = vectorQuality * direction_modifier_x;
+										//p+= fabs(slope_x_incr);
+										//g += fabs(slope_x_incr);
 									}
 								}
-								if (i == 994 && x == 90)
-								{
-									int u = 0;
-								}
+								p++;
+								g++;
 								check(x1, x2, y1, y2, slope_x_modf, slope_y_modf, slope_x_incr, slope_y_incr, directions);
 								if (slope_x_incr == 0.0f && slope_y_incr == 0.0f)
 								{
-									px_quantity = i;
 									break_loop = true;
 									break;
 								}
@@ -981,9 +984,12 @@ namespace vector2d
 								float slope_x_incr = vectorQuality * direction_modifier_x, slope_y_incr = vectorQuality * direction_modifier_y;
 								draw_pixel(x1 + slope_x_modf, y1 + slope_y_modf, color);
 								check(x1, x2, y1, y2, slope_x_modf, slope_y_modf, slope_x_incr, slope_y_incr, directions);
+								//p += fabs(slope_x_incr);
+								//g += fabs(slope_x_incr);
+								p++;
+								g++;
 								if (slope_x_incr == 0.0f && slope_y_incr == 0.0f)
 								{
-									px_quantity = i;
 									break_loop = true;
 									break;
 								}
@@ -998,25 +1004,30 @@ namespace vector2d
 							for (int y = 0; y < cl_y_add; y++)
 							{
 								float slope_x_incr = vectorQuality * direction_modifier_y, slope_y_incr = vectorQuality * direction_modifier_y;
-								if (check_number_type(slope_y) == false)
+								if (check_if_float_has_digits(slope_y) == false)
 								{
 									if (y == floor(fabs(slope_y))) // floor(fabs(slope_y)) will detect the last loop and that's why there is ceil in for-i loop statement.
 									{ //if statement checks the last loop of for-i loop because only last pixel's size must be changed in x_cycle or y_cycle
 										slope_y_incr = (fabs(slope_y) - floor(fabs(slope_y))) * vectorQuality * direction_modifier_y;
+										//q += fabs(slope_y_incr);
+										//g += fabs(slope_y_incr);
 									}
 									else if (y != floor(fabs(slope_y))) // if the loop is not the last then it doesn't change pixels' size.
 									{
 										slope_y_incr = vectorQuality * direction_modifier_y;
+										//q += fabs(slope_y_incr);
+										//g += fabs(slope_y_incr);
 									}
 								}
 								check(x1, x2, y1, y2, slope_x_modf, slope_y_modf, slope_x_incr, slope_y_incr, directions);
 								if (slope_x_incr == 0.0f && slope_y_incr == 0.0f)
 								{
-									px_quantity = i;
 									break_loop = true;
 									break;
 								}
 								slope_y_modf += slope_y_incr;
+								q++;
+								g++;
 								draw_pixel(x1 + slope_x_modf, y1 + slope_y_modf, color);
 							}
 						}
@@ -1027,12 +1038,15 @@ namespace vector2d
 								float slope_x_incr = vectorQuality * direction_modifier_y, slope_y_incr = vectorQuality * direction_modifier_y;
 								draw_pixel(x1 + slope_x_modf, y1 + slope_y_modf, color);
 								check(x1, x2, y1, y2, slope_x_modf, slope_y_modf, slope_x_incr, slope_y_incr, directions);
+								q += fabs(slope_y_incr);
+								g += fabs(slope_y_incr);
 								if (slope_x_incr == 0.0f && slope_y_incr == 0.0f)
 								{
-									px_quantity = i;
 									break_loop = true;
 									break;
 								}
+								q++;
+								g++;
 								slope_y_modf += slope_y_incr;
 							}
 						}
@@ -1044,7 +1058,6 @@ namespace vector2d
 						break_loop = true;
 					}
 				}
-				px_quantity = ipx;
 			}
 			else if (straight_line_drawing == true)
 			{
@@ -1057,6 +1070,7 @@ namespace vector2d
 				{
 					max_pixels = adx;
 				}
+				g = max_pixels;
 				for (int x = 0; x < max_pixels; x++)
 				{
 					if (straight_line_type == 0) //down
@@ -1064,31 +1078,39 @@ namespace vector2d
 						float slope_y_incr = PIXEL_SIZE_STLN; float slope_x_incr = PIXEL_SIZE_STLN;
 						draw_pixel(x1, y1 + slope_y_modf, color);
 						slope_y_modf += slope_y_incr;
+						q = max_pixels;
 					}
 					else if (straight_line_type == 1) //up
 					{
 						float slope_y_incr = PIXEL_SIZE_STLN; float slope_x_incr = PIXEL_SIZE_STLN;
 						draw_pixel(x1, y1 + slope_y_modf, color);
 						slope_y_modf -= slope_y_incr;
+						q = max_pixels;
 					}
 					else if (straight_line_type == 2) //right
 					{
 						float slope_y_incr = PIXEL_SIZE_STLN; float slope_x_incr = PIXEL_SIZE_STLN;
 						draw_pixel(x1 + slope_x_modf, y1, color);
 						slope_x_modf += slope_x_incr;
+						p = max_pixels;
 					}
 					else if (straight_line_type == 3) //left
 					{
 						float slope_y_incr = PIXEL_SIZE_STLN; float slope_x_incr = PIXEL_SIZE_STLN;
 						draw_pixel(x1 + slope_x_modf, y1, color);
 						slope_x_modf -= slope_x_incr;
+						p = max_pixels;
 					}
-					px_quantity = x;
 				}
 			}
+			px_quantity_x_cycle = p;
+			px_quantity_y_cycle = q;
+			px_quantity = p + q;
 		}
 	public:
-		int px_quantity = 0;
+		float px_quantity = 0.0f;
+		float px_quantity_x_cycle = 0.0f;
+		float px_quantity_y_cycle = 0.0f;
 		float x1 = 0.0f;
 		float y1 = 0.0f;
 		float x2 = 0.0f;
@@ -1113,7 +1135,7 @@ namespace vector2d
 			highlight_vertexes = false;
 			highlightColor = colors.white;
 			visible = visible_;
-			get_angle();
+			get_rotation_radius();
 		}
 		fvector()
 		{
@@ -1134,7 +1156,7 @@ namespace vector2d
 			vectorQuality = VECTOR_MQ;
 			highlightColor = colors.white;
 			visible = visible_;
-			get_angle();
+			get_rotation_radius();
 		}
 		//Calculate X Center of a vector
 		float centerx()
@@ -1157,42 +1179,42 @@ namespace vector2d
 			y2 = y2_;
 			draw();
 		}
-		inline void Rotate(float angle_)
-		{
-			angle_ = clamp(0.0f, angle, 3600.0f);
-			/*Firstly, algorithm gets |x2-x1| and |y2-y1| and checks which one is bigger and draws the ellipse with following radius which must be equal. Then algorithm finds in ellipse's pixel matrix vertex with same x as x2(last not changed vector's pixel.x). Followingly,
-			When algorithm found that vertex, it substracts vertex's y from |y2-y1| to get the difference between them. Then, it uplifts the |y2-y1| by the difference and then it draws the new vector with changed rotation
-			by getting the pixel matrix of the new ellipse with increasing angle by 10 index because that is how program draws ellipse.*/
-			float ra = fabs(x2 - x1);
-			float rb = fabs(y2 - y1);
-			float r = 0.0f;
-			if (ra >= rb)
-			{
-				r = ra;
-			}
-			if (ra < rb)
-			{
-				r = rb;
-			}
-			float temp_y2 = 0.0f;
-			float diff = 0.0f;
-			ellipse2d::ellipsed e1(x1, y1, r, r, color, 0, 3600, false, false); e1.draw();
-			int q = 0;
-			for (int k = 0; k < 3600; k++)
-			{
-				if (floor(e1.matrix_pixels_pos[k].x) == floor(x2 - 1.0f))
-				{
-					q = k;
-					temp_y2 = e1.matrix_pixels_pos[k].y;
-					diff = y2 - temp_y2;
-					break;
-				}
-			}
-			ellipse2d::ellipsed e2(x1, y1, (y2 + diff) - y1, (y2 + diff) - y1, colors.blue, 0, 3600, false, false); e2.draw();
-			x2 = e2.matrix_pixels_pos[(int)angle_ * 10].x;
-			y2 = e2.matrix_pixels_pos[(int)angle_ * 10].y;
-			angle = angle_;
-		}
+		//inline void Rotate(float angle_)
+		//{
+		//	/*Firstly, algorithm gets |x2-x1| and |y2-y1| and checks which one is bigger and draws the ellipse with following radius which must be equal. Then algorithm finds in ellipse's pixel matrix vertex with same x as x2(last not changed vector's pixel.x). Followingly,
+		//	When algorithm found that vertex, it substracts vertex's y from |y2-y1| to get the difference between them. Then, it uplifts the |y2-y1| by the difference and then it draws the new vector with changed rotation
+		//	by getting the pixel matrix of the new ellipse with increasing angle by 10 index because that is how program draws ellipse.*/
+		//	float ra = fabs(x2 - x1);
+		//	float rb = fabs(y2 - y1);
+		//	float r = 0.0f;
+		//	if (ra >= rb)
+		//	{
+		//		r = ra;
+		//	}
+		//	if (ra < rb)
+		//	{
+		//		r = rb;
+		//	}
+		//	float temp_y2 = 0.0f;
+		//	float diff = 0.0f;
+		//	ellipse2d::ellipsed e1(x1, y1, rb, rb, color, 0, 3600, false, true); e1.draw();
+		//	vector2d::fvector v1(x1, y1, x2, y2, color, true); v1.draw();
+		//	int q = 0;
+		//	for (int k = 0; k < 3600; k++)
+		//	{
+		//		if (floor(e1.matrix_pixels_pos[k].x) == floor(x2))
+		//		{
+		//			q = k;
+		//			temp_y2 = e1.matrix_pixels_pos[k].y;
+		//			diff = y2 - temp_y2;
+		//			break;
+		//		}
+		//	}
+		//	ellipse2d::ellipsed e2(x1, y1, (y2 + diff) - y1, (y2 + diff) - y1, colors.blue, 0, 3600, false, true); e2.draw();
+		//	x2 = e2.matrix_pixels_pos[(int)angle_ * 10].x;
+		//	y2 = e2.matrix_pixels_pos[(int)angle_ * 10].y;
+		//	angle = angle_;
+		//}
 		//Calculate Vector's angle
 		float get_angle()
 		{
@@ -1221,38 +1243,151 @@ namespace vector2d
 	class dvector
 	{
 	private:
-		inline void get_angle_()
+		inline void get_rotation_radius()
 		{
 			//Compute angle
-            /*Firstly, algorithm works by drawing an ellipse with |x2-x1| and |y2-y1| radiuses. Then algorithm finds in ellipse's pixel matrix vertex with same x as x2(last not changed vector's pixel.x). Followingly,
-            When algorithm found that vertex, it substracts vertex's y from |y2-y1| to get the difference between them. Then, it uplifts the |y2-y1| by the difference and then it checks if new ellipse's pixel
+			/*Firstly, algorithm works by drawing an ellipse with |x2-x1| and |y2-y1| radiuses. Then algorithm finds in ellipse's pixel matrix vertex with same x as x2(last not changed vector's pixel.x). Followingly,
+			When algorithm found that vertex, it substracts vertex's y from |y2-y1| to get the difference between them. Then, it uplifts the |y2-y1| by the difference and then it checks if new ellipse's pixel
 			matrix x and y are equal to x2 and y2 of new vector's x2 and y2.*/
+			float dx = x2 - x1;
+			float dy = y2 - y1;
+			float adx = fabs(x2 - x1);
+			float ady = fabs(y2 - y1);
+			float alpha = atan2(ady, adx); alpha *= 180.0f / pi;
+			alpha = fabs(alpha);
+			bool directions[4]
+			{
+				false, // up_right
+				false, // up_left
+				false, // down_right
+				false // down_left
+			};
+			float direction_modifiers[4]
+			{
+				0,
+				0,
+				0,
+				0,
+			};
+			dx > 0.0f && dy > 0.0f ? directions[0] = true : directions[0] = false; // if (dx > 0.0f && dy > 0.0f){directions[0]=true} else {directions=false}
+			dx < 0.0f && dy > 0.0f ? directions[1] = true : directions[1] = false;
+			dx > 0.0f && dy < 0.0f ? directions[2] = true : directions[2] = false;
+			dx < 0.0f && dy < 0.0f ? directions[3] = true : directions[3] = false;
+			for (int j = 0; j < 4; j++)
+			{
+				if (directions[j] == true)
+				{
+					if (j == 2)
+					{
+						alpha += 90;
+					}
+					if (j == 3)
+					{
+						alpha = 90 - alpha;
+						alpha += 180;
+					}
+					if (j == 1)
+					{
+						alpha += 270;
+					}
+					if (j == 0)
+					{
+						alpha = 90 - alpha;
+					}
+				}
+			}
+			angle = alpha;
 			float ra = fabs(x2 - x1);
 			float rb = fabs(y2 - y1);
-			float temp_y2 = 0.0f;
-			float diff = 0.0f;
-			ellipse2d::ellipsed e1(x1, y1, ra * 2.0f, rb, color, 0, 3600, false, false); e1.draw();
-			int q = 0;
-			for (int k = 0; k < 3600; k++)
+			float r = ra + rb;
+			float error_distance = 9.5f;
+			float range_x = 150.0f;
+			float range_y = 50.0f;
+			float error_distance_bug_fixer = 1.0f;
+			float rdiv = 0.0f;
+			float rmodf = 0.0f;
+			ellipse2d::ellipsed e1(x1, y1, r, r, colors.red, 0, 3600, false, false); e1.draw();
+			float x2_ = 0.0f;
+			float y2_ = 0.0f;
+			if (rb >= ra)
 			{
-				if (floor(e1.matrix_pixels_pos[k].x) == floor(x2 - 1.0f))
+				x2_ = e1.matrix_pixels_pos[0].x;
+				y2_ = e1.matrix_pixels_pos[0].y;
+			}
+			else
+			{
+				x2_ = e1.matrix_pixels_pos[900].x;
+				y2_ = 0.0f;
+			}
+			vector2d::fvector v2(x1, y1, x2_, y2_, colors.blue, false); v2.vectorQuality = VECTOR_LQ; v2.draw();
+			vector2d::fvector d1(x1, y1, x2, y2, colors.white, false); d1.vectorQuality = VECTOR_LQ; d1.draw();
+			if (ra == rb)
+			{
+				error_distance_bug_fixer = 1.5f;
+			}
+			if (ra > rb)
+			{
+				rdiv = ra / rb;
+			}
+			else if (ra <= rb)
+			{
+				rdiv = rb / ra;
+			}
+			if (rdiv >= 4.0f)
+			{
+				error_distance_bug_fixer = 0.5f;
+			}
+			if (ra > rb)
+			{
+				rmodf = (fabs(v2.px_quantity_x_cycle - d1.px_quantity_x_cycle)) / error_distance / error_distance_bug_fixer;
+			}
+			else if (ra <= rb)
+			{
+				rmodf = (fabs(v2.px_quantity_y_cycle - d1.px_quantity_y_cycle)) / error_distance / error_distance_bug_fixer;
+			}
+			bool found = false;
+			for (int i = 0; i < 20; i++)
+			{
+				if (v2.px_quantity_x_cycle < d1.px_quantity_x_cycle)
 				{
-					q = k;
-					temp_y2 = e1.matrix_pixels_pos[k].y;
-					diff = y2 - temp_y2;
+					break;
+				}
+				if (rb >= ra)
+				{
+					r -= rmodf;
+				}
+				else if (ra > rb)
+				{
+					r -= rmodf;
+				}
+				if ((angle * 10) - range_x < 0)
+				{
+					range_x = (angle * 10);
+				}
+				if ((angle * 10) + range_y > 3600)
+				{
+					range_y = 3600 - (angle * 10);
+				}
+				ellipse2d::ellipsed e2(x1, y1, r, r, colors.white, (angle * 10) - range_x, (angle * 10) + range_y, false, false); e2.draw();
+				for (int k = (angle * 10) - range_x; k < (angle * 10) + range_y; k++)
+				{
+					bool x_range = in_range(e2.matrix_pixels_pos[k].x, x2, error_distance / 2.0f);
+					bool y_range = in_range(e2.matrix_pixels_pos[k].y, y2, error_distance / 2.0f);
+					//if ((x_range == true && y_range == true) || (ceil(e2.matrix_pixels_pos[k].x) == ceil(x2) && ceil(e2.matrix_pixels_pos[k].y) == ceil(y2)) || (floor(e2.matrix_pixels_pos[k].x) == ceil(x2) && floor(e2.matrix_pixels_pos[k].y) == floor(y2)))
+					if (x_range == true && y_range == true)
+					{
+						angle = k + 20;
+						found = true;
+						break;
+					}
+				}
+				//Computing angle
+				if (found == true)
+				{
 					break;
 				}
 			}
-		    ellipse2d::ellipsed e2(x1, y1, ra * 2.0f, y2 + diff, color, 0, 3600, false, false); e2.draw();
-			for (int i = 0; i < 3600; i++)
-			{
-				if (e2.matrix_pixels_pos[i].x == x2 && e2.matrix_pixels_pos[i].y == y2)
-				{
-					q = i;
-					break;
-				}
-			}
-			angle = (float)q / 10.0f;
+			rotation_radius = r;
 		}
 		inline void check(float x1, float x2, float y1, float y2, float slope_x_modf, float slope_y_modf, float& slope_x_incr, float& slope_y_incr, bool directions[4])
 		{
@@ -1399,6 +1534,7 @@ namespace vector2d
 			//}
 			//draw_pixel(0.0f, 0.0f, rgb(255, 255, 0));
 			float slope_x = 1.0f, slope_y = 1.0f;
+			int ipx = 0;
 			if (straight_line_drawing == false && draw_just_pixel == false)
 			{
 				int max_pixels = 0;
@@ -1483,7 +1619,7 @@ namespace vector2d
 							for (int x = 0; x < cl_x_add; x++)
 							{
 								float slope_x_incr = vectorQuality * direction_modifier_x, slope_y_incr = vectorQuality * direction_modifier_x;
-								if (check_number_type(slope_x) == false)// floor(fabs(slope_y)) will detect the last loop and that's why there is ceil in for-i loop statement.
+								if (check_if_float_has_digits(slope_x) == false)// floor(fabs(slope_y)) will detect the last loop and that's why there is ceil in for-i loop statement.
 								{ //if statement checks the last loop of for-i loop because only last pixel's size must be changed in x_cycle or y_cycle
 									if (x == cl_x_add - 1)
 									{
@@ -1497,7 +1633,6 @@ namespace vector2d
 								check(x1, x2, y1, y2, slope_x_modf, slope_y_modf, slope_x_incr, slope_y_incr, directions);
 								if (slope_x_incr == 0.0f && slope_y_incr == 0.0f)
 								{
-									px_quantity = i;
 									break_loop = true;
 									break;
 								}
@@ -1510,14 +1645,14 @@ namespace vector2d
 								{
 									matrix_pixels[g].x = x1 + slope_x_modf;
 									matrix_pixels[g].y = y1 + slope_y_modf;
-									g++;
 								}
+								g++;
 								if (save_pixels_matrix_x_cycle == true)
 								{
 									matrix_pixels_x_cycle[p].x = x1 + slope_x_modf;
 									matrix_pixels_x_cycle[p].y = y1 + slope_y_modf;
-									p++;
 								}
+								p++;
 							}
 						}
 						else if (x_y_outweight == true)
@@ -1533,18 +1668,17 @@ namespace vector2d
 								{
 									matrix_pixels[g].x = x1 + slope_x_modf;
 									matrix_pixels[g].y = y1 + slope_y_modf;
-									g++;
 								}
+								g++;
 								if (save_pixels_matrix_x_cycle == true)
 								{
 									matrix_pixels_x_cycle[p].x = x1 + slope_x_modf;
 									matrix_pixels_x_cycle[p].y = y1 + slope_y_modf;
-									p++;
 								}
+								p++;
 								check(x1, x2, y1, y2, slope_x_modf, slope_y_modf, slope_x_incr, slope_y_incr, directions);
 								if (slope_x_incr == 0.0f && slope_y_incr == 0.0f)
 								{
-									px_quantity = i;
 									break_loop = true;
 									break;
 								}
@@ -1559,7 +1693,7 @@ namespace vector2d
 							for (int y = 0; y < cl_y_add; y++)
 							{
 								float slope_x_incr = vectorQuality * direction_modifier_y, slope_y_incr = vectorQuality * direction_modifier_y;
-								if (check_number_type(slope_y) == false)
+								if (check_if_float_has_digits(slope_y) == false)
 								{
 									if (y == cl_y_add - 1) // floor(fabs(slope_y)) will detect the last loop and that's why there is ceil in for-i loop statement.
 									{ //if statement checks the last loop of for-i loop because only last pixel's size must be changed in x_cycle or y_cycle
@@ -1586,14 +1720,14 @@ namespace vector2d
 								{
 									matrix_pixels[g].x = x1 + slope_x_modf;
 									matrix_pixels[g].y = y1 + slope_y_modf;
-									g++;
 								}
+								g++;
 								if (save_pixels_matrix_y_cycle == true)
 								{
 									matrix_pixels_y_cycle[q].x = x1 + slope_x_modf;
 									matrix_pixels_y_cycle[q].y = y1 + slope_y_modf;
-									q++;
 								}
+								q++;
 							}
 						}
 						else if (x_y_outweight == false)
@@ -1609,21 +1743,20 @@ namespace vector2d
 								{
 									matrix_pixels[g].x = x1 + slope_x_modf;
 									matrix_pixels[g].y = y1 + slope_y_modf;
-									g++;
 								}
+								g++;
 								if (save_pixels_matrix_y_cycle == true)
 								{
 									matrix_pixels_y_cycle[q].x = x1 + slope_x_modf;
 									matrix_pixels_y_cycle[q].y = y1 + slope_y_modf;
-									q++;
 								}
+								q++;
 								if (visible)
 								{
 									check(x1, x2, y1, y2, slope_x_modf, slope_y_modf, slope_x_incr, slope_y_incr, directions);
 								}
 								if (slope_x_incr == 0.0f && slope_y_incr == 0.0f)
 								{
-									px_quantity = i;
 									break_loop = true;
 									break;
 								}
@@ -1635,7 +1768,6 @@ namespace vector2d
 					check(x1, x2, y1, y2, slope_x_modf, slope_y_modf, slope_x_incr, slope_y_incr, directions);
 					if (slope_x_incr == 0.0f && slope_y_incr == 0.0f)
 					{
-						px_quantity = i;
 						break_loop = true;
 						break;
 					}
@@ -1652,6 +1784,7 @@ namespace vector2d
 				{
 					max_pixels = adx;
 				}
+				ipx = max_pixels;
 				for (int x = 0; x < max_pixels; x++)
 				{
 					if (straight_line_type == 0) //down
@@ -1776,6 +1909,7 @@ namespace vector2d
 		bool save_pixels_position_y_cycle = false;
 		int px_quantity_x_cycle_each = 0;
 		int px_quantity_y_cycle_each = 0;
+		float rotation_radius = 0.0f;
 		int thickness_l = 1; //thickness left
 		int thickness_r = 1; //thickness right
 		//Draw 2d vector.
@@ -1793,7 +1927,7 @@ namespace vector2d
 			thickness_l = thickness_l_;
 			thickness_r = thickness_r_;
 			visible = visible_;
-			get_angle_();
+			get_rotation_radius();
 		}
 		dvector(Vector2f& vx1, Vector2f& vx2, uint32 color_, bool visible_ = true, int thickness_l_ = 1, int thickness_r_ = 1, bool save_pixels_position_ = false, bool save_pixels_position_x_cycle_ = false, bool save_pixels_position_y_cycle_ = false)
 		{
@@ -1809,7 +1943,7 @@ namespace vector2d
 			thickness_l = thickness_l_;
 			thickness_r = thickness_r_;
 			visible = visible_;
-			get_angle_();
+			get_rotation_radius();
 		}
 		dvector()
 		{
@@ -1825,38 +1959,19 @@ namespace vector2d
 		}
 		inline void Rotate(float angle_)
 		{
-			angle_ = clamp(0.0f, angle, 3600.0f);
-			/*Firstly, algorithm gets |x2-x1| and |y2-y1| and checks which one is bigger and draws the ellipse with following radius which must be equal. Then algorithm finds in ellipse's pixel matrix vertex with same x as x2(last not changed vector's pixel.x). Followingly,
-			When algorithm found that vertex, it substracts vertex's y from |y2-y1| to get the difference between them. Then, it uplifts the |y2-y1| by the difference and then it draws the new vector with changed rotation
-			by getting the pixel matrix of the new ellipse with increasing angle by 10 index because that is how program draws ellipse.*/
-			float ra = fabs(x2 - x1);
-			float rb = fabs(y2 - y1);
-			float r = 0.0f;
-			if (ra >= rb)
+			int m = angle_ / 360.0f;
+			if (angle_ >= 360.0f*(m))
 			{
-				r = ra;
+				angle_ = (angle_ - (360.0f*m));
 			}
-			if (ra < rb)
+			else if (angle_ < 0.0f+(360*(m-1)))
 			{
-				r = rb;
+				angle_ = (360.0f*m) - fabs(angle_);
 			}
-			float temp_y2 = 0.0f;
-			float diff = 0.0f;
-			ellipse2d::ellipsed e1(x1, y1, r, r, color, 0, 3600, false, false); e1.draw();
-			int q = 0;
-			for (int k = 0; k < 3600; k++)
-			{
-				if (floor(e1.matrix_pixels_pos[k].x) == floor(x2 - 1.0f))
-				{
-					q = k;
-					temp_y2 = e1.matrix_pixels_pos[k].y;
-					diff = y2 - temp_y2;
-					break;
-				}
-			}
-			ellipse2d::ellipsed e2(x1, y1, (y2 + diff) - y1, (y2 + diff) - y1, colors.blue, 0, 3600, false, false); e2.draw();
-			x2 = e2.matrix_pixels_pos[(int)angle_ * 10].x;
-			y2 = e2.matrix_pixels_pos[(int)angle_ * 10].y;
+			ellipse2d::ellipsed rotation_ellipse(x1, y1, rotation_radius, rotation_radius, colors.green, angle_*10.0f, angle_*10.0f+1, false, true);
+			rotation_ellipse.draw();
+			x2 = rotation_ellipse.matrix_pixels_pos[(int)angle_ * 10].x;
+			y2 = rotation_ellipse.matrix_pixels_pos[(int)angle_ * 10].y;
 			angle = angle_;
 		}
 		//Calculate Vector's angle
@@ -1910,7 +2025,7 @@ namespace vector2d
 inline static void draw_coordinate_grid(uint32 color)
 {
 	vector2d::fvector v1(-1500.0f, 0.0f, 1500.0f, 0.0f, color, true); v1.draw();
-	vector2d::fvector v2(0.0f, -500.0f, 0.0f, 500.0f, color, true); v1.draw();
+	vector2d::fvector v2(0.0f, -500.0f, 0.0f, 500.0f, color, true); v2.draw();
 }
 
 namespace cube
@@ -2277,7 +2392,7 @@ namespace text2d
 			}
 			if (ch == 'B')
 			{
-				vector2d::dvector v1(position.x, position.y, position.x, position.y + ch_height, color, true, 1, 1, true, true, true); v1.draw(); v1.draw(); // straight line
+				vector2d::dvector v1(position.x, position.y, position.x, position.y + ch_height, color, true, 1, 1, true, true, true); v1.draw(); // straight line
 				ellipse2d::ellipsef e1(position.x, position.y + (ch_height / 4.0f), ch_width / 1.5f, ch_height / 4.0f, color, 0, 1800, false, true); e1.draw(); // bottom ellipse
 				ellipse2d::ellipsef e2(position.x, position.y + (ch_height / 1.33f), ch_width / 1.5f, ch_height / 4.0f, color, 0, 1800, false, true); e2.draw(); // top ellipse
 				next_pos = new Vector2f(position.x + ch_width / 1.5f, position.y);
@@ -2389,7 +2504,7 @@ namespace text2d
 			if (ch == 'S')
 			{
 				ellipse2d::ellipsef e1(position.x, position.y + ch_height / 4.0f, ch_width, ch_height / 4.0f, color, 300, 1800, false, true); e1.draw(); // bottom ellipse
-				ellipse2d::ellipsef e2(position.x + ch_width, position.y + ch_height / 1.33f, ch_width, ch_height / 4.0f, color, 2100, 3600, false, true); e1.draw(); // top ellipse
+				ellipse2d::ellipsef e2(position.x + ch_width, position.y + ch_height / 1.33f, ch_width, ch_height / 4.0f, color, 2100, 3600, false, true); e2.draw(); // top ellipse
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'T')
@@ -2449,8 +2564,8 @@ namespace text2d
 			}
 			if (ch == 'b')
 			{
-				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height / 2.5f, color); // straight line
-				ellipse2d::ellipsef e1(position.x, position.y + (ch_height / 8.0f), ch_width / 3.0f, ch_height / 8.0f, color, 0, 1800, false, true); v1.draw(); // bottom ellipse
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height / 2.5f, color); v1.draw();	// straight line
+				ellipse2d::ellipsef e1(position.x, position.y + (ch_height / 8.0f), ch_width / 3.0f, ch_height / 8.0f, color, 0, 1800, false, true); e1.draw(); // bottom ellipse
 				next_pos = new Vector2f(position.x + ch_width / 3.0f, position.y);
 			}
 			if (ch == 'c')
@@ -2461,8 +2576,8 @@ namespace text2d
 			}
 			if (ch == 'd')
 			{
-				vector2d::fvector v1(position.x + ch_width / 6.0f, position.y, position.x + ch_width / 6.0f, position.y + ch_height / 2.2f, color); // straight line
-				ellipse2d::ellipsef e1(position.x + ch_width / 6.0f, position.y + (ch_height / 8.0f), ch_width / 4.0f, ch_height / 8.0f, color, 1800, 3600, false, true); v1.draw(); // bottom ellipse
+				vector2d::fvector v1(position.x + ch_width / 6.0f, position.y, position.x + ch_width / 6.0f, position.y + ch_height / 2.2f, color); v1.draw(); // straight line
+				ellipse2d::ellipsef e1(position.x + ch_width / 6.0f, position.y + (ch_height / 8.0f), ch_width / 4.0f, ch_height / 8.0f, color, 1800, 3600, false, true); e1.draw(); // bottom ellipse
 				next_pos = new Vector2f(position.x + ch_width / 6.0f, position.y);
 			}
 			if (ch == 'e')
@@ -2518,7 +2633,7 @@ namespace text2d
 			}
 			if (ch == 'l')
 			{
-				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height / 2.0f, color, true); v1.draw();
+				vector2d::fvector v1(position.x, position.y, position.x, position.y + ch_height / 1.7f, color, true); v1.draw();
 				next_pos = new Vector2f(position.x + 0.2f, position.y);
 			}
 			if (ch == 'm')
@@ -2574,8 +2689,8 @@ namespace text2d
 			{
 				float avg = (position.x + ch_width / 4.0f) - position.x;
 				vector2d::fvector v1(position.x + ch_width / 11.0f, position.y + ch_height / 9.14f, position.x + ch_width / 12.0f, position.y + ch_height / 2.0f, color, true); v1.draw(); // straight line
-				vector2d::fvector v2(position.x, position.y + ch_height / 4.0f, position.x + ch_width / 4.0f, position.y + ch_height / 3.5f, color, true); v1.draw(); // top line
-				ellipse2d::ellipsef e1(position.x + avg * 1.5f, position.y + ch_height / 10.0f, ch_width / 4.0f, ch_height / 8.0f, color, 2700, 2100, false, true); v1.draw();
+				vector2d::fvector v2(position.x, position.y + ch_height / 4.0f, position.x + ch_width / 4.0f, position.y + ch_height / 3.5f, color, true); v2.draw(); // top line
+				ellipse2d::ellipsef e1(position.x + avg * 1.5f, position.y + ch_height / 10.0f, ch_width / 4.0f, ch_height / 8.0f, color, 2700, 2100, false, true); e1.draw();
 				//vector2d::fvector v3(position.x, position.y + ch_height / 1.5f, position.x + ch_width, position.y + ch_height / 1.5f, color, true); v1.draw(); // middle line
 				next_pos = new Vector2f(position.x + ch_width / 4.0f, position.y);
 			}
@@ -2683,7 +2798,7 @@ namespace text2d
 			}
 			if (ch == '.')
 			{
-				ellipse2d::ellipsef e1(position.x - ch_width / 36.0f, position.y + ch_width / 10.0f, ch_width / 24.0f, ch_height / 24.0f, color, 0, 3600, true, true); e1.draw();
+				ellipse2d::ellipsef e1(1073.0f, 0.0f, ch_width / 10.0f, ch_height / 10.0f, color, 0, 3600, true, true); e1.draw();
 				next_pos = new Vector2f(position.x + ch_width / 24.0f, position.y);
 			}
 			if (ch == '-')
