@@ -26,8 +26,12 @@ struct Colors
 	uint32 black = 0;
 };
 Colors colors;
-static enum TextureFilter { neutral, grayscale, redfilter, bluefilter, greenfilter };
-static enum pivot { center, startpos, endpos };
+static enum pivot 
+{ 
+	center, 
+	startpos,
+	endpos 
+};
 //Set window screen color
 inline static void update_screen(uint32 color) // processing screen visibility. This function is done to place update_screen function to the bottom of the code.
 {
@@ -130,35 +134,61 @@ namespace rectangle
 	public:
 		float x = 0.0f;
 		float y = 0.0f;
-		float a = 0.0f;
-		float b = 0.0f;
+		float width = 0.0f;
+		float height = 0.0f;
 		uint32 color = colors.red;
 		bool visible = true;
 		//Draw rectangle
-		RECT(float x_, float y_, float a_, float b_, uint32 color_, bool visible_ = true)
+		RECT(float x_, float y_, float width_, float height_, uint32 color_, bool visible_ = true)
 		{
 			x = x_;
 			y = y_;
-			a = a_;
-			b = b_;
+			width = width_;
+			height = height_;
 			color = color_;
 			if (visible_)
 			{
 				visible = true;
-				draw_rect(x_, y_, a_, b_, color_);
+				draw_rect(x_, y_, width_, height_, color_);
 			}
 		}
-		RECT(Vector2f& pos_, float a_, float b_, uint32 color_, bool visible_ = true)
+		RECT(Vector2f& pos_, float width_, float height_, uint32 color_, bool visible_ = true)
 		{
 			x = pos_.x;
 			y = pos_.y;
-			a = a_;
-			b = b_;
+			width = width_;
+			height = height_;
 			color = color_;
 			if (visible_)
 			{
 				visible = true;
-				draw_rect(pos_.x, pos_.y, a_, b_, color_);
+				draw_rect(pos_.x, pos_.y, width_, height_, color_);
+			}
+		}
+		RECT(float x_, float y_, Vector2f& size, uint32 color_, bool visible_ = true)
+		{
+			x = x_;
+			y = y_;
+			width = size.x;
+			height = size.y;
+			color = color_;
+			if (visible_)
+			{
+				visible = true;
+				draw_rect(x_, y_, size.x, size.y, color_);
+			}
+		}
+		RECT(Vector2f& pos_, Vector2f& size, uint32 color_, bool visible_ = true)
+		{
+			x = pos_.x;
+			y = pos_.y;
+			width = size.x;
+			height = size.y;
+			color = color_;
+			if (visible_)
+			{
+				visible = true;
+				draw_rect(pos_.x, pos_.y, size.x, size.y, color_);
 			}
 		}
 		RECT()
@@ -172,17 +202,17 @@ namespace rectangle
 		//Calculate rectangle's perimeter
 		float perimeter()
 		{
-			return (2.0f * a) + (2.0f * b);
+			return (2.0f * width) + (2.0f * height);
 		}
 		//Calculate rectangle's area
 		float area()
 		{
-			return x * y;
+			return width * height;
 		}
 		//Draw function
 		inline void draw()
 		{
-			draw_rect(x, y, a, b, color);
+			draw_rect(x, y, width, height, color);
 		}
 	private:
 		inline void draw_rect(float x, float y, float half_size_x, float half_size_y, uint32 color)
@@ -416,14 +446,48 @@ namespace ellipse2d
 		bool visible = true;
 		bool filled = false;
 		uint32 color = colors.red;
-		int px_circum_ = 0;
-		int px_area = 0;
 		int start_circum = 0;
 		int end_circum = 3600;
 		ellipsef(float x_, float y_, float radiusa_, float radiusb_, uint32 color_, int start_circum_, int end_circum_, bool filled_, bool visible_ = true)
 		{
 			x = x_;
 			y = y_;
+			radiusa = radiusa_;
+			radiusb = radiusb_;
+			filled = filled_;
+			color = color_;
+			start_circum = start_circum_;
+			end_circum = end_circum_;
+			visible = visible_;
+		}
+		ellipsef(float x_, float y_, float radiusa_, float radiusb_, uint32 color_, bool filled_, bool visible_ = true)
+		{
+			x = x_;
+			y = y_;
+			radiusa = radiusa_;
+			radiusb = radiusb_;
+			filled = filled_;
+			color = color_;
+			start_circum = 0;
+			end_circum = 3600;
+			visible = visible_;
+		}
+		ellipsef(Vector2f& pos_, float radiusa_, float radiusb_, uint32 color_, bool filled_, bool visible_ = true)
+		{
+			x = pos_.x;
+			y = pos_.y;
+			radiusa = radiusa_;
+			radiusb = radiusb_;
+			filled = filled_;
+			color = color_;
+			start_circum = 0;
+			end_circum = 3600;
+			visible = visible_;
+		}
+		ellipsef(Vector2f& pos_, float radiusa_, float radiusb_, uint32 color_, int start_circum_, int end_circum_, bool filled_, bool visible_ = true)
+		{
+			x = pos_.x;
+			y = pos_.y;
 			radiusa = radiusa_;
 			radiusb = radiusb_;
 			filled = filled_;
@@ -441,13 +505,15 @@ namespace ellipse2d
 
 		}
 		//Calculate circle's size
-		int circumference_px()
+		int perimeter()
 		{
-			return 3600;
+			float h = pow((radiusa - radiusb), 2) / pow((radiusa + radiusb), 2);
+			float p = (pi * radiusa) + (pi * radiusb) * (1.0f + ((3.0f* h) / 10.0f + sqrt(4.0f - 3.0f * h)));
+			return p/2.0f;
 		}
-		int area_px()
+		int area()
 		{
-			return px_area;
+			return pi*radiusa*radiusb;
 		}
 		inline void draw()
 		{
@@ -664,10 +730,7 @@ namespace ellipse2d
 		bool visible = true;
 		Vector2f matrix_pixels_pos[3600];
 		bool filled = false;
-		bool get_ellipse_pixel_matrix = false;
 		uint32 color = colors.red;
-		int px_circum_ = 0;
-		int px_area = 0;
 		int start_circum = 0;
 		int end_circum = 3600;
 		ellipsed(float x_, float y_, float radiusa_, float radiusb_, uint32 color_, int start_circum_, int end_circum_, bool filled_, bool visible_ = true)
@@ -680,7 +743,42 @@ namespace ellipse2d
 			color = color_;
 			start_circum = start_circum_;
 			end_circum = end_circum_;
-			get_ellipse_pixel_matrix = false;
+			visible = visible_;
+		}
+		ellipsed(float x_, float y_, float radiusa_, float radiusb_, uint32 color_, bool filled_, bool visible_ = true)
+		{
+			x = x_;
+			y = y_;
+			radiusa = radiusa_;
+			radiusb = radiusb_;
+			filled = filled_;
+			color = color_;
+			start_circum = 0;
+			end_circum = 3600;
+			visible = visible_;
+		}
+		ellipsed(Vector2f& pos_, float radiusa_, float radiusb_, uint32 color_, bool filled_, bool visible_ = true)
+		{
+			x = pos_.x;
+			y = pos_.y;
+			radiusa = radiusa_;
+			radiusb = radiusb_;
+			filled = filled_;
+			color = color_;
+			start_circum = 0;
+			end_circum = 3600;
+			visible = visible_;
+		}
+		ellipsed(Vector2f& pos_, float radiusa_, float radiusb_, uint32 color_, int start_circum_, int end_circum_, bool filled_, bool visible_ = true)
+		{
+			x = pos_.x;
+			y = pos_.y;
+			radiusa = radiusa_;
+			radiusb = radiusb_;
+			filled = filled_;
+			color = color_;
+			start_circum = start_circum_;
+			end_circum = end_circum_;
 			visible = visible_;
 		}
 		ellipsed()
@@ -692,13 +790,15 @@ namespace ellipse2d
 
 		}
 		//Calculate circle's size
-		int circumference_px()
+		int perimeter()
 		{
-			return 3600;
+			float h = pow((radiusa - radiusb), 2) / pow((radiusa + radiusb), 2);
+			float p = (pi * radiusa) + (pi * radiusb) * (1.0f + ((3.0f * h) / 10.0f + sqrt(4.0f - 3.0f * h)));
+			return p / 2.0f;
 		}
-		int area_px()
+		int area()
 		{
-			return px_area;
+			return pi * radiusa * radiusb;
 		}
 		inline void draw()
 		{
@@ -711,39 +811,6 @@ namespace vector2d
 	class fvector
 	{
 	private:
-		inline void get_rotation_radius()
-		{
-			//Compute angle
-			/*Firstly, algorithm works by drawing an ellipse with |x2-x1| and |y2-y1| radiuses. Then algorithm finds in ellipse's pixel matrix vertex with same x as x2(last not changed vector's pixel.x). Followingly,
-			When algorithm found that vertex, it substracts vertex's y from |y2-y1| to get the difference between them. Then, it uplifts the |y2-y1| by the difference and then it checks if new ellipse's pixel
-			matrix x and y are equal to x2 and y2 of new vector's x2 and y2.*/
-			float ra = fabs(x2 - x1);
-			float rb = fabs(y2 - y1);
-			float temp_y2 = 0.0f;
-			float diff = 0.0f;
-			ellipse2d::ellipsed e1(x1, y1, ra * 2.0f, rb, color, 0, 3600, false, false); e1.draw();
-			int q = 0;
-			for (int k = 0; k < 3600; k++)
-			{
-				if (floor(e1.matrix_pixels_pos[k].x) == floor(x2 - 1.0f))
-				{
-					q = k;
-					temp_y2 = e1.matrix_pixels_pos[k].y;
-					diff = y2 - temp_y2;
-					break;
-				}
-			}
-			ellipse2d::ellipsed e2(x1, y1, ra * 2.0f, y2 + diff, color, 0, 3600, false, false); e2.draw();
-			for (int i = 0; i < 3600; i++)
-			{
-				if (e2.matrix_pixels_pos[i].x == x2 && e2.matrix_pixels_pos[i].y == y2)
-				{
-					q = i;
-					break;
-				}
-			}
-			angle = (float)q / 10.0f;
-		}
 		inline void check(float x1, float x2, float y1, float y2, float slope_x_modf, float slope_y_modf, float& slope_x_incr, float& slope_y_incr, bool directions[4])
 		{
 			float differencex = 0.0f;
@@ -1140,7 +1207,6 @@ namespace vector2d
 		float y1 = 0.0f;
 		float x2 = 0.0f;
 		float y2 = 0.0f;
-		float angle = 0.0f;
 		float vectorQuality = VECTOR_MQ;
 		bool visible = true;
 		bool highlight_vertexes = false;
@@ -1160,15 +1226,30 @@ namespace vector2d
 			highlight_vertexes = false;
 			highlightColor = colors.white;
 			visible = visible_;
-			get_rotation_radius();
 		}
-		fvector()
+		fvector(float x1_, float y1_, Vector2f& vx2, uint32 color_, bool visible_ = true)
 		{
-
+			x1 = x1_;
+			y1 = y1_;
+			x2 = vx2.x;
+			y2 = vx2.y;
+			color = color_;
+			vectorQuality = VECTOR_MQ;
+			highlight_vertexes = false;
+			highlightColor = colors.white;
+			visible = visible_;
 		}
-		~fvector()
+		fvector(Vector2f& vx1, float x2_, float y2_, uint32 color_, bool visible_ = true)
 		{
-
+			x1 = vx1.x;
+			y1 = vx1.y;;
+			x2 = x2_;
+			y2 = y2_;
+			color = color_;
+			vectorQuality = VECTOR_MQ;
+			highlight_vertexes = false;
+			highlightColor = colors.white;
+			visible = visible_;
 		}
 		fvector(Vector2f& vx1, Vector2f& vx2, uint32 color_, bool visible_ = true)
 		{
@@ -1177,11 +1258,18 @@ namespace vector2d
 			x2 = vx2.x;
 			y2 = vx2.y;
 			color = color_;
-			highlight_vertexes = false;
 			vectorQuality = VECTOR_MQ;
+			highlight_vertexes = false;
 			highlightColor = colors.white;
 			visible = visible_;
-			get_rotation_radius();
+		}
+		fvector()
+		{
+
+		}
+		~fvector()
+		{
+
 		}
 		//Calculate X Center of a vector
 		float centerx()
@@ -1193,57 +1281,18 @@ namespace vector2d
 		{
 			return (y2 - y1) / 2.0f;
 		}
-		//Calculate Vector's magnitude in pixels
+		//Calculate Vector's magnitude
 		float magnitude()
 		{
-			return px_quantity;
+			float adx = fabs(x2 - x1);
+			float ady = fabs(y2 - y1);
+			return sqrt(adx*adx+ady*ady);
 		}
 		inline void add_vector(float x2_, float y2_)
 		{
 			x2 = x2_;
 			y2 = y2_;
 			draw();
-		}
-		//inline void Rotate(float angle_)
-		//{
-		//	/*Firstly, algorithm gets |x2-x1| and |y2-y1| and checks which one is bigger and draws the ellipse with following radius which must be equal. Then algorithm finds in ellipse's pixel matrix vertex with same x as x2(last not changed vector's pixel.x). Followingly,
-		//	When algorithm found that vertex, it substracts vertex's y from |y2-y1| to get the difference between them. Then, it uplifts the |y2-y1| by the difference and then it draws the new vector with changed rotation
-		//	by getting the pixel matrix of the new ellipse with increasing angle by 10 index because that is how program draws ellipse.*/
-		//	float ra = fabs(x2 - x1);
-		//	float rb = fabs(y2 - y1);
-		//	float r = 0.0f;
-		//	if (ra >= rb)
-		//	{
-		//		r = ra;
-		//	}
-		//	if (ra < rb)
-		//	{
-		//		r = rb;
-		//	}
-		//	float temp_y2 = 0.0f;
-		//	float diff = 0.0f;
-		//	ellipse2d::ellipsed e1(x1, y1, rb, rb, color, 0, 3600, false, true); e1.draw();
-		//	vector2d::fvector v1(x1, y1, x2, y2, color, true); v1.draw();
-		//	int q = 0;
-		//	for (int k = 0; k < 3600; k++)
-		//	{
-		//		if (floor(e1.matrix_pixels_pos[k].x) == floor(x2))
-		//		{
-		//			q = k;
-		//			temp_y2 = e1.matrix_pixels_pos[k].y;
-		//			diff = y2 - temp_y2;
-		//			break;
-		//		}
-		//	}
-		//	ellipse2d::ellipsed e2(x1, y1, (y2 + diff) - y1, (y2 + diff) - y1, colors.blue, 0, 3600, false, true); e2.draw();
-		//	x2 = e2.matrix_pixels_pos[(int)angle_ * 10].x;
-		//	y2 = e2.matrix_pixels_pos[(int)angle_ * 10].y;
-		//	angle = angle_;
-		//}
-		//Calculate Vector's angle
-		float get_angle()
-		{
-			return angle;
 		}
 		//Draw function
 		inline void draw()
@@ -1265,6 +1314,7 @@ namespace vector2d
 	class dvector
 	{
 	private:
+		float rotation_radius = 0.0f;
 		inline void get_rotation_radius(pivot pivot_)
 		{
 			//Compute angle
@@ -1938,12 +1988,59 @@ namespace vector2d
 		bool save_pixels_position_y_cycle = false;
 		int px_quantity_x_cycle_each = 0;
 		int px_quantity_y_cycle_each = 0;
-		float rotation_radius = 0.0f;
 		pivot pivot_rotation = center;
 		int thickness_l = 1; //thickness left
 		int thickness_r = 1; //thickness right
 		//Draw 2d vector.
-		dvector(float x1_, float y1_, float x2_, float y2_, uint32 color_, bool visible_ = true, int thickness_l_ = 1, int thickness_r_ = 1, bool save_pixels_position_ = false, bool save_pixels_position_x_cycle_ = false, bool save_pixels_position_y_cycle_ = false, pivot rpivot = center)
+		dvector(float x1_, float y1_, float x2_, float y2_, uint32 color_, bool visible_ = true, pivot rpivot = center)
+		{
+			x1 = x1_;
+			y1 = y1_;
+			x2 = x2_;
+			y2 = y2_;
+			color = color_;
+			vectorQuality = VECTOR_MQ;
+			visible = visible_;
+			pivot_rotation = rpivot;
+			get_rotation_radius(rpivot);
+		}
+		dvector(float x1_, float y1_, Vector2f& vx2, uint32 color_, bool visible_ = true, pivot rpivot = center)
+		{
+			x1 = x1_;
+			y1 = y1_;
+			x2 = vx2.x;
+			y2 = vx2.y;
+			color = color_;
+			vectorQuality = VECTOR_MQ;
+			visible = visible_;
+			pivot_rotation = rpivot;
+			get_rotation_radius(rpivot);
+		}
+		dvector(Vector2f& vx1, float x2_, float y2_, uint32 color_, bool visible_ = true, pivot rpivot = center)
+		{
+			x1 = vx1.x;
+			y1 = vx1.y;
+			x2 = x2_;
+			y2 = y2_;
+			color = color_;
+			vectorQuality = VECTOR_MQ;
+			visible = visible_;
+			pivot_rotation = rpivot;
+			get_rotation_radius(rpivot);
+		}
+		dvector(Vector2f& vx1, Vector2f& vx2, uint32 color_, bool visible_ = true,  pivot rpivot = center)
+		{
+			x1 = vx1.x;
+			y1 = vx1.y;
+			x2 = vx2.x;
+			y2 = vx2.y;
+			color = color_;
+			vectorQuality = VECTOR_MQ;
+			visible = visible_;
+			pivot_rotation = rpivot;
+			get_rotation_radius(rpivot);
+		}
+		dvector(float x1_, float y1_, float x2_, float y2_, uint32 color_, int thickness_l_, int thickness_r_, bool save_pixels_position_, bool save_pixels_position_x_cycle_, bool save_pixels_position_y_cycle_, bool visible_ = true, pivot rpivot = center)
 		{
 			x1 = x1_;
 			y1 = y1_;
@@ -1960,10 +2057,44 @@ namespace vector2d
 			pivot_rotation = rpivot;
 			get_rotation_radius(rpivot);
 		}
-		dvector(Vector2f& vx1, Vector2f& vx2, uint32 color_, bool visible_ = true, int thickness_l_ = 1, int thickness_r_ = 1, bool save_pixels_position_ = false, bool save_pixels_position_x_cycle_ = false, bool save_pixels_position_y_cycle_ = false, pivot rpivot = center)
+		dvector(Vector2f& vx1, Vector2f& vx2, uint32 color_, int thickness_l_, int thickness_r_, bool save_pixels_position_, bool save_pixels_position_x_cycle_, bool save_pixels_position_y_cycle_, bool visible_ = true, pivot rpivot = center)
 		{
 			x1 = vx1.x;
 			y1 = vx1.y;
+			x2 = vx2.x;
+			y2 = vx2.y;
+			color = color_;
+			save_pixels_position = save_pixels_position_;
+			save_pixels_position_x_cycle = save_pixels_position_x_cycle_;
+			save_pixels_position_y_cycle = save_pixels_position_y_cycle_;
+			vectorQuality = VECTOR_MQ;
+			thickness_l = thickness_l_;
+			thickness_r = thickness_r_;
+			visible = visible_;
+			pivot_rotation = rpivot;
+			get_rotation_radius(rpivot);
+		}
+		dvector(Vector2f& vx1,float x2_, float y2_, uint32 color_, int thickness_l_, int thickness_r_, bool save_pixels_position_, bool save_pixels_position_x_cycle_, bool save_pixels_position_y_cycle_, bool visible_ = true, pivot rpivot = center)
+		{
+			x1 = vx1.x;
+			y1 = vx1.y;;
+			x2 = x2_;
+			y2 = y2_;
+			color = color_;
+			save_pixels_position = save_pixels_position_;
+			save_pixels_position_x_cycle = save_pixels_position_x_cycle_;
+			save_pixels_position_y_cycle = save_pixels_position_y_cycle_;
+			vectorQuality = VECTOR_MQ;
+			thickness_l = thickness_l_;
+			thickness_r = thickness_r_;
+			visible = visible_;
+			pivot_rotation = rpivot;
+			get_rotation_radius(rpivot);
+		}
+		dvector(float x1_,float y1_, Vector2f& vx2, uint32 color_, int thickness_l_, int thickness_r_, bool save_pixels_position_, bool save_pixels_position_x_cycle_, bool save_pixels_position_y_cycle_, bool visible_ = true, pivot rpivot = center)
+		{
+			x1 = x1_;
+			y1 = y1_;
 			x2 = vx2.x;
 			y2 = vx2.y;
 			color = color_;
@@ -2090,18 +2221,18 @@ namespace cube
 	private:
 		void draw_cube(float x, float y, float a, int r, int g, int b) // size of each side of a cube
 		{
-			vector2d::fvector v1(x, y, x - (a / 2.0f), y - (a / 2.0f), rgb(r - 10, g - 10, b - 10)); v1.draw(); px_cube += v1.magnitude();
-			vector2d::fvector v2(x - (a / 2.0f), y - (a / 2.0f), x + (a / 2.0f), y - (a / 2.0f), rgb(r, g, b)); v2.draw(); px_cube += v2.magnitude();
-			vector2d::fvector v3(x - (a / 2.0f), y - (a / 2.0f), x - (a / 2.0f), y + (a / 2.0f), rgb(r, g, b)); v3.draw(); px_cube += v3.magnitude();
-			vector2d::fvector v4(x - (a / 2.0f), y + (a / 2.0f), x + (a / 2.0f), y + (a / 2.0f), rgb(r, g, b)); v4.draw(); px_cube += v4.magnitude();
-			vector2d::fvector v5(x + (a / 2.0f), y - (a / 2.0f), x + (a / 2.0f), y + (a / 2.0f), rgb(r, g, b)); v5.draw(); px_cube += v5.magnitude();
-			vector2d::fvector v6(x, y, x, y + a, rgb(r - 10, g - 10, b - 10)); v6.draw(); px_cube += v6.magnitude();
-			vector2d::fvector v7(x, y + a, x + a, y + a, rgb(r, g, b)); v7.draw(); px_cube += v7.magnitude();
-			vector2d::fvector v8(x, y + a, x - (a / 2.0f), y + (a / 2.0f), rgb(r, g, b)); v8.draw(); px_cube += v8.magnitude();
-			vector2d::fvector v9(x, y, x + a, y, rgb(r - 10, g - 10, b - 10)); v9.draw(); px_cube += v9.magnitude();
-			vector2d::fvector v10(x + a, y + a, x + (a / 2.0f), y + (a / 2.0f), rgb(r, g, b)); v10.draw(); px_cube += v10.magnitude();
-			vector2d::fvector v11(x + (a / 2.0f), y - (a / 2.0f), x + a, y, rgb(r, g, b)); v11.draw(); px_cube += v11.magnitude();
-			vector2d::fvector v12(x + a, y + a, x + a, y, rgb(r, g, b)); v12.draw(); px_cube += v12.magnitude();
+			vector2d::fvector v1(x, y, x - (a / 2.0f), y - (a / 2.0f), rgb(r - 10, g - 10, b - 10));
+			vector2d::fvector v2(x - (a / 2.0f), y - (a / 2.0f), x + (a / 2.0f), y - (a / 2.0f), rgb(r, g, b)); v2.draw();
+			vector2d::fvector v3(x - (a / 2.0f), y - (a / 2.0f), x - (a / 2.0f), y + (a / 2.0f), rgb(r, g, b)); v3.draw();
+			vector2d::fvector v4(x - (a / 2.0f), y + (a / 2.0f), x + (a / 2.0f), y + (a / 2.0f), rgb(r, g, b)); v4.draw();
+			vector2d::fvector v5(x + (a / 2.0f), y - (a / 2.0f), x + (a / 2.0f), y + (a / 2.0f), rgb(r, g, b)); v5.draw();
+			vector2d::fvector v6(x, y, x, y + a, rgb(r - 10, g - 10, b - 10)); v6.draw();
+			vector2d::fvector v7(x, y + a, x + a, y + a, rgb(r, g, b)); v7.draw();
+			vector2d::fvector v8(x, y + a, x - (a / 2.0f), y + (a / 2.0f), rgb(r, g, b)); v8.draw();
+			vector2d::fvector v9(x, y, x + a, y, rgb(r - 10, g - 10, b - 10)); v9.draw();
+			vector2d::fvector v10(x + a, y + a, x + (a / 2.0f), y + (a / 2.0f), rgb(r, g, b)); v10.draw();
+			vector2d::fvector v11(x + (a / 2.0f), y - (a / 2.0f), x + a, y, rgb(r, g, b)); v11.draw();
+			vector2d::fvector v12(x + a, y + a, x + a, y, rgb(r, g, b)); v12.draw();
 			//fix bug with drawing last line
 		}
 	public:
@@ -2125,6 +2256,19 @@ namespace cube
 				draw_cube(x_, y_, a_, r_, g_, b_);
 			}
 		}
+		CUBE(Vector2f& vx1, float a_, float r_, float g_, float b_, bool visible = true)
+		{
+			x = vx1.x;
+			y = vx1.y;
+			a = a_;
+			r = r_;
+			g = g_;
+			b = b_;
+			if (visible == true)
+			{
+				draw_cube(vx1.x, vx1.y, a_, r_, g_, b_);
+			}
+		}
 		CUBE()
 		{
 
@@ -2135,7 +2279,11 @@ namespace cube
 		}
 		float perimeter()
 		{
-			return px_cube;
+			return 6.0f*a;
+		}
+		float area()
+		{
+			return a * a * a;
 		}
 		void draw()
 		{
@@ -2150,60 +2298,60 @@ namespace triangle2d
 	private:
 		inline void draw_triangle(float a, float b, float c, float h_apex, float x, float y, uint32 color, bool filled)
 		{
-			vector2d::dvector v1(x - c / 2.0f, y, x + c / 2.0f, y, color, true, 1, 1, true, true, true); v1.draw(); v1.draw(); //c-line
-			vector2d::dvector v2(x - c / 2.0f, y, (x - c / 2.0f) + a, y + h_apex, color, false, 1, 1, true, true, true); v1.draw(); v1.draw(); //a-line
-			vector2d::dvector v3(x + c / 2.0f, y, v2.x2, v2.y2, color, false, 1, 1, true, true, true); v1.draw(); v1.draw(); //b-line
-			int fill_type = 0; //0 - a > c; 1 - b > c; 2 - a and b < c
-			if (a >= b && a < c && b < c)
-			{
-				float abx = a - b;
-				v2.x1 = x - c / 2.0f; v2.y1 = y; v2.x2 = x + abx; v2.y2 = y + h_apex; v2.color = color; v2.draw();
-				v3.x1 = x + c / 2.0f; v3.y1 = y; v3.x2 = v2.x2; v3.y2 = v2.y2;  v3.color = color; v3.draw();
-				fill_type = 1;
-			}
-			if (a < b && a < c && b < c)
-			{
-				float abx = b - a;
-				v2.x1 = x - c / 2.0f; v2.y1 = y; v2.x2 = x - abx; v2.y2 = y + h_apex; v2.color = color; v2.draw();
-				v3.x1 = x + c / 2.0f; v3.y1 = y; v3.x2 = v2.x2; v3.y2 = v2.y2;  v3.color = color; v3.draw();
-				fill_type = 2;
-			}
-			if (a > c && b < c && a > b)
-			{
-				v2.draw();
-				v3.draw();
-				fill_type = 0;
-			}
-			if (b > c && a < c && a < b)
-			{
-				v3.x2 = (x + c / 2.0f) - b; v3.y2 = y + h_apex;
-				v2.x2 = v3.x2; v2.y2 = v3.y2;
-				v2.draw();
-				v3.draw();
-				fill_type = 4;
-			}
-			if (filled)
-			{
-				//Drawing triangle works simply by drawing the base line(c-line), then drawing a- or b-line depending on which is bigger and connecting them to each other.
-				//Filling triangle algorithm works simply by connecting all c-line pixels x, y with a-line only y_cycle pixels x, y.
-				float v1y = v1.matrix_pixels[0].y;
-				if (filled)
-				{
-					if (fill_type == 1 || fill_type == 2)
-					{
-						for (int j = 0; j < v2.px_quantity_x_cycle; j++)
-						{
-							float mxp_v1 = v2.matrix_pixels_x_cycle[j].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
-							vector2d::fvector v4(mxp_v1, v1y, mxp_v1, v2.matrix_pixels_x_cycle[j].y, color, true); v1.draw();
-							//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
-						}
-						for (int z = v2.px_quantity_x_cycle; z < v2.px_quantity_x_cycle + v3.px_quantity_x_cycle; z++)
-						{
-							int r = v3.px_quantity_x_cycle - (z - v2.px_quantity_x_cycle) - 1;
-							float mxp_v1 = v3.matrix_pixels_x_cycle[r].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
-							vector2d::fvector v4(mxp_v1, v1y, mxp_v1, v3.matrix_pixels_x_cycle[r].y, color, true); v1.draw();
-						}
-					}
+			//vector2d::dvector v1(x - c / 2.0f, y, x + c / 2.0f, y, color, true, 1, 1, true, true, true); v1.draw(); v1.draw(); //c-line
+			//vector2d::dvector v2(x - c / 2.0f, y, (x - c / 2.0f) + a, y + h_apex, color, false, 1, 1, true, true, true); v1.draw(); v1.draw(); //a-line
+			//vector2d::dvector v3(x + c / 2.0f, y, v2.x2, v2.y2, color, false, 1, 1, true, true, true); v1.draw(); v1.draw(); //b-line
+			//int fill_type = 0; //0 - a > c; 1 - b > c; 2 - a and b < c
+			//if (a >= b && a < c && b < c)
+			//{
+			//	float abx = a - b;
+			//	v2.x1 = x - c / 2.0f; v2.y1 = y; v2.x2 = x + abx; v2.y2 = y + h_apex; v2.color = color; v2.draw();
+			//	v3.x1 = x + c / 2.0f; v3.y1 = y; v3.x2 = v2.x2; v3.y2 = v2.y2;  v3.color = color; v3.draw();
+			//	fill_type = 1;
+			//}
+			//if (a < b && a < c && b < c)
+			//{
+			//	float abx = b - a;
+			//	v2.x1 = x - c / 2.0f; v2.y1 = y; v2.x2 = x - abx; v2.y2 = y + h_apex; v2.color = color; v2.draw();
+			//	v3.x1 = x + c / 2.0f; v3.y1 = y; v3.x2 = v2.x2; v3.y2 = v2.y2;  v3.color = color; v3.draw();
+			//	fill_type = 2;
+			//}
+			//if (a > c && b < c && a > b)
+			//{
+			//	v2.draw();
+			//	v3.draw();
+			//	fill_type = 0;
+			//}
+			//if (b > c && a < c && a < b)
+			//{
+			//	v3.x2 = (x + c / 2.0f) - b; v3.y2 = y + h_apex;
+			//	v2.x2 = v3.x2; v2.y2 = v3.y2;
+			//	v2.draw();
+			//	v3.draw();
+			//	fill_type = 4;
+			//}
+			//if (filled)
+			//{
+			//	//Drawing triangle works simply by drawing the base line(c-line), then drawing a- or b-line depending on which is bigger and connecting them to each other.
+			//	//Filling triangle algorithm works simply by connecting all c-line pixels x, y with a-line only y_cycle pixels x, y.
+			//	float v1y = v1.matrix_pixels[0].y;
+			//	if (filled)
+			//	{
+			//		if (fill_type == 1 || fill_type == 2)
+			//		{
+			//			for (int j = 0; j < v2.px_quantity_x_cycle; j++)
+			//			{
+			//				float mxp_v1 = v2.matrix_pixels_x_cycle[j].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
+			//				vector2d::fvector v4(mxp_v1, v1y, mxp_v1, v2.matrix_pixels_x_cycle[j].y, color, true); v1.draw();
+			//				//y1 is never changing because c is straight horizontal vector and there is no need to get it every time if it does not alter. Only y2 is a changing value of every a-line pixel's y.
+			//			}
+			//			for (int z = v2.px_quantity_x_cycle; z < v2.px_quantity_x_cycle + v3.px_quantity_x_cycle; z++)
+			//			{
+			//				int r = v3.px_quantity_x_cycle - (z - v2.px_quantity_x_cycle) - 1;
+			//				float mxp_v1 = v3.matrix_pixels_x_cycle[r].x; //mxp_v1 is the pixel's x of c- and a-line and they must be equal to build straight upward vector. Thus, here program gets one variable to not get it twice in x1 and x2
+			//				vector2d::fvector v4(mxp_v1, v1y, mxp_v1, v3.matrix_pixels_x_cycle[r].y, color, true); v1.draw();
+			//			}
+			//		}
 					//if (fill_type == 0)
 					//{
 					//	int index_v3 = 0;
@@ -2342,8 +2490,6 @@ namespace triangle2d
 					//		}
 					//	}
 					//}
-				}
-			}
 		}
 	public:
 		float a = 0.0f;
@@ -2407,7 +2553,6 @@ public:
 	int texture_width = 0;
 	int texture_height = 0;
 	int rgb_channels = 3;
-	TextureFilter texturefilter = neutral;
 	Texture(const char* path_)
 	{
 		path = path_;
@@ -2440,14 +2585,14 @@ namespace text2d
 			}
 			if (ch == 'A')
 			{
-				vector2d::dvector v1(position.x, position.y, position.x + ch_width / 2.0f, position.y + ch_height, color, true, 1, 1, true, true, true); v1.draw(); // left line
-				vector2d::dvector v2(position.x + ch_width, position.y, v1.x2, v1.y2, color, true, 1, 1, true, true, true); v2.draw(); // right line
+				vector2d::dvector v1(position.x, position.y, position.x + ch_width / 2.0f, position.y + ch_height, color, true); v1.save_pixels_position = true; v1.save_pixels_position_x_cycle = true; v1.save_pixels_position_y_cycle = true; v1.draw(); // left line
+				vector2d::dvector v2(position.x + ch_width, position.y, v1.x2, v1.y2, color, true); v1.save_pixels_position = true; v1.save_pixels_position_x_cycle = true; v1.save_pixels_position_y_cycle = true; v2.draw(); // right line
 				vector2d::fvector v3(v1.matrix_pixels_y_cycle[int(v1.px_quantity_y_cycle / 2.0f) - 2].x, v1.matrix_pixels_y_cycle[int(v1.px_quantity_y_cycle / 2.0f) - 1].y, v2.matrix_pixels_y_cycle[int(v2.px_quantity_y_cycle / 2.0f) - 1].x, v1.matrix_pixels_y_cycle[int(v1.px_quantity_y_cycle / 2.0f) - 1].y, color, true); v3.draw(); // middle line
 				next_pos = new Vector2f(position.x + ch_width, position.y);
 			}
 			if (ch == 'B')
 			{
-				vector2d::dvector v1(position.x, position.y, position.x, position.y + ch_height, color, true, 1, 1, true, true, true); v1.draw(); // straight line
+				vector2d::dvector v1(position.x, position.y, position.x, position.y + ch_height, color, true); v1.save_pixels_position = true; v1.save_pixels_position_x_cycle = true; v1.save_pixels_position_y_cycle = true; v1.draw(); // straight line
 				ellipse2d::ellipsef e1(position.x, position.y + (ch_height / 4.0f), ch_width / 1.5f, ch_height / 4.0f, color, 0, 1800, false, true); e1.draw(); // bottom ellipse
 				ellipse2d::ellipsef e2(position.x, position.y + (ch_height / 1.33f), ch_width / 1.5f, ch_height / 4.0f, color, 0, 1800, false, true); e2.draw(); // top ellipse
 				next_pos = new Vector2f(position.x + ch_width / 1.5f, position.y);
@@ -2460,7 +2605,7 @@ namespace text2d
 			}
 			if (ch == 'D')
 			{
-				vector2d::dvector v1(position.x, position.y, position.x, position.y + ch_height, color, true, 1, 1, true, true, true); v1.draw(); v1.draw(); // straight line
+				vector2d::dvector v1(position.x, position.y, position.x, position.y + ch_height, color, true); v1.save_pixels_position = true; v1.save_pixels_position_x_cycle = true; v1.save_pixels_position_y_cycle = true; v1.draw(); // straight line
 				ellipse2d::ellipsef e1(position.x, position.y + ch_height / 2.0f, ch_width / 1.5f, ch_height / 2.0f, color, 0, 1800, false, true); e1.draw();
 				next_pos = new Vector2f(position.x + ch_width / 1.5f, position.y);
 			}
@@ -2962,7 +3107,7 @@ namespace text2d
 		float space_width = 0.0f;
 		uint32 color = colors.red;
 		bool visible = true;
-		text(const char* txt, float x_, float y_, float ch_width_, float ch_height_, float ch_space_, uint32 color_, bool visible_)
+		text(const char* txt, float x_, float y_, float ch_width_, float ch_height_, float ch_space_, uint32 color_, bool visible_ = true)
 		{
 			x = x_; y = y_;
 			content = txt;
@@ -2974,8 +3119,25 @@ namespace text2d
 			visible = visible_;
 			next_pos = new Vector2f(x_, y_);
 		}
+		text(const char* txt, Vector2f pos_, float ch_width_, float ch_height_, float ch_space_, uint32 color_, bool visible_ = true)
+		{
+			x = pos_.x;
+			y = pos_.y;
+			content = txt;
+			ch_spacing = ch_space_;
+			ch_width = ch_width_;
+			ch_height = ch_height_;
+			space_width = ch_width / 3.0f;
+			color = color_;
+			visible = visible_;
+			next_pos = new Vector2f(pos_.x, pos_.y);
+		}
 		//think about default constructor for text
 		text()
+		{
+
+		}
+		~text()
 		{
 
 		}
@@ -3004,6 +3166,35 @@ namespace text2d
 }
 class Sprite
 {
+private:
+	inline uint32 ProcessImageColor(uint32& r1, uint32& g1, uint32& b1)
+	{
+		uint32 col = 0;
+		if (redfilter == false && greenfilter == false && bluefilter == false && grayscalefilter == false)
+		{
+			col = rgb(r1, g1, b1);
+		}
+		if (grayscalefilter == true)
+		{
+			col = rgb((r1 + b1 + g1) / 3, (r1 + b1 + g1) / 3, (r1 + b1 + g1) / 3);
+		}
+		if (redfilter == true)
+		{
+			r1 += filterIntensity_red;
+			col = rgb(r1, g1, b1);
+		}
+		if (greenfilter == true)
+		{
+			g1 += filterIntensity_green;
+			col = rgb(r1, g1, b1);
+		}
+		if (bluefilter == true)
+		{
+			b1 += filterIntensity_blue;
+			col = rgb(r1, g1, b1);
+		}
+		return col;
+	}
 public:
 	const char* texture_path = "";
 	float x = 0.0f;
@@ -3013,14 +3204,32 @@ public:
 	int texture_original_height = 0;
 	float texture_width = 0.0f;
 	float texture_height = 0.0f;
-	TextureFilter texturefilter = neutral;
+	bool redfilter = false;
+	bool greenfilter = false;
+	bool bluefilter = false;
+	bool grayscalefilter = false;
+	uint32 filterIntensity_red = 50;
+	uint32 filterIntensity_green = 50;
+	uint32 filterIntensity_blue = 50;
 	int rgb_channels = 3;
 	Sprite(Texture& texture_, float x_, float y_, float img_width_, float img_height_, bool visible_)
 	{
 		texture_path = texture_.path;
-		texturefilter = texture_.texturefilter;
 		x = x_;
 		y = y_;
+		texture_width = img_width_;
+		texture_height = img_height_;
+		if (visible_)
+		{
+			visible = true;
+			draw_sprite();
+		}
+	}
+	Sprite(Texture& texture_, Vector2f& pos_, float img_width_, float img_height_, bool visible_)
+	{
+		texture_path = texture_.path;
+		x = pos_.x;
+		y = pos_.y;
 		texture_width = img_width_;
 		texture_height = img_height_;
 		if (visible_)
@@ -3042,6 +3251,19 @@ public:
 			draw_sprite();
 		}
 	}
+	Sprite(const char* path_, Vector2f& pos_, float img_width_, float img_height_, bool visible_)
+	{
+		texture_path = path_;
+		x = pos_.x;
+		y = pos_.y;
+		texture_width = img_width_;
+		texture_height = img_height_;
+		if (visible_)
+		{
+			visible = true;
+			draw_sprite();
+		}
+	}
 	Sprite()
 	{
 
@@ -3052,30 +3274,45 @@ public:
 	}
 	void draw_sprite()
 	{
-		unsigned char* data = stbi_load(texture_path, &texture_original_width, &texture_original_height, &rgb_channels, 0);
+		/*Resizing Algorithm:
+        Algorithm works by decreasing or increasing distance between pixels depending on texture_width and texture_height. 
+		If texture_width and texture_height are 0.5 then distance between pixels will be 1*0.5 = 0.5. Consequently, image becomes smaller in size.
+		But when expanding image's size algorithm draws additional pixels to fill empty pixels. For example, texture_width = 2 and texture_height = 2, 
+		then distance between pixels will be 1*2=2, and one pixel will be missing every time pixel is built. To solve this issue algorithm draws additional pixel every time pixel is built, 
+		distance from previous pixel equals to texture_width-PIXEL_SIZE_MAX and same with y. */
+	    unsigned char* data = stbi_load(texture_path, &texture_original_width, &texture_original_height, &rgb_channels, 0);
 		// ... process data if not NULL ..
 		int ipx = 0;
 		float y_ = y + (texture_original_height / 2.0f) * PIXEL_SIZE_MAX * texture_height; // to achieve the center pivot of the picture
 		float x_ = x - (texture_original_width / 2.0f) * PIXEL_SIZE_MAX * texture_width; // to achieve the center pivot of the picture
+		bool image_expand_error = false;
+		float image_expand_error_fx_x = 0.0f;
+		float image_expand_error_fx_y = 0.0f;
+		if (texture_width - PIXEL_SIZE_MAX > 0.0f)
+		{
+			image_expand_error = true;
+			image_expand_error_fx_x = texture_width - PIXEL_SIZE_MAX;
+		}
+		if (texture_height - PIXEL_SIZE_MAX > 0.0f)
+		{
+			image_expand_error = true;
+			image_expand_error_fx_y = texture_height - PIXEL_SIZE_MAX;
+		}
 		if (data != nullptr && texture_original_height > 0 && texture_original_width > 0)
 		{
 			for (int i = 0; i < texture_original_height; i++)
 			{
 				for (int j = 0; j < texture_original_width; j++)
 				{
-					unsigned int r1 = static_cast<int>(data[ipx]);
-					unsigned int g1 = static_cast<int>(data[ipx + 1]);
-					unsigned int b1 = static_cast<int>(data[ipx + 2]);
-					uint32 col = 0;
-					if (texturefilter == neutral)
+					unsigned int r1 = static_cast<unsigned int>(data[ipx]);
+					unsigned int g1 = static_cast<unsigned int>(data[ipx + 1]);
+					unsigned int b1 = static_cast<unsigned int>(data[ipx + 2]);
+					uint32 col = ProcessImageColor(r1,g1,b1);
+					draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width), (y_ - i * PIXEL_SIZE_MAX * texture_height), col);
+					if (image_expand_error)
 					{
-						col = rgb(r1, g1, b1);
+						draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width) + image_expand_error_fx_x, (y_ - i * PIXEL_SIZE_MAX * texture_height)+image_expand_error_fx_y, col);
 					}
-					else if (texturefilter == grayscale)
-					{
-						col = rgb((r1 + b1 + g1) / 3, (r1 + b1 + g1) / 3, (r1 + b1 + g1) / 3);
-					}
-					draw_pixel(x_ + j * PIXEL_SIZE_MAX * texture_width, y_ - i * PIXEL_SIZE_MAX * texture_height, col);
 					ipx += 3;
 					//std::cout << index << " pixel: RGB " << static_cast<int>(data[index]) << " " << static_cast<int>(data[index + 1]) << " " << static_cast<int>(data[index + 2]) << std::endl;
 				}
