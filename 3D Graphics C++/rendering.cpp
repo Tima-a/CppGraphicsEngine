@@ -1,5 +1,5 @@
 typedef unsigned int uint32;
-static double render_scale = 0.001f;
+static float render_scale = 0.001f;
 static float gravity = -9.81f;
 static float Gravitational_constant = 0.000000000016f;
 float pi = 3.14f;
@@ -15,6 +15,7 @@ const float VECTOR_HQ = 0.1f; // 1 coordinate unit equals ten pixel
 const float VECTOR_MQ = 0.5f; // 1 coordinate unit equals five pixel
 const float VECTOR_LQ = 1.0f; // 1 coordinate unit equals one pixel
 const float PIXEL_SIZE_STLN = 1.0f;
+
 //Pixel size presets
 struct Colors
 {
@@ -26,57 +27,18 @@ struct Colors
 	uint32 black = 0;
 };
 Colors colors;
-static enum pivot 
-{ 
-	center, 
+static enum pivot
+{
+	center,
 	startpos,
-	endpos 
+	endpos,
+	around_point
 };
-//Set window screen color
-inline static void update_screen(uint32 color) // processing screen visibility. This function is done to place update_screen function to the bottom of the code.
+static enum rotation_direction_
 {
-	screen.update_screen = true;
-	screen.scr_refresh_color = color;
-}
-inline static void refresh_screen(uint32 color)
-{
-	if (screen.update_screen)
-	{
-		uint32* pixel = (uint32*)render.memory;
-		for (int y = 0; y < render.height; y++)
-		{
-			for (int x = 0; x < render.width; x++)
-			{
-				*pixel++ = screen.scr_refresh_color;
-			}
-		}
-		screen.update_screen = false;
-	}
-}
-//Draw pixel on x, y positions
-inline static void draw_pixel(float x, float y, uint32 color)
-{
-	float x_pixel_size = PIXEL_SIZE_DEF * render.height * render_scale;
-	float y_pixel_size = PIXEL_SIZE_DEF * render_scale * render_scale;
-	x *= render.height * render_scale;
-	y *= render.height * render_scale;
-	x += (float)render.width / 2.0f;
-	y += (float)render.height / 2.0f;
-
-	// Change to pixels
-	int x0 = (int)x - (int)x_pixel_size;
-	int x1 = (int)x + (int)x_pixel_size;
-	int y0 = (int)y - (int)y_pixel_size;
-	int y1 = (int)y + (int)y_pixel_size;
-
-	x0 = clamp(0, x0, render.width);
-	x1 = clamp(0, x1, render.width);
-	y0 = clamp(0, y0, render.height);
-	y1 = clamp(0, y1, render.height);
-
-	uint32* pixel = (uint32*)render.memory + x0 + y0 * render.width;
-	*pixel++ = color;
-}
+	clockwise,
+	counter_clockwise
+};
 class Vector2f
 {
 public:
@@ -127,130 +89,91 @@ public:
 		y = vx.y;
 	}
 };
-namespace rectangle
+class Color32
 {
-	class RECT
+public:
+	float red = 255.0f;
+	float green = 255.0f;
+	float blue = 255.0f;
+	float alpha = 255.0f;
+	Color32(float red_, float green_, float blue_, float alpha_)
 	{
-	public:
-		float x = 0.0f;
-		float y = 0.0f;
-		float width = 0.0f;
-		float height = 0.0f;
-		uint32 color = colors.red;
-		bool visible = true;
-		//Draw rectangle
-		RECT(float x_, float y_, float width_, float height_, uint32 color_, bool visible_ = true)
+		red = red_;
+		green = green_;
+		blue = blue_;
+		alpha = alpha_;
+	}
+	Color32()
+	{
+
+	}
+	~Color32()
+	{
+
+	}
+	Color32(Color32& col_)
+	{
+		red = col_.red;
+		green = col_.green;
+		blue = col_.blue;
+		alpha = col_.alpha;
+	}
+	inline uint32 get_color()
+	{
+		return rgba(red, green, blue, alpha);
+	}
+};
+//Set window screen color
+inline static void update_screen(uint32 color) // processing screen visibility. This function is done to place update_screen function to the bottom of the code.
+{
+	screen.update_screen = true;
+	screen.scr_refresh_color = color;
+}
+inline static void refresh_screen(uint32 color)
+{
+	if (screen.update_screen)
+	{
+		uint32* pixel = (uint32*)render.memory;
+		for (int y = 0; y < render.height; y++)
 		{
-			x = x_;
-			y = y_;
-			width = width_;
-			height = height_;
-			color = color_;
-			if (visible_)
+			for (int x = 0; x < render.width; x++)
 			{
-				visible = true;
-				draw_rect(x_, y_, width_, height_, color_);
+				*pixel++ = screen.scr_refresh_color;
 			}
 		}
-		RECT(Vector2f& pos_, float width_, float height_, uint32 color_, bool visible_ = true)
-		{
-			x = pos_.x;
-			y = pos_.y;
-			width = width_;
-			height = height_;
-			color = color_;
-			if (visible_)
-			{
-				visible = true;
-				draw_rect(pos_.x, pos_.y, width_, height_, color_);
-			}
-		}
-		RECT(float x_, float y_, Vector2f& size, uint32 color_, bool visible_ = true)
-		{
-			x = x_;
-			y = y_;
-			width = size.x;
-			height = size.y;
-			color = color_;
-			if (visible_)
-			{
-				visible = true;
-				draw_rect(x_, y_, size.x, size.y, color_);
-			}
-		}
-		RECT(Vector2f& pos_, Vector2f& size, uint32 color_, bool visible_ = true)
-		{
-			x = pos_.x;
-			y = pos_.y;
-			width = size.x;
-			height = size.y;
-			color = color_;
-			if (visible_)
-			{
-				visible = true;
-				draw_rect(pos_.x, pos_.y, size.x, size.y, color_);
-			}
-		}
-		RECT()
-		{
+		screen.update_screen = false;
+	}
+}
+//Draw pixel on x, y positions
+inline static void draw_pixel(float x, float y, uint32 color)
+{
+	float x_pixel_size = PIXEL_SIZE_DEF * render.height * render_scale;
+	float y_pixel_size = PIXEL_SIZE_DEF * render_scale * render_scale;
+	x *= render.height * render_scale;
+	y *= render.height * render_scale;
+	x += (float)render.width / 2.0f;
+	y += (float)render.height / 2.0f;
 
-		}
-		~RECT()
-		{
+	// Change to pixels
+	int x0 = (int)x - (int)x_pixel_size;
+	int x1 = (int)x + (int)x_pixel_size;
+	int y0 = (int)y - (int)y_pixel_size;
+	int y1 = (int)y + (int)y_pixel_size;
 
-		}
-		//Calculate rectangle's perimeter
-		float perimeter()
-		{
-			return (2.0f * width) + (2.0f * height);
-		}
-		//Calculate rectangle's area
-		float area()
-		{
-			return width * height;
-		}
-		//Draw function
-		inline void draw()
-		{
-			draw_rect(x, y, width, height, color);
-		}
-	private:
-		inline void draw_rect(float x, float y, float half_size_x, float half_size_y, uint32 color)
-		{
-			x *= render.height * render_scale;
-			y *= render.height * render_scale;
-			half_size_x *= render.height * render_scale;
-			half_size_y *= render.height * render_scale;
+	x0 = clamp(0, x0, render.width);
+	x1 = clamp(0, x1, render.width);
+	y0 = clamp(0, y0, render.height);
+	y1 = clamp(0, y1, render.height);
 
-			x += (float)render.width / 2.0f;
-			y += (float)render.height / 2.0f;
-
-			// Change to pixels
-			int x0 = (int)x - (int)half_size_x;
-			int x1 = (int)x + (int)half_size_x;
-			int y0 = (int)y - (int)half_size_y;
-			int y1 = (int)y + (int)half_size_y;
-
-			x0 = clamp(0, x0, render.width);
-			x1 = clamp(0, x1, render.width);
-			y0 = clamp(0, y0, render.height);
-			y1 = clamp(0, y1, render.height);
-			for (int y = y0; y < y1; y++)
-			{
-				uint32* pixel = (uint32*)render.memory + x0 + y * render.width;
-				for (int x = x0; x < x1; x++)
-				{
-					*pixel++ = color;
-				}
-			}
-		}
-	};
+	uint32* pixel = (uint32*)render.memory + x0 + y0 * render.width;
+	*pixel++ = color;
 }
 namespace ellipse2d
 {
 	class ellipsef
 	{
 	private:
+		Vector2f half_ellpse[1800];
 		inline float fast_trunc_ellipse_function(float num)
 		{
 			return int(num * 10.0f) / 10.0f;
@@ -500,20 +423,16 @@ namespace ellipse2d
 		{
 
 		}
-		~ellipsef()
-		{
-
-		}
 		//Calculate circle's size
 		int perimeter()
 		{
 			float h = pow((radiusa - radiusb), 2) / pow((radiusa + radiusb), 2);
-			float p = (pi * radiusa) + (pi * radiusb) * (1.0f + ((3.0f* h) / 10.0f + sqrt(4.0f - 3.0f * h)));
-			return p/2.0f;
+			float p = (pi * radiusa) + (pi * radiusb) * (1.0f + ((3.0f * h) / 10.0f + sqrt(4.0f - 3.0f * h)));
+			return p / 2.0f;
 		}
 		int area()
 		{
-			return pi*radiusa*radiusb;
+			return pi * radiusa * radiusb;
 		}
 		inline void draw()
 		{
@@ -782,10 +701,6 @@ namespace ellipse2d
 			visible = visible_;
 		}
 		ellipsed()
-		{
-
-		}
-		~ellipsed()
 		{
 
 		}
@@ -1210,7 +1125,10 @@ namespace vector2d
 		float vectorQuality = VECTOR_MQ;
 		bool visible = true;
 		bool highlight_vertexes = false;
+		float angle = 0.0f;
 		uint32 highlightColor = colors.yellow;
+		pivot pivot_rotation = center;
+		rotation_direction_ rotation_direction = clockwise;
 		uint32 color = colors.red;
 		int thickness_l = 1; //thickness left
 		int thickness_r = 1; //thickness right
@@ -1267,10 +1185,6 @@ namespace vector2d
 		{
 
 		}
-		~fvector()
-		{
-
-		}
 		//Calculate X Center of a vector
 		float centerx()
 		{
@@ -1286,7 +1200,67 @@ namespace vector2d
 		{
 			float adx = fabs(x2 - x1);
 			float ady = fabs(y2 - y1);
-			return sqrt(adx*adx+ady*ady);
+			return sqrt(adx * adx + ady * ady);
+		}
+		inline void Rotate(float angle_, pivot rpivot, rotation_direction_ rotation_direction__ = clockwise)
+		{
+			pivot_rotation = rpivot;
+			rotation_direction = rotation_direction__;
+			int m = angle_ / 360.0f;
+			if (angle_ >= 360.0f * (m))
+			{
+				angle_ = (angle_ - (360.0f * m));
+			}
+			else if (angle_ < 0.0f + (360 * (m - 1)))
+			{
+				angle_ = (360.0f * m) - fabs(angle_);
+			}
+			angle_ = fabs(angle_);
+			if (pivot_rotation == center)
+			{
+				if (rotation_direction__ == clockwise)
+				{
+					angle_ = -1.0f * angle_;
+				}
+				int i = 0;
+				if ((int)angle_ >= 180)
+				{
+					i = angle_ - 180;
+				}
+				else
+				{
+					i = 180 + angle_;
+				}
+				Vector2f_r p1 = rotate_point(x2, y2, (x1+x2)/2.0f, (y1+y2)/2.0f, angle_);
+				Vector2f_r p2 = rotate_point(x2, y2, (x1 + x2) / 2.0f, (y1 + y2) / 2.0f, i);
+				x1 = p1.x;
+				y1 = p1.y;
+				x2 = p2.x;
+				y2 = p2.y;
+				angle = angle_;
+			}
+			else if (pivot_rotation == startpos)
+			{
+				if (rotation_direction__ == clockwise)
+				{
+					angle_ = -1.0f * angle_;
+				}
+				Vector2f_r p1 = rotate_point(x2, y2, x1, y1, angle_);
+				x2 = p1.x;
+				y2 = p1.y;
+				angle = angle_;
+			}
+			if (pivot_rotation == endpos)
+			{
+				if (rotation_direction__ == clockwise)
+				{
+					angle_ = -1.0f * angle_;
+				}
+				Vector2f_r p1 = rotate_point(x1, y1, x2, y2, angle_);
+				x1 = p1.x;
+				y1 = p1.y;
+				angle = angle_;
+			}
 		}
 		inline void add_vector(float x2_, float y2_)
 		{
@@ -1314,160 +1288,6 @@ namespace vector2d
 	class dvector
 	{
 	private:
-		float rotation_radius = 0.0f;
-		inline void get_rotation_radius(pivot pivot_)
-		{
-			//Compute angle
-			/*Firstly, algorithm works by drawing an ellipse with |x2-x1| and |y2-y1| radiuses. Then algorithm finds in ellipse's pixel matrix vertex with same x as x2(last not changed vector's pixel.x). Followingly,
-			When algorithm found that vertex, it substracts vertex's y from |y2-y1| to get the difference between them. Then, it uplifts the |y2-y1| by the difference and then it checks if new ellipse's pixel
-			matrix x and y are equal to x2 and y2 of new vector's x2 and y2.*/
-			float x1_ = x1;
-			float y1_ = y1;
-			if (pivot_ == center)
-			{
-				x1_ = (x1 + x2) / 2.0f;
-				y1_ = (y1 + y2) / 2.0f;
-			}
-			float dx = x2 - x1_;
-			float dy = y2 - y1_;
-			float adx = fabs(x2 - x1_);
-			float ady = fabs(y2 - y1_);
-			float alpha = atan2(ady, adx); alpha *= 180.0f / pi;
-			alpha = fabs(alpha);
-			bool directions[4]
-			{
-				false, // up_right
-				false, // up_left
-				false, // down_right
-				false // down_left
-			};
-			float direction_modifiers[4]
-			{
-				0,
-				0,
-				0,
-				0,
-			};
-			dx > 0.0f && dy > 0.0f ? directions[0] = true : directions[0] = false; // if (dx > 0.0f && dy > 0.0f){directions[0]=true} else {directions=false}
-			dx < 0.0f && dy > 0.0f ? directions[1] = true : directions[1] = false;
-			dx > 0.0f && dy < 0.0f ? directions[2] = true : directions[2] = false;
-			dx < 0.0f && dy < 0.0f ? directions[3] = true : directions[3] = false;
-			for (int j = 0; j < 4; j++)
-			{
-				if (directions[j] == true)
-				{
-					if (j == 2)
-					{
-						alpha += 90;
-					}
-					if (j == 3)
-					{
-						alpha = 90 - alpha;
-						alpha += 180;
-					}
-					if (j == 1)
-					{
-						alpha += 270;
-					}
-					if (j == 0)
-					{
-						alpha = 90 - alpha;
-					}
-				}
-			}
-			angle = alpha;
-			float ra = fabs(x2 - x1_);
-			float rb = fabs(y2 - y1_);
-			float r = ra + rb;
-			float error_distance = 9.5f;
-			float range_x = 150.0f;
-			float range_y = 50.0f;
-			float error_distance_bug_fixer = 1.0f;
-			float rdiv = 0.0f;
-			float rmodf = 0.0f;
-			ellipse2d::ellipsed e1(x1_, y1_, r, r, colors.red, 0, 3600, false, false); e1.draw();
-			float x2__ = 0.0f;
-			float y2__ = 0.0f;
-			if (rb >= ra)
-			{
-				x2__ = e1.matrix_pixels_pos[0].x;
-				y2__ = e1.matrix_pixels_pos[0].y;
-			}
-			else
-			{
-				x2__ = e1.matrix_pixels_pos[900].x;
-				y2__ = 0.0f;
-			}
-			vector2d::fvector v2(x1_, y1_, x2__, y2__, colors.blue, false); v2.vectorQuality = VECTOR_LQ; v2.draw();
-			vector2d::fvector d1(x1_, y1_, x2, y2, colors.white, false); d1.vectorQuality = VECTOR_LQ; d1.draw();
-			if (ra == rb)
-			{
-				error_distance_bug_fixer = 1.5f;
-			}
-			if (ra > rb)
-			{
-				rdiv = ra / rb;
-			}
-			else if (ra <= rb)
-			{
-				rdiv = rb / ra;
-			}
-			if (rdiv >= 4.0f)
-			{
-				error_distance_bug_fixer = 0.5f;
-			}
-			if (ra > rb)
-			{
-				rmodf = (fabs(v2.px_quantity_x_cycle - d1.px_quantity_x_cycle)) / error_distance / error_distance_bug_fixer;
-			}
-			else if (ra <= rb)
-			{
-				rmodf = (fabs(v2.px_quantity_y_cycle - d1.px_quantity_y_cycle)) / error_distance / error_distance_bug_fixer;
-			}
-			bool found = false;
-			for (int i = 0; i < 20; i++)
-			{
-				if (v2.px_quantity_x_cycle < d1.px_quantity_x_cycle)
-				{
-					break;
-				}
-				if (rb >= ra)
-				{
-					r -= rmodf;
-				}
-				else if (ra > rb)
-				{
-					r -= rmodf;
-				}
-				if ((angle * 10) - range_x < 0)
-				{
-					range_x = (angle * 10);
-				}
-				if ((angle * 10) + range_y > 3600)
-				{
-					range_y = 3600 - (angle * 10);
-				}
-				ellipse2d::ellipsed e2(x1_, y1_, r, r, colors.white, (angle * 10) - range_x, (angle * 10) + range_y, false, false); e2.draw();
-				for (int k = (angle * 10) - range_x; k < (angle * 10) + range_y; k++)
-				{
-					bool x_range = in_range(e2.matrix_pixels_pos[k].x, x2, error_distance / 2.0f);
-					bool y_range = in_range(e2.matrix_pixels_pos[k].y, y2, error_distance / 2.0f);
-					//if ((x_range == true && y_range == true) || (ceil(e2.matrix_pixels_pos[k].x) == ceil(x2) && ceil(e2.matrix_pixels_pos[k].y) == ceil(y2)) || (floor(e2.matrix_pixels_pos[k].x) == ceil(x2) && floor(e2.matrix_pixels_pos[k].y) == floor(y2)))
-					if (x_range == true && y_range == true)
-					{
-						angle = k + 20;
-						found = true;
-						break;
-					}
-				}
-				//Computing angle
-				if (found == true)
-				{
-					break;
-				}
-			}
-			rotation_radius = r;
-		}
 		inline void check(float x1, float x2, float y1, float y2, float slope_x_modf, float slope_y_modf, float& slope_x_incr, float& slope_y_incr, bool directions[4])
 		{
 			float differencex = 0.0f;
@@ -1989,10 +1809,12 @@ namespace vector2d
 		int px_quantity_x_cycle_each = 0;
 		int px_quantity_y_cycle_each = 0;
 		pivot pivot_rotation = center;
+		rotation_direction_ rotation_direction = clockwise;
+		Vector2f pivot_point; 
 		int thickness_l = 1; //thickness left
 		int thickness_r = 1; //thickness right
 		//Draw 2d vector.
-		dvector(float x1_, float y1_, float x2_, float y2_, uint32 color_, bool visible_ = true, pivot rpivot = center)
+		dvector(float x1_, float y1_, float x2_, float y2_, uint32 color_, bool visible_ = true)
 		{
 			x1 = x1_;
 			y1 = y1_;
@@ -2001,10 +1823,9 @@ namespace vector2d
 			color = color_;
 			vectorQuality = VECTOR_MQ;
 			visible = visible_;
-			pivot_rotation = rpivot;
-			get_rotation_radius(rpivot);
+			pivot_point.x = 0.0f; pivot_point.y = 0.0f;
 		}
-		dvector(float x1_, float y1_, Vector2f& vx2, uint32 color_, bool visible_ = true, pivot rpivot = center)
+		dvector(float x1_, float y1_, Vector2f& vx2, uint32 color_, bool visible_ = true)
 		{
 			x1 = x1_;
 			y1 = y1_;
@@ -2013,10 +1834,9 @@ namespace vector2d
 			color = color_;
 			vectorQuality = VECTOR_MQ;
 			visible = visible_;
-			pivot_rotation = rpivot;
-			get_rotation_radius(rpivot);
+			pivot_point.x = 0.0f; pivot_point.y = 0.0f;
 		}
-		dvector(Vector2f& vx1, float x2_, float y2_, uint32 color_, bool visible_ = true, pivot rpivot = center)
+		dvector(Vector2f& vx1, float x2_, float y2_, uint32 color_, bool visible_ = true)
 		{
 			x1 = vx1.x;
 			y1 = vx1.y;
@@ -2025,10 +1845,9 @@ namespace vector2d
 			color = color_;
 			vectorQuality = VECTOR_MQ;
 			visible = visible_;
-			pivot_rotation = rpivot;
-			get_rotation_radius(rpivot);
+			pivot_point.x = 0.0f; pivot_point.y = 0.0f;
 		}
-		dvector(Vector2f& vx1, Vector2f& vx2, uint32 color_, bool visible_ = true,  pivot rpivot = center)
+		dvector(Vector2f& vx1, Vector2f& vx2, uint32 color_, bool visible_ = true)
 		{
 			x1 = vx1.x;
 			y1 = vx1.y;
@@ -2037,10 +1856,9 @@ namespace vector2d
 			color = color_;
 			vectorQuality = VECTOR_MQ;
 			visible = visible_;
-			pivot_rotation = rpivot;
-			get_rotation_radius(rpivot);
+			pivot_point.x = 0.0f; pivot_point.y = 0.0f;
 		}
-		dvector(float x1_, float y1_, float x2_, float y2_, uint32 color_, int thickness_l_, int thickness_r_, bool save_pixels_position_, bool save_pixels_position_x_cycle_, bool save_pixels_position_y_cycle_, bool visible_ = true, pivot rpivot = center)
+		dvector(float x1_, float y1_, float x2_, float y2_, uint32 color_, int thickness_l_, int thickness_r_, bool save_pixels_position_, bool save_pixels_position_x_cycle_, bool save_pixels_position_y_cycle_, bool visible_ = true)
 		{
 			x1 = x1_;
 			y1 = y1_;
@@ -2054,10 +1872,9 @@ namespace vector2d
 			thickness_l = thickness_l_;
 			thickness_r = thickness_r_;
 			visible = visible_;
-			pivot_rotation = rpivot;
-			get_rotation_radius(rpivot);
+			pivot_point.x = 0.0f; pivot_point.y = 0.0f;
 		}
-		dvector(Vector2f& vx1, Vector2f& vx2, uint32 color_, int thickness_l_, int thickness_r_, bool save_pixels_position_, bool save_pixels_position_x_cycle_, bool save_pixels_position_y_cycle_, bool visible_ = true, pivot rpivot = center)
+		dvector(Vector2f& vx1, Vector2f& vx2, uint32 color_, int thickness_l_, int thickness_r_, bool save_pixels_position_, bool save_pixels_position_x_cycle_, bool save_pixels_position_y_cycle_, bool visible_ = true)
 		{
 			x1 = vx1.x;
 			y1 = vx1.y;
@@ -2071,10 +1888,9 @@ namespace vector2d
 			thickness_l = thickness_l_;
 			thickness_r = thickness_r_;
 			visible = visible_;
-			pivot_rotation = rpivot;
-			get_rotation_radius(rpivot);
+			pivot_point.x = 0.0f; pivot_point.y = 0.0f;
 		}
-		dvector(Vector2f& vx1,float x2_, float y2_, uint32 color_, int thickness_l_, int thickness_r_, bool save_pixels_position_, bool save_pixels_position_x_cycle_, bool save_pixels_position_y_cycle_, bool visible_ = true, pivot rpivot = center)
+		dvector(Vector2f& vx1, float x2_, float y2_, uint32 color_, int thickness_l_, int thickness_r_, bool save_pixels_position_, bool save_pixels_position_x_cycle_, bool save_pixels_position_y_cycle_, bool visible_ = true)
 		{
 			x1 = vx1.x;
 			y1 = vx1.y;;
@@ -2088,10 +1904,9 @@ namespace vector2d
 			thickness_l = thickness_l_;
 			thickness_r = thickness_r_;
 			visible = visible_;
-			pivot_rotation = rpivot;
-			get_rotation_radius(rpivot);
+			pivot_point.x = 0.0f; pivot_point.y = 0.0f;
 		}
-		dvector(float x1_,float y1_, Vector2f& vx2, uint32 color_, int thickness_l_, int thickness_r_, bool save_pixels_position_, bool save_pixels_position_x_cycle_, bool save_pixels_position_y_cycle_, bool visible_ = true, pivot rpivot = center)
+		dvector(float x1_, float y1_, Vector2f& vx2, uint32 color_, int thickness_l_, int thickness_r_, bool save_pixels_position_, bool save_pixels_position_x_cycle_, bool save_pixels_position_y_cycle_, bool visible_ = true)
 		{
 			x1 = x1_;
 			y1 = y1_;
@@ -2105,14 +1920,9 @@ namespace vector2d
 			thickness_l = thickness_l_;
 			thickness_r = thickness_r_;
 			visible = visible_;
-			pivot_rotation = rpivot;
-			get_rotation_radius(rpivot);
+			pivot_point.x = 0.0f; pivot_point.y = 0.0f;
 		}
 		dvector()
-		{
-
-		}
-		~dvector()
 		{
 
 		}
@@ -2120,8 +1930,10 @@ namespace vector2d
 		{
 			return px_quantity;
 		}
-		inline void Rotate(float angle_)
+		inline void Rotate(float angle_, pivot rpivot, rotation_direction_ rotation_direction__ = clockwise)
 		{
+			pivot_rotation = rpivot;
+			rotation_direction = rotation_direction__;
 			int m = angle_ / 360.0f;
 			if (angle_ >= 360.0f * (m))
 			{
@@ -2131,32 +1943,50 @@ namespace vector2d
 			{
 				angle_ = (360.0f * m) - fabs(angle_);
 			}
+			angle_ = fabs(angle_);
 			if (pivot_rotation == center)
 			{
-				int i = 0;
-				if (((int)angle_ * 10) >= 1800)
+				if (rotation_direction__ == clockwise)
 				{
-					i = angle_ * 10.0f - 1800;
+					angle_ = -1.0f * angle_;
+				}
+				int i = 0;
+				if ((int)angle_ >= 180)
+				{
+					i = angle_ - 180;
 				}
 				else
 				{
-					i = 1800 + angle_ * 10.0f;
+					i = 180 + angle_;
 				}
-				ellipse2d::ellipsed rotation_ellipse1((x1 + x2) / 2.0f, (y1 + y2) / 2.0f, rotation_radius, rotation_radius, colors.green, (int)angle_ * 10, (int)angle_ * 10 + 1, false, false);
-				rotation_ellipse1.draw();
-				ellipse2d::ellipsed rotation_ellipse2((x1 + x2) / 2.0f, (y1 + y2) / 2.0f, rotation_radius, rotation_radius, colors.green, i, i + 1, false, false);
-				rotation_ellipse2.draw();
-				x1 = rotation_ellipse2.matrix_pixels_pos[i].x;
-				y1 = rotation_ellipse2.matrix_pixels_pos[i].y;
-				x2 = rotation_ellipse1.matrix_pixels_pos[(int)angle_ * 10].x;
-				y2 = rotation_ellipse1.matrix_pixels_pos[(int)angle_ * 10].y;
+				Vector2f_r p1 = rotate_point(x2, y2, (x1 + x2) / 2.0f, (y1 + y2) / 2.0f, angle_);
+				Vector2f_r p2 = rotate_point(x2, y2, (x1 + x2) / 2.0f, (y1 + y2) / 2.0f, i);
+				x1 = p1.x;
+				y1 = p1.y;
+				x2 = p2.x;
+				y2 = p2.y;
+				angle = angle_;
 			}
 			else if (pivot_rotation == startpos)
 			{
-				ellipse2d::ellipsed rotation_ellipse(x1, y1, rotation_radius, rotation_radius, colors.green, (int)angle_ * 10, (int)angle_ * 10 + 1, false, true);
-				rotation_ellipse.draw();
-				x2 = rotation_ellipse.matrix_pixels_pos[(int)angle_ * 10].x;
-				y2 = rotation_ellipse.matrix_pixels_pos[(int)angle_ * 10].y;
+				if (rotation_direction__ == clockwise)
+				{
+					angle_ = -1.0f * angle_;
+				}
+				Vector2f_r p1 = rotate_point(x2, y2, x1, y1, angle_);
+				x2 = p1.x;
+				y2 = p1.y;
+				angle = angle_;
+			}
+			if (pivot_rotation == endpos)
+			{
+				if (rotation_direction__ == clockwise)
+				{
+					angle_ = -1.0f * angle_;
+				}
+				Vector2f_r p1 = rotate_point(x1, y1, x2, y2, angle_);
+				x1 = p1.x;
+				y1 = p1.y;
 				angle = angle_;
 			}
 		}
@@ -2208,6 +2038,189 @@ namespace vector2d
 		}
 	};
 }
+namespace rectangle
+{
+	class rectf
+	{
+	public:
+		float x = 0.0f;
+		float y = 0.0f;
+		float width = 0.0f;
+		float height = 0.0f;
+		uint32 color = colors.red;
+		float angle = 0.0f;
+		pivot transformation_pivot = startpos;
+		pivot rotation_pivot = center;
+		Vector2f rotation_point;
+		bool visible = true;
+		bool filled = true;
+		bool rotate_bool = false;
+		rotation_direction_ rotation_direction = clockwise;
+		//Draw rectangle
+		rectf(float x_, float y_, float width_, float height_, uint32 color_, bool filled_ = true, bool visible_ = true)
+		{
+			x = x_;
+			y = y_;
+			width = width_;
+			height = height_;
+			color = color_;
+			filled = filled_;
+			rotation_point.x = x;
+			rotation_point.y = y;
+			visible = visible_;
+		}
+		rectf(Vector2f& pos_, float width_, float height_, uint32 color_, bool filled_ = true, bool visible_ = true)
+		{
+			x = pos_.x;
+			y = pos_.y;
+			width = width_;
+			height = height_;
+			color = color_;
+			filled = filled_;
+			rotation_point.x = x;
+			rotation_point.y = y;
+			visible = visible_;
+		}
+		rectf(float x_, float y_, Vector2f& size, uint32 color_, bool filled_ = true, bool visible_ = true)
+		{
+			x = x_;
+			y = y_;
+			width = size.x;
+			height = size.y;
+			color = color_;
+			filled = filled_;
+			rotation_point.x = x;
+			rotation_point.y = y;
+			visible = visible_;
+		}
+		rectf(Vector2f& pos_, Vector2f& size, uint32 color_, bool filled_ = true, bool visible_ = true)
+		{
+			x = pos_.x;
+			y = pos_.y;
+			width = size.x;
+			height = size.y;
+			color = color_;
+			filled = filled_;
+			rotation_point.x = x;
+			rotation_point.y = y;
+			visible = visible_;
+		}
+		rectf()
+		{
+
+		}
+		~rectf()
+		{
+
+		}
+		//Calculate rectangle's perimeter
+		float perimeter()
+		{
+			return (2.0f * width) + (2.0f * height);
+		}
+		//Calculate rectangle's area
+		float area()
+		{
+			return width * height;
+		}
+		inline void Rotate(float angle_, pivot rotation_pivot_, rotation_direction_ rotation_direction__ = clockwise)
+		{
+			angle = angle_;
+			rotation_pivot = rotation_pivot_;
+			rotation_direction = rotation_direction__;
+			rotate_bool = true;
+		}
+		//Draw function
+		inline void draw()
+		{
+			if (visible)
+			{
+				draw_rect(x, y, width, height, color, filled, rotate_bool, rotation_direction);
+			}
+		}
+	private:
+		inline void draw_rect(float x, float y, float width, float height, uint32 color, bool filled, bool rotate_call_ = false, rotation_direction_ rotation_direction__ = clockwise)
+		{
+			if (rotation_pivot == center)
+			{
+				rotation_point.x = x;
+				rotation_point.y = y;
+			}
+			else if (rotation_pivot == startpos)
+			{
+				rotation_point.x = x - width / 2.0f;
+				rotation_point.y = y - height / 2.0f;
+			}
+			else if (rotation_pivot == endpos)
+			{
+				rotation_point.x = x + width / 2.0f;
+				rotation_point.y = y + height / 2.0f;
+			}
+			if (rotation_direction__ == clockwise)
+			{
+				angle = -1.0f * angle;
+			}
+			if (!filled && rotate_call_)
+			{
+				float x_ = x - width / 2.0f;
+				float y_ = y - height / 2.0f;
+				Vector2f_r p1 = rotate_point(x_, y_, x, y, angle);
+				Vector2f_r p2 = rotate_point(x_, y + height/2.0f, x, y, angle);
+				Vector2f_r p3 = rotate_point(x + width/2.0f, y_, x, y, angle);
+				Vector2f_r p4 = rotate_point(x + width/2.0f, y + height/2.0f, x, y, angle);
+				vector2d::fvector v1(p1.x, p1.y, p2.x, p2.y, color, true); v1.draw();
+	            vector2d::fvector v2(p1.x, p1.y, p3.x, p3.y, color, true); v2.draw();
+	            vector2d::fvector v3(p3.x, p3.y, p4.x, p4.y, color, true); v3.draw();
+	            vector2d::fvector v4(p2.x, p2.y, p4.x, p4.y, color, true); v4.draw();
+			}
+			if (filled && rotate_call_)
+			{
+				float sb = 0.0f;
+				if (width >= height)
+				{
+					sb = width;
+				}
+				else
+				{
+					sb = height;
+				}
+				for (int i = 0; i < sb; i++)
+				{
+					for (int d = 0; d < height; d++)
+					{
+						Vector2f_r px1 = rotate_point(x-width/2.0f + i, y-height/2.0f + d, rotation_point.x, rotation_point.y, angle);
+						draw_pixel(px1.x, px1.y, color);
+					}
+				}
+			}
+			if (!rotate_call_ && filled)
+			{
+				float sb = 0.0f;
+				if (width >= height)
+				{
+					sb = width;
+				}
+				else
+				{
+					sb = height;
+				}
+				for (int i = 0; i < sb; i++)
+				{
+					vector2d::dvector v1(x-width/2.0f + i, y-height/2.0f, x-width/2.0f + i, y + height/2.0f, color, true);
+					v1.draw();
+				}
+			}
+			if (!rotate_call_ && !filled)
+			{
+				vector2d::fvector v1(x-width/2.0f, y-height/2.0f, x-width/2.0f, y + height/2.0f, color, visible); v1.draw();
+				vector2d::fvector v2(x - width / 2.0f, y-height/2.0f, x + width/2.0f, y-height/2.0f, color, visible); v2.draw();
+				vector2d::fvector v3(x - width / 2.0f, y + height/2.0f, x + width/2.0f, y + height/2.0f, color, visible); v3.draw();
+				vector2d::fvector v4(x + width/2.0f, y-height/2.0f, x + width/2.0f, y + height/2.0f, color, visible); v4.draw();
+			}
+		}
+	};
+}
+
 inline static void draw_coordinate_grid(uint32 color)
 {
 	vector2d::fvector v1(-1500.0f, 0.0f, 1500.0f, 0.0f, color, true); v1.draw();
@@ -2279,7 +2292,7 @@ namespace cube
 		}
 		float perimeter()
 		{
-			return 6.0f*a;
+			return 6.0f * a;
 		}
 		float area()
 		{
@@ -2545,29 +2558,6 @@ namespace triangle2d
 		}
 	};
 }
-class Texture
-{
-public:
-	const char* path = "";
-	bool visible = true;
-	int texture_width = 0;
-	int texture_height = 0;
-	int rgb_channels = 3;
-	Texture(const char* path_)
-	{
-		path = path_;
-		visible = true;
-		stbi_load(path, &texture_width, &texture_height, &rgb_channels, 0);
-	}
-	Texture()
-	{
-
-	}
-	~Texture()
-	{
-
-	}
-};
 namespace text2d
 {
 	class text
@@ -3137,10 +3127,6 @@ namespace text2d
 		{
 
 		}
-		~text()
-		{
-
-		}
 		//should be private void
 		inline void draw()
 		{
@@ -3164,6 +3150,26 @@ namespace text2d
 		}
 	};
 }
+class Texture
+{
+public:
+	const char* path = "";
+	bool visible = true;
+	int texture_width = 0;
+	int texture_height = 0;
+	int rgb_channels = 3;
+	float opacity = 255.0f;
+	Texture(const char* path_)
+	{
+		path = path_;
+		visible = true;
+		stbi_load(path, &texture_width, &texture_height, &rgb_channels, 0);
+	}
+	Texture()
+	{
+
+	}
+};
 class Sprite
 {
 private:
@@ -3204,6 +3210,7 @@ public:
 	int texture_original_height = 0;
 	float texture_width = 0.0f;
 	float texture_height = 0.0f;
+	float opacity = 255.0f;
 	bool redfilter = false;
 	bool greenfilter = false;
 	bool bluefilter = false;
@@ -3212,31 +3219,29 @@ public:
 	uint32 filterIntensity_green = 50;
 	uint32 filterIntensity_blue = 50;
 	int rgb_channels = 3;
+	bool rotate_bool = false;
+	float angle = 0.0f;
+	pivot rotation_pivot = center;
+	rotation_direction_ rotation_direction = clockwise;
 	Sprite(Texture& texture_, float x_, float y_, float img_width_, float img_height_, bool visible_)
 	{
 		texture_path = texture_.path;
+		opacity = texture_.opacity;
 		x = x_;
 		y = y_;
 		texture_width = img_width_;
 		texture_height = img_height_;
-		if (visible_)
-		{
-			visible = true;
-			draw_sprite();
-		}
+		visible = visible_;
 	}
 	Sprite(Texture& texture_, Vector2f& pos_, float img_width_, float img_height_, bool visible_)
 	{
 		texture_path = texture_.path;
+		opacity = texture_.opacity;
 		x = pos_.x;
 		y = pos_.y;
 		texture_width = img_width_;
 		texture_height = img_height_;
-		if (visible_)
-		{
-			visible = true;
-			draw_sprite();
-		}
+		visible = visible_;
 	}
 	Sprite(const char* path_, float x_, float y_, float img_width_, float img_height_, bool visible_)
 	{
@@ -3245,11 +3250,7 @@ public:
 		y = y_;
 		texture_width = img_width_;
 		texture_height = img_height_;
-		if (visible_)
-		{
-			visible = true;
-			draw_sprite();
-		}
+		visible = visible_;
 	}
 	Sprite(const char* path_, Vector2f& pos_, float img_width_, float img_height_, bool visible_)
 	{
@@ -3258,66 +3259,98 @@ public:
 		y = pos_.y;
 		texture_width = img_width_;
 		texture_height = img_height_;
-		if (visible_)
-		{
-			visible = true;
-			draw_sprite();
-		}
+		visible = visible_;
 	}
 	Sprite()
 	{
 
 	}
-	~Sprite()
+	inline void Rotate(float angle_, pivot rotation_pivot_, rotation_direction_ rotation_direction__)
 	{
-
+		angle = angle_;
+		rotation_pivot = rotation_pivot_;
+		rotation_direction = rotation_direction__;
+		rotate_bool = true;
 	}
-	void draw_sprite()
+	inline void draw_sprite()
 	{
-		/*Resizing Algorithm:
-        Algorithm works by decreasing or increasing distance between pixels depending on texture_width and texture_height. 
-		If texture_width and texture_height are 0.5 then distance between pixels will be 1*0.5 = 0.5. Consequently, image becomes smaller in size.
-		But when expanding image's size algorithm draws additional pixels to fill empty pixels. For example, texture_width = 2 and texture_height = 2, 
-		then distance between pixels will be 1*2=2, and one pixel will be missing every time pixel is built. To solve this issue algorithm draws additional pixel every time pixel is built, 
-		distance from previous pixel equals to texture_width-PIXEL_SIZE_MAX and same with y. */
-	    unsigned char* data = stbi_load(texture_path, &texture_original_width, &texture_original_height, &rgb_channels, 0);
-		// ... process data if not NULL ..
-		int ipx = 0;
-		float y_ = y + (texture_original_height / 2.0f) * PIXEL_SIZE_MAX * texture_height; // to achieve the center pivot of the picture
-		float x_ = x - (texture_original_width / 2.0f) * PIXEL_SIZE_MAX * texture_width; // to achieve the center pivot of the picture
-		bool image_expand_error = false;
-		float image_expand_error_fx_x = 0.0f;
-		float image_expand_error_fx_y = 0.0f;
-		if (texture_width - PIXEL_SIZE_MAX > 0.0f)
+		if (visible)
 		{
-			image_expand_error = true;
-			image_expand_error_fx_x = texture_width - PIXEL_SIZE_MAX;
-		}
-		if (texture_height - PIXEL_SIZE_MAX > 0.0f)
-		{
-			image_expand_error = true;
-			image_expand_error_fx_y = texture_height - PIXEL_SIZE_MAX;
-		}
-		if (data != nullptr && texture_original_height > 0 && texture_original_width > 0)
-		{
-			for (int i = 0; i < texture_original_height; i++)
+			/*Resizing Algorithm:
+			Algorithm works by decreasing or increasing distance between pixels depending on texture_width and texture_height.
+			If texture_width and texture_height are 0.5 then distance between pixels will be 1*0.5 = 0.5. Consequently, image becomes smaller in size.
+			But when expanding image's size algorithm draws additional pixels to fill empty pixels. For example, texture_width = 2 and texture_height = 2,
+			then distance between pixels will be 1*2=2, and one pixel will be missing every time pixel is built. To solve this issue algorithm draws additional pixel every time pixel is built,
+			distance from previous pixel equals to texture_width-PIXEL_SIZE_MAX and same with y. */
+			unsigned char* data = stbi_load(texture_path, &texture_original_width, &texture_original_height, &rgb_channels, 0);
+			int ipx = 0;
+			float y_ = y + (texture_original_height / 2.0f) * PIXEL_SIZE_MAX * texture_height; // to achieve the center pivot of the picture
+			float x_ = x - (texture_original_width / 2.0f) * PIXEL_SIZE_MAX * texture_width; // to achieve the center pivot of the picture
+			float angle_ = angle;
+			float rot_x = x;
+			float rot_y = y;
+			if (rotation_direction == clockwise)
 			{
-				for (int j = 0; j < texture_original_width; j++)
+				angle_ = -1.0f * angle_;
+			}
+			if (rotation_pivot == startpos)
+			{
+				rot_x = x - (texture_original_width / 2.0f) * texture_width;
+				rot_y = y - (texture_original_height / 2.0f) * texture_height;
+			}
+			else if (rotation_pivot == endpos)
+			{
+				rot_x = x + (texture_original_width / 2.0f) * texture_width;
+				rot_y = y + (texture_original_height / 2.0f) * texture_height;
+			}
+			bool image_expand_error = false;
+			float image_expand_error_fx_x = 0.0f;
+			float image_expand_error_fx_y = 0.0f;
+			if (texture_width - PIXEL_SIZE_MAX > 0.0f)
+			{
+				image_expand_error = true;
+				image_expand_error_fx_x = texture_width - PIXEL_SIZE_MAX;
+			}
+			if (texture_height - PIXEL_SIZE_MAX > 0.0f)
+			{
+				image_expand_error = true;
+				image_expand_error_fx_y = texture_height - PIXEL_SIZE_MAX;
+			}
+			if (data != nullptr && texture_original_height > 0 && texture_original_width > 0)
+			{
+				for (int i = 0; i < texture_original_height; i++)
 				{
-					unsigned int r1 = static_cast<unsigned int>(data[ipx]);
-					unsigned int g1 = static_cast<unsigned int>(data[ipx + 1]);
-					unsigned int b1 = static_cast<unsigned int>(data[ipx + 2]);
-					uint32 col = ProcessImageColor(r1,g1,b1);
-					draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width), (y_ - i * PIXEL_SIZE_MAX * texture_height), col);
-					if (image_expand_error)
+					for (int j = 0; j < texture_original_width; j++)
 					{
-						draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width) + image_expand_error_fx_x, (y_ - i * PIXEL_SIZE_MAX * texture_height)+image_expand_error_fx_y, col);
+						unsigned int r1 = static_cast<unsigned int>(data[ipx]);
+						unsigned int g1 = static_cast<unsigned int>(data[ipx + 1]);
+						unsigned int b1 = static_cast<unsigned int>(data[ipx + 2]);
+						uint32 col = ProcessImageColor(r1, g1, b1);
+						col = rgba(r1, g1, b1, opacity); //Apply opacity to each pixel of the image
+						if (!rotate_bool)
+						{
+							draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width), (y_ - i * PIXEL_SIZE_MAX * texture_height), col);
+							if (image_expand_error)
+							{
+								draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width) + image_expand_error_fx_x, (y_ - i * PIXEL_SIZE_MAX * texture_height) + image_expand_error_fx_y, col);
+							}
+						}
+						else if (rotate_bool)
+						{
+							Vector2f_r p1 = rotate_point(x_ + (j * PIXEL_SIZE_MAX * texture_width), (y_ - i * PIXEL_SIZE_MAX * texture_height), rot_x, rot_y, angle_);
+							draw_pixel(p1.x, p1.y, col);
+							if (image_expand_error)
+							{
+								Vector2f_r p1 = rotate_point(x_ + (j * PIXEL_SIZE_MAX * texture_width) + image_expand_error_fx_x, (y_ - i * PIXEL_SIZE_MAX * texture_height) + image_expand_error_fx_y, rot_x, rot_y, angle_);
+								draw_pixel(p1.x, p1.y, col);
+							}
+						}
+						ipx += 3;
+						//std::cout << index << " pixel: RGB " << static_cast<int>(data[index]) << " " << static_cast<int>(data[index + 1]) << " " << static_cast<int>(data[index + 2]) << std::endl;
 					}
-					ipx += 3;
-					//std::cout << index << " pixel: RGB " << static_cast<int>(data[index]) << " " << static_cast<int>(data[index + 1]) << " " << static_cast<int>(data[index + 2]) << std::endl;
 				}
 			}
+			stbi_image_free(data);
 		}
-		stbi_image_free(data);
 	}
 };
