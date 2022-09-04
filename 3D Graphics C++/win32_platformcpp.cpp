@@ -15,10 +15,16 @@ struct Render
 {
 	void* memory;
 	int width, height;
+	float x_pixel_size;
+	float y_pixel_size;
+	float render_scale_height;
+	float screen_half_width;
+	float screen_half_height;
 	BITMAPINFO bitmap_info;
 };
 Render render;
 LPCTSTR window_name = "C++ Graphics";
+
 HWND hWnd = FindWindow("Game Window Class", window_name);
 static struct gTime
 {
@@ -28,7 +34,7 @@ gTime gtime;
 //#include <vector>
 //template <class T>
 //std::vector<T> name;
-#include "renderering.cpp"
+#include "rendering.cpp"
 #include <time.h>
 #include "game.cpp"
 typedef unsigned int uint32;
@@ -50,6 +56,11 @@ LRESULT CALLBACK Window_callback(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 		GetClientRect(hwnd, &rect);
 		render.width = rect.right - rect.left;
 		render.height = rect.bottom - rect.top;
+		render.x_pixel_size = PIXEL_SIZE_DEF * render.height * render_scale;
+		render.y_pixel_size = PIXEL_SIZE_DEF * render_scale * render_scale;
+		render.render_scale_height = render.height * render_scale;
+		render.screen_half_width = (float)render.width / 2.0f;
+		render.screen_half_height = (float)render.height / 2.0f;
 		int size = render.width * render.height * sizeof(uint32);
 		if (render.memory)
 		{
