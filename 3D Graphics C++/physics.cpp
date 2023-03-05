@@ -124,18 +124,16 @@ namespace physics2d
             }
             wind_angle = angle_;
         }
-        inline void InitializePhysicsComponent(float mass_)
+        inline void ApplyPhysicsComponent(float mass_, rectangle::rectf& rect_)
         {
             mass = mass_;
-        }
-        inline void ApplyPhysicsComponent(rectangle::rectf& rect_)
-        {
             x = rect_.x;
             y = rect_.y;
             area = rect_.area();
         }
-        inline void ApplyPhysicsComponent(ellipse2d::ellipsef& ellps)
+        inline void ApplyPhysicsComponent(float mass_, ellipse2d::ellipsef& ellps)
         {
+            mass = mass_;
             x = ellps.x;
             y = ellps.y;
             area = ellps.area();
@@ -164,26 +162,30 @@ namespace physics2d
                 air_density = (partial_pressure_of_dry_air * MolarMassOfDryAir + vapor_pressure * MolarMassOfHumidAir) / (UniversalGasConstant * temperature_);
             }
         }
-        inline void ApplyPhysicsComponent(ellipse2d::ellipsed& ellps)
+        inline void ApplyPhysicsComponent(float mass_, ellipse2d::ellipsed& ellps)
         {
+            mass = mass_;
             x = ellps.x;
             y = ellps.y;
             area = ellps.area();
         }
-        inline void ApplyPhysicsComponent(vector2d::fvector& vec)
+        inline void ApplyPhysicsComponent(float mass_, vector2d::fvector& vec)
         {
+            mass = mass_;
             x = (vec.transform.position.x1+vec.transform.position.x2)/2;
             y = (vec.transform.position.y1 + vec.transform.position.y2) / 2;
             area = vec.transform.magnitude();
         }
-        inline void ApplyPhysicsComponent(vector2d::dvector& vec)
+        inline void ApplyPhysicsComponent(float mass_, vector2d::dvector& vec)
         {
+            mass = mass_;
             x = (vec.x1+vec.x2)/2;
             y = (vec.y1 + vec.y2) / 2;
             area = vec.magnitude();
         }
-        inline void ApplyPhysicsComponent(Sprite& sprt)
+        inline void ApplyPhysicsComponent(float mass_, Sprite& sprt)
         {
+            mass = mass_;
             x = sprt.x;
             y = sprt.y;
             area = sprt.area_;
@@ -193,7 +195,7 @@ namespace physics2d
             r.x = x;
             r.y = y;
         }
-        inline void Fall()// formula: V = gt - 1/2 * density of air * air drag coefficent * area * velocity^2*t*t/m.
+        inline void StartPhysicsSimulation()// formula: V = gt - 1/2 * density of air * air drag coefficent * area * velocity^2*t*t/m.
 		{
 			//The less massive the object is, the more the force of air resistance slows the object down as it falls
             if (ar_type == NO_AR)
@@ -213,14 +215,14 @@ namespace physics2d
             float ar_acceleration = 0.0f;
             float delta_a = 0.0f;
             float free_fall_acceleration = 0.0f;
-            if (air_type == NO_AIR)
+            free_fall_acceleration = y_velocity / timef;
+            if (air_type != NO_AIR)
             {
                 ar_force = 1.0f / 2.0f * air_density / pixel_meter_ratio * ar_coefficent * drag_coefficent * a * y_velocity * y_velocity; // when increasing ar_drag velocity increases due to minus sign in calculation of full_force variable;
                 ar_velocity = (ar_force * timef) / m;
                 ar_acceleration = ar_velocity / timef;
                 delta_a = fabs(free_fall_acceleration) - ar_acceleration;
             }
-            free_fall_acceleration = y_velocity / timef;
             float x_wind_velocity = 0.0f;
             float y_wind_velocity = 0.0f;
             if (wind_type == ACCELERATING_WIND)
@@ -246,7 +248,7 @@ namespace physics2d
             }
             float full_force = 0.0f;
             float full_velocity = 0.0f;
-            if (air_type == NO_AIR)
+            if (air_type != NO_AIR)
             {
                 if (delta_a > 0.0f)
                 {
