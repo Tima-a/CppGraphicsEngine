@@ -57,7 +57,7 @@
 #define MolarMassOfHumidAir 0.018016f
 #define EarthRadius 6371000
 const float g_earth = -9.80665f;
-float pixel_meter_ratio = 30.0f;
+float pixel_meter_ratio = 50.0f;
 static enum AirResistanceType_
 {
 	NO_AR,
@@ -140,9 +140,10 @@ namespace physics2d
         }
         inline void SetAirDensityParametresHeight(AirType_ AirType, float temperature_, float height_, float specific_humidity = 0.0f, float relative_humidity = 0.0f)
         {
-            if (AirType == NO_WIND)
+            if (AirType == NO_AIR)
             {
                 air_density = 0.0f;
+                accel_due_to_gravity = g_earth;
             }
             if (AirType == DRY_AIR)
             {
@@ -198,6 +199,7 @@ namespace physics2d
         inline void StartPhysicsSimulation()// formula: V = gt - 1/2 * density of air * air drag coefficent * area * velocity^2*t*t/m.
 		{
 			//The less massive the object is, the more the force of air resistance slows the object down as it falls
+
             if (ar_type == NO_AR)
             {
                 ar_coefficent = 0.0f;
