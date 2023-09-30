@@ -80,8 +80,7 @@ We add to y coordinate of the object the full y velocity and we add to x coordin
 # Utility
 I have utility.cpp which has many useful functions which my program uses in rendering.cpp or which user can utilize.
 # Why do I do it?
-
-
+I made my own engine for pure excitement. I really like Mathematics, Physics and Programming, so the only option for me which combines all this three subjects was to build my own engine.
 
 
 
