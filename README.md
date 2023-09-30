@@ -3,6 +3,7 @@ C++ Graphics Engine is a graphics engine written by Teymur Aghayev on C++ for bu
 My engine can draw simple shapes like rectangles, triangles, ellipses, vectors. Also it can draw 2D Text and import images as sprites. It also has basic Physics simulations.<br />
 I started writing this engine in summer of 2019.<br />
 You can use C++ Graphics engine just by downloading the project and the in Visual Studio open an existing project and select C++ Graphics Engine folder.<br />
+My trello: 
 # Features
 Firstly, user must create a WINDOW class which creates the window with user-inputted x,y,width,height.<br />
 The user has simulategame() function which is a main loop function where all user code is written. In the beggining of main loop user must update the window with the refresh_screen(color, window) function.<br />
@@ -14,6 +15,7 @@ On the other side, fvectors and ellipsef classes are faster because they don't s
 Actually the first shape I have done is rectangle because of its simplicity.<br />
 How does my engine draw rectangles?<br />
 It creates a line of width user inputted and draws that line from upper height to a lower one.<br />
+![alt text](https://i.ibb.co/S3zJvcF/cpp1.png)
 # Vectors
 Was really difficult for me to write, but i still managed to do it.<br />
 How does my engine draw vectors?<br />
@@ -25,11 +27,13 @@ After that, if |x2-x1| > |y2-y1| then it stores slope to variable slope_x, and x
 And the basic principle is to check if in x_cycle x_y_outweight is false, then program starts to draw initially with x_cycle and it draws amount of pixels equivalent to slope_x.<br />
 Then, in y_cycle if x_y_outweight is false program draws only one pixel and then goes again to x_cycle.<br />
 If |x2-x1| < |y2-y1| and x_y_outweight is true, then it does everything oppositely where in x_cycle engine draws only one pixel and in y_cycle it draws slope_y amount of pixels.<br />
+![alt text](https://i.ibb.co/mD8LLjx/cpp2.png)
 # Triangles
 To create triangle, user must input the length of first side(a), the length of second side(b), the length of third side(c), height of the triangle, and x, y positions of triangle.<br />
 C is casually the line in the bottom of default triangle which connects a and b.<br />
 Firstly it visualizes the triangle by drawing a,b,c depending on which is side is bigger.<br />
 Then, it is filled from the point where a and b intersect (let's call it D) by creating vectors from D to every pixel of vector C.<br />
+![alt text](https://i.ibb.co/MD5Xx6P/cpp5.png)
 # Ellipses
 Also a difficult one, so the main method of creating ellipses is by using sin(t)*radius_width and cos(t)*radius_height to get position of all pixels the raw ellipse must be built of.<br />
 t - is the variable which is initially 360 and is decreasing by 1 every time in loop. (converted to radians before using in sin and cos functions)<br />
@@ -38,13 +42,19 @@ start_circum 0 means the top center pixel which is drawn first.<br />
 To fill ellipse, engine connects every pixel of right side of ellipse with the central vertical line of the ellipse and then from left side of ellipse with the central vertical line.<br />
 Why not just instantly from left side to right side?<br />
 Because ellipses can be drawn partially, for example ellipse with start_circum of 0 and end_circum of 220 will not work with this approach. So it firsly fills all the left side of ellipse with central vertical line and then the right side with central vertical line.<br />
+![alt text](https://i.ibb.co/jbS3Fv4/cpp3.png)<br />
+![alt text](https://i.ibb.co/Z1Xrrmp/cpp4.png)<br />
 # 2D Text
 Actually, the 2D Text object is created by dividing the user-inputted text to chars(letters) and drawing them separately. Every letter is drawn uniquely. For example, letter A has one vector facing top-right, one vector facing down-right, and one straight vector between them.<br />
 This is done with every character. Also numbers and doubles can be inputted as text.<br />
+![alt text](https://i.ibb.co/G2RgZK1/cpp6.png)
 # Images, Sprites
 Here I used stb_image library. It only gets every pixels' color of image in rgb format. Then, my engine draws those pixels as a rectangle and creates an image.<br />
 Then if user wants to resize and move an image useer creates a Sprite class. Resizing works by increasing or decreasing size of the pixels.<br />
 Sprite class also has many filters like red, green, blue and grayscale.
+![alt text](https://pouch.jumpshare.com/preview/6N2sfOd_1OLmNMenmdiw_3-biHcT1R_ZUmRyT_rVRIc8de742tZstzxilHryB8EbishaExPOGYwvEzUm334Yygem7Zegu0Lh_xixQMXVwr8)<br />
+![alt text](https://i.ibb.co/kX8wTqp/cpp8.png)<br />
+Here sprite is decreased by 2 in width and height and a grayscale filter is applied.
 # Rotation
 All mentioned objects can be rotated. Rotation works by functions<br />
 x = (cos(angle)⋅(x-origin_x)-sin(angle)⋅(y-origin_y))+origin_x<br />
@@ -53,6 +63,8 @@ x and y is the position of the pixel and origin_x, and origin_y are values of x 
 Rotation has different pivots, so it can rotate object around its center, around its starting position, ending position, and around other point.<br />
 Object can be rotated clockwise and counterclockwise.<br />
 To rotate an object my engine rotates all pixels of that object around a point using mentioned formula.<br />
+![alt text](https://pouch.jumpshare.com/preview/GYr6qjap9X5QgguyJZrx4d94EJ3zBKW8aQd2oA5Mzihds6vjGu1TEm8V3Z4D_iYnfdsfTruUqELZTWVUg196gAJTxMZOc-ZV3ivQzhbEkag)<br/>
+Quality and fps is low because of the .gif format
 # Dynamic Windows
 Also I created Dynamic Windows class which can create new windows, change their size, position, name, and options at runtime. Each window can be coded independently. It can create up to 100 windows.<br />
 I used Windows.h library for implementing this.<br />
@@ -77,6 +89,10 @@ For velocity x:<br />
 Here we have two forces acting on object: throwing object force x and wind resistance force x.<br />
 In conclusion, we convert every x and y forces to velocities. <br />
 We add to y coordinate of the object the full y velocity and we add to x coordinate of the object the full x velocity.<br />
+![alt text](https://pouch.jumpshare.com/preview/9iu7n7NYldwfrw7QQwJK6AdH87BIYfIuh5x-PBIeotZwnvSlJxcrlM8aUZohv7VORUTJmrJi93WKB9B3ncx8_q-lqmudp1HPd_Kbif2i95c)<br />
+Quality and fps is low because of the .gif format<br />
+Here object of mass 1 kg is thrown at 25 degrees, with initial velocity of 20(m/s), accelerating wind is acting from 90 degrees(from right side of the screen to left) with wind acceleration of 4 m/s^2, air is dry at an altitude 10000 meters.
+As you can see, firstly object resists the wind, but as the time goes on, wind gets more velocity and surpasses the object. 
 # Utility
 I have utility.cpp which has many useful functions which my program uses in rendering.cpp or which user can utilize.
 # Why do I do it?
