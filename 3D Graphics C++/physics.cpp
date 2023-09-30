@@ -138,7 +138,7 @@ namespace physics2d
             y = ellps.y;
             area = ellps.area();
         }
-        inline void SetAirDensityParametresHeight(AirType_ AirType, float temperature_, float height_, float specific_humidity = 0.0f, float relative_humidity = 0.0f)
+        inline void SetAirDensityParametersHeight(AirType_ AirType, float temperature_, float height_, float specific_humidity = 0.0f, float relative_humidity = 0.0f)
         {
             if (AirType == NO_AIR)
             {
@@ -196,7 +196,7 @@ namespace physics2d
             r.x = x;
             r.y = y;
         }
-        inline void StartPhysicsSimulation()// formula: V = gt - 1/2 * density of air * air drag coefficent * area * velocity^2*t*t/m.
+        inline void StartPhysicsSimulation()
 		{
 			//The less massive the object is, the more the force of air resistance slows the object down as it falls
 
@@ -269,7 +269,6 @@ namespace physics2d
 			free_fall_force = free_fall_force_;
             air_resistance_force = ar_force;
 			complete_force = full_force;
-
 		}
 	};
 }
