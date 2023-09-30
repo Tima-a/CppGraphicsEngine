@@ -3,7 +3,7 @@ C++ Graphics Engine is a graphics engine written by Teymur Aghayev on C++ for bu
 My engine can draw simple shapes like rectangles, triangles, ellipses, vectors. Also it can draw 2D Text and import images as sprites. It also has basic Physics simulations.<br />
 I started writing this engine in summer of 2019.<br />
 You can use C++ Graphics engine just by downloading the project and the in Visual Studio open an existing project and select C++ Graphics Engine folder.<br />
-My trello: 
+
 # Features
 Firstly, user must create a WINDOW class which creates the window with user-inputted x,y,width,height.<br />
 The user has simulategame() function which is a main loop function where all user code is written. In the beggining of main loop user must update the window with the refresh_screen(color, window) function.<br />
