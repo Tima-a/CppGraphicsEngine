@@ -64,6 +64,8 @@ x and y is the position of the pixel and origin_x, and origin_y are values of x 
 Rotation has different pivots, so it can rotate object around its center, around its starting position, ending position, and around other point.<br />
 Object can be rotated clockwise and counterclockwise.<br />
 To rotate an object my engine rotates all pixels of that object around a point using mentioned formula.<br />
+<iframe src="https://player.vimeo.com/video/884051687?h=323eb9b72f" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+<p><a href="https://vimeo.com/884051687">2023-09-30 18-42-31</a> from <a href="https://vimeo.com/user211070479">tima timka</a> on <a href="https://vimeo.com">Vimeo</a>.</p>
 ![alt text]([https://pouch.jumpshare.com/preview/GYr6qjap9X5QgguyJZrx4d94EJ3zBKW8aQd2oA5Mzihds6vjGu1TEm8V3Z4D_iYnfdsfTruUqELZTWVUg196gAJTxMZOc-ZV3ivQzhbEkag](https://vimeo.com/884051687))<br/>
 Quality and fps are low because of the .gif format
 # Dynamic Windows
