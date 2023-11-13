@@ -53,7 +53,7 @@ This is done with every character. Also numbers and doubles can be inputted as t
 Here I used the stb_image library. It gets every pixel's color of the image in RGB format. Then, my engine draws those pixels as a rectangle and creates an image.<br />
 Then if the user wants to resize and move an image, the user creates a Sprite class. Resizing works by increasing or decreasing size of the pixels.<br />
 Sprite class also has many filters like red, green, blue and grayscale.
-![alt text](https://pouch.jumpshare.com/preview/6N2sfOd_1OLmNMenmdiw_3-biHcT1R_ZUmRyT_rVRIc8de742tZstzxilHryB8EbishaExPOGYwvEzUm334Yygem7Zegu0Lh_xixQMXVwr8)<br />
+![cpp7](https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/b3536f74-5371-4b33-875a-27c7147f06b8)
 ![alt text](https://i.ibb.co/kX8wTqp/cpp8.png)<br />
 Here, the sprite is decreased by 2 in width and height, and a grayscale filter is applied.
 # Rotation
@@ -65,7 +65,6 @@ Rotation has different pivots, so it can rotate object around its center, around
 Object can be rotated clockwise and counterclockwise.<br />
 To rotate an object my engine rotates all pixels of that object around a point using mentioned formula.<br />
 ![2023-09-30 18-42-31 (online-video-cutter com) (1)](https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/0c383c03-890a-4064-a687-feb8213a69db)
-Quality and fps are low because of the .gif format
 # Dynamic Windows
 Also I created Dynamic Windows class which can create new windows, change their size, position, name, and options at runtime. Each window can be coded independently. It can create up to 100 windows.<br />
 I used Windows.h library for implementing this.<br />
@@ -90,8 +89,7 @@ For velocity x:<br />
 Here we have two forces acting on object: throwing object force x and wind resistance force x.<br />
 In conclusion, we convert every x and y force to velocity. <br />
 We add to y coordinate of the object the full y velocity and we add to x coordinate of the object the full x velocity.<br />
-![alt text](https://pouch.jumpshare.com/preview/9iu7n7NYldwfrw7QQwJK6AdH87BIYfIuh5x-PBIeotZwnvSlJxcrlM8aUZohv7VORUTJmrJi93WKB9B3ncx8_q-lqmudp1HPd_Kbif2i95c)<br />
-Quality and fps are low because of the .gif format<br />
+https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/d4bdfdb5-7678-46bd-828a-09d0efdee8e8 <br />
 Here, an object with a mass of 1 kg is thrown at 25 degrees, with an initial velocity of 20 m/s, and accelerating wind is acting from 90 degrees (from the right side of the screen to the left) with a wind acceleration of 4 m/s^2. The air is dry at an altitude of 10,000 meters.
 # Utility
 I have utility.cpp, which has many useful functions that my program uses in rendering.cpp or that the user can utilize.
