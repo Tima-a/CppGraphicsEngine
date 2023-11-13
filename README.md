@@ -64,7 +64,7 @@ x and y is the position of the pixel and origin_x, and origin_y are values of x 
 Rotation has different pivots, so it can rotate object around its center, around its starting position, ending position, and around other point.<br />
 Object can be rotated clockwise and counterclockwise.<br />
 To rotate an object my engine rotates all pixels of that object around a point using mentioned formula.<br />
-![alt text](https://i.ibb.co/kX8wTqp/cpp8.png)<br />
+![alt text](https://i.ibb.co/yhj6frZ/2023-09-30-18-42-31-online-video-cutter-com-1.gif)<br />
 Quality and fps are low because of the .gif format
 # Dynamic Windows
 Also I created Dynamic Windows class which can create new windows, change their size, position, name, and options at runtime. Each window can be coded independently. It can create up to 100 windows.<br />
