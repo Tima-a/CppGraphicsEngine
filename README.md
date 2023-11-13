@@ -89,7 +89,7 @@ For velocity x:<br />
 Here we have two forces acting on object: throwing object force x and wind resistance force x.<br />
 In conclusion, we convert every x and y force to velocity. <br />
 We add to y coordinate of the object the full y velocity and we add to x coordinate of the object the full x velocity.<br />
-https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/d4bdfdb5-7678-46bd-828a-09d0efdee8e8 <br />
+![2023-09-30 18-16-14 (online-video-cutter com) (2)](https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/82158179-85f9-4052-9c71-8b6ff09eebe4)
 Here, an object with a mass of 1 kg is thrown at 25 degrees, with an initial velocity of 20 m/s, and accelerating wind is acting from 90 degrees (from the right side of the screen to the left) with a wind acceleration of 4 m/s^2. The air is dry at an altitude of 10,000 meters.
 # Utility
 I have utility.cpp, which has many useful functions that my program uses in rendering.cpp or that the user can utilize.
