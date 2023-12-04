@@ -15,7 +15,8 @@ On the other side, fvectors and ellipsef classes are faster because they don't s
 Actually the first shape I have done is rectangle because of its simplicity.<br />
 How does my engine draw rectangles?<br />
 It creates a line of width user inputted and draws that line from upper height to a lower one.<br />
-![alt text](https://i.ibb.co/S3zJvcF/cpp1.png)
+![cpp1](https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/60bf005b-a6c4-4d63-bce1-c14e10356754)
+
 # Vectors
 Was really difficult for me to write, but i still managed to do it.<br />
 How does my engine draw vectors?<br />
@@ -27,13 +28,14 @@ After that, if |x2-x1| > |y2-y1| then it stores slope to variable slope_x, and x
 And the basic principle is to check if in x_cycle x_y_outweight is false, then program starts to draw initially with x_cycle and it draws amount of pixels equivalent to slope_x.<br />
 Then, in y_cycle if x_y_outweight is false program draws only one pixel and then goes again to x_cycle.<br />
 If |x2-x1| < |y2-y1| and x_y_outweight is true, then it does everything oppositely where in x_cycle engine draws only one pixel and in y_cycle it draws slope_y amount of pixels.<br />
-![alt text](https://i.ibb.co/mD8LLjx/cpp2.png)
+![cpp2](https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/99dfebb2-fe3d-4380-a13a-9267dd55072d)
 # Triangles
 To create triangle, user must input the length of first side(a), the length of second side(b), the length of third side(c), height of the triangle, and x, y positions of triangle.<br />
 C is casually the line in the bottom of default triangle which connects a and b.<br />
 Firstly it visualizes the triangle by drawing a,b,c depending on which is side is bigger.<br />
 Then, it is filled from the point where a and b intersect (let's call it D) by creating vectors from D to every pixel of vector C.<br />
-![alt text](https://i.ibb.co/MD5Xx6P/cpp5.png)
+![cpp5](https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/f7df8fca-84f1-4a17-9989-c57234abcec8)
+
 # Ellipses
 Also, a difficult one, so the main method of creating ellipses is by using sin(t)*radius_width and cos(t)*radius_height to get the position of all pixels the raw ellipse must be built of.<br />
 t - is the variable which is initially 360 and is decreasing by 1 every time in loop. (converted to radians before using in sin and cos functions)<br />
@@ -43,18 +45,20 @@ To fill ellipse, engine connects every pixel of right side of ellipse with the c
 Why not just instantly from left side to right side?<br />
 Because ellipses can be drawn partially, for example, an ellipse with a start_circum of 0 and an end_circum of 220 will not work with this approach.<br />
 So it firsly fills all the left side of ellipse with central vertical line and then the right side with central vertical line.<br />
-![alt text](https://i.ibb.co/jbS3Fv4/cpp3.png)<br />
-![alt text](https://i.ibb.co/Z1Xrrmp/cpp4.png)<br />
+![cpp3](https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/2f52b510-c66b-4fc6-859d-7fc0c4bff027)
+![cpp4](https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/5f97c45d-6a62-4bfe-99eb-e5da64bb374d)
 # 2D Text
 Actually, the 2D Text object is created by dividing the user-input text into chars (letters) and drawing them separately. Every letter is drawn uniquely. For example, letter A has one vector facing top-right, one vector facing down-right, and one straight vector between them.<br />
 This is done with every character. Also numbers and doubles can be inputted as text.<br />
-![alt text](https://i.ibb.co/G2RgZK1/cpp6.png)
+![cpp6](https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/03b5ba43-fdcf-41e9-9ec2-490b78519626)
+
 # Images, Sprites
 Here I used the stb_image library. It gets every pixel's color of the image in RGB format. Then, my engine draws those pixels as a rectangle and creates an image.<br />
 Then if the user wants to resize and move an image, the user creates a Sprite class. Resizing works by increasing or decreasing size of the pixels.<br />
 Sprite class also has many filters like red, green, blue and grayscale.
 ![cpp7](https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/b3536f74-5371-4b33-875a-27c7147f06b8)
-![alt text](https://i.ibb.co/kX8wTqp/cpp8.png)<br />
+![cpp8](https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/164c592a-9643-4348-a961-2a011d9a0c85)
+
 Here, the sprite is decreased by 2 in width and height, and a grayscale filter is applied.
 # Rotation
 All mentioned objects can be rotated. Rotation works with functions:<br />
