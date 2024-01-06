@@ -8,9 +8,9 @@ You can use C++ Graphics engine just by downloading the project and the in Visua
 Firstly, user must creates the WINDOW class with user-input x, y, width, and height.<br />
 The user has simulategame() function which is a main loop function where all user code is written. In the beggining of main loop user must update the window with the refresh_screen(color, window) function.<br />
 Every graphics unit should be called as object and after the object is created user should write object_name.draw() and object will be drawn.<br />
-Then, vector, and ellipse shapes have two classes of fvector, dvector and ellipsef, ellipsed classes respectively. In dvector and ellipsed classes, when shapes are drawn, the user can access some variables that are really important..<br />
+Then, vector, and ellipse shapes have two classes of fvector, dvector and ellipsef, ellipsed classes respectively. In dvector and ellipsed classes, when shapes are drawn, the user can access some variables that are really important.<br />
 For example, in dvector and ellipsed classes there is an array of x and y positions of all pixels that shape contains. Those classes are often used in other classes like in triangles, rectangles and 2D Text.<br />
-On the other side, fvectors and ellipsef classes are faster because they don't save such information.<br />
+On the other side, fvectors and ellipsef classes are faster because they don't save such information. Engine now can draw 300 million pixels in one second <br />
 # Rectangles
 Actually the first shape I have done is rectangle because of its simplicity.<br />
 How does my engine draw rectangles?<br />
@@ -94,7 +94,7 @@ Here we have two forces acting on object: throwing object force x and wind resis
 In conclusion, we convert every x and y force to velocity. <br />
 We add to y coordinate of the object the full y velocity and we add to x coordinate of the object the full x velocity.<br />
 ![2023-09-30 18-16-14 (online-video-cutter com) (2)](https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/82158179-85f9-4052-9c71-8b6ff09eebe4)
-Here, an object with a mass of 1 kg is thrown at 25 degrees, with an initial velocity of 20 m/s, and accelerating wind is acting from 90 degrees (from the right side of the screen to the left) with a wind acceleration of 4 m/s^2. The air is dry at an altitude of 10,000 meters.
+Here, an object with a mass of 1 kg is thrown at 25 degrees, with an initial velocity of 20 m/s, and accelerating wind is acting from 90 degrees (from the right side of the screen to the left) with a wind acceleration of 4 m/s^2. The air is dry at an altitude of 10,000 meters. All these values can be modified which impact air resistance and wind resistance.
 # Utility
 I have utility.cpp, which has many useful functions that my program uses in rendering.cpp or that the user can utilize.
 # Why do I do it?
