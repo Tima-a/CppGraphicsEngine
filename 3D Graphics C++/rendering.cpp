@@ -299,12 +299,12 @@ inline static void refresh_screen(uint32 color, WINDOW& window_)
 //Draw pixels on x, y
 inline static void draw_pixel(float x, float y, uint32 color, WINDOW& window)
 {
-	if ((x >= 0.0f && x < _win.win_width_px[window.wnd_param]) && (y > 0.0f && y < _win.win_height_px[window.wnd_param]))
-	{
-		y += 40.0f; //fixing some bugs
-		uint32* pixel = (uint32*)_win.win_memory[window.wnd_param] + (int)x + (int)y * _win.win_width[window.wnd_param];
-		*pixel++ = color;
-	}
+	/*if ((x >= 0.0f && x < _win.win_width_px[window.wnd_param]) && (y > 0.0f && y < _win.win_height_px[window.wnd_param]))
+	{*/
+	y += 40.0f; //fixing some bugs
+	uint32* pixel = (uint32*)_win.win_memory[window.wnd_param] + (int)x + (int)y * _win.win_width[window.wnd_param];
+	*pixel++ = color;
+	//}
 }
 namespace ellipse2d
 {
@@ -2219,10 +2219,6 @@ namespace rectangle
 		{
 
 		}
-		~rectf()
-		{
-
-		}
 		//Calculate rectangle's perimeter
 		float perimeter()
 		{
@@ -2319,7 +2315,7 @@ namespace rectangle
 				}
 				for (int i = 0; i < sb; i++)
 				{
-					vector2d::dvector v1(window, x - width / 2.0f + i, y - height / 2.0f, x - width / 2.0f + i, y + height / 2.0f, color, true);
+					vector2d::fvector v1(window, x - width / 2.0f + i, y - height / 2.0f, x - width / 2.0f + i, y + height / 2.0f, color, true);
 					v1.draw();
 				}
 			}
@@ -3152,11 +3148,12 @@ public:
 	int texture_height = 0;
 	int rgb_channels = 3;
 	float opacity = 255.0f;
+	unsigned char* data = {};
 	Texture(const char* path_)
 	{
 		path = path_;
 		visible = true;
-		stbi_load(path, &texture_width, &texture_height, &rgb_channels, 0);
+		data=stbi_load(path, &texture_width, &texture_height, &rgb_channels, 0);
 	}
 	Texture()
 	{
@@ -3209,6 +3206,9 @@ public:
 	bool greenfilter = false;
 	bool bluefilter = false;
 	bool grayscalefilter = false;
+	bool alpha_opacity = false; // pixels with user-inputted color are not drawn 
+	Color32 alpha_color;
+	Color32 alpha_color_margin;//made because of anti-aliaing pixels 
 	uint32 filterIntensity_red = 50;
 	uint32 filterIntensity_green = 50;
 	uint32 filterIntensity_blue = 50;
@@ -3217,7 +3217,14 @@ public:
 	float angle = 0.0f;
 	pivot rotation_pivot = center;
 	rotation_direction_ rotation_direction = clockwise;
+	int pixel_count = 0;
 	WINDOW window;
+	bool using_tileset = false;
+	int width_x1=0;
+	int width_x2 = 0;
+	int height_y1 = 0;
+	int height_y2 = 0;
+	bool once = false;
 	Sprite(WINDOW win, Texture& texture_, float x_, float y_, float img_width_, float img_height_, bool visible_)
 	{
 		window = win;
@@ -3286,6 +3293,11 @@ public:
 			distance from previous pixel equals to texture_width-PIXEL_SIZE_MAX and same with y. */
 			unsigned char* data = stbi_load(texture_path, &texture_original_width, &texture_original_height, &rgb_channels, 0);
 			int ipx = 0;
+			if (using_tileset)
+			{
+				ipx = (texture_original_width * height_y1) + width_x1;
+				ipx *= 3;
+			}
 			float y_ = y + (texture_original_height / 2.0f) * PIXEL_SIZE_MAX * texture_height; // to achieve the center pivot of the picture
 			float x_ = x - (texture_original_width / 2.0f) * PIXEL_SIZE_MAX * texture_width; // to achieve the center pivot of the picture
 			float angle_ = angle;
@@ -3319,36 +3331,70 @@ public:
 				image_expand_error_fx_y = texture_height - PIXEL_SIZE_MAX;
 			}
 			area_ = texture_original_height * texture_original_width;
+			if (using_tileset)
+			{
+				/*texture_width = (width_x2 - width_x1)/100;
+				texture_height = (height_y2 - height_y1)/100;*/
+			}
+			else
+			{
+				width_x2 = texture_original_width;
+				height_y2 = texture_original_height;
+			}
 			if (data != nullptr && texture_original_height > 0 && texture_original_width > 0)
 			{
-				for (int i = 0; i < texture_original_height; i++)
+				for (int i = height_y1; i < height_y2; i++)
 				{
 					for (int j = 0; j < texture_original_width; j++)
 					{
-						unsigned int r1 = static_cast<unsigned int>(data[ipx]);
-						unsigned int g1 = static_cast<unsigned int>(data[ipx + 1]);
-						unsigned int b1 = static_cast<unsigned int>(data[ipx + 2]);
-						uint32 col = ProcessImageColor(r1, g1, b1);
-						if (!rotate_bool)
+					    unsigned int r1 = static_cast<unsigned int>(data[ipx]);
+					    unsigned int g1 = static_cast<unsigned int>(data[ipx + 1]);
+					    unsigned int b1 = static_cast<unsigned int>(data[ipx + 2]);
+						bool alpha_pixel = false;
+						/*if (alpha_opacity && in_range(r1,(uint32)alpha_color.red,(uint32)alpha_color_margin.red) && in_range(g1, (uint32)alpha_color.green, (uint32)alpha_color_margin.green) && in_range(b1, (uint32)alpha_color.blue, (uint32)alpha_color_margin.blue))
 						{
-							draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width), (y_ - i * PIXEL_SIZE_MAX * texture_height), col, window);
-							if (image_expand_error)
+							alpha_pixel = true;
+						}*/
+						if (!alpha_pixel)
+						{
+							//if (once == false)
+							//{
+							//	y_ = y + (texture_original_height / 2.0f) * PIXEL_SIZE_MAX * texture_height; // to achieve the center pivot of the picture
+							//	x_ = x - (texture_original_width / 2.0f) * PIXEL_SIZE_MAX * texture_width; // to achieve the center pivot of the picture
+							//	once = true;
+							//}
+							uint32 col = ProcessImageColor(r1, g1, b1);
+							if (!rotate_bool)
 							{
-								draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width) + image_expand_error_fx_x, (y_ - i * PIXEL_SIZE_MAX * texture_height) + image_expand_error_fx_y, col, window);
+								draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width), (y_ - i * PIXEL_SIZE_MAX * texture_height), col, window);
+								if (image_expand_error)
+								{
+									draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width) + image_expand_error_fx_x, (y_ - i * PIXEL_SIZE_MAX * texture_height) + image_expand_error_fx_y, col, window);
+								}
+								pixel_count++;
+
 							}
-						}
-						else if (rotate_bool)
-						{
-							Vector2f_r p1 = rotate_point(x_ + (j * PIXEL_SIZE_MAX * texture_width), (y_ - i * PIXEL_SIZE_MAX * texture_height), rot_x, rot_y, angle_);
-							draw_pixel(p1.x, p1.y, col, window);
-							if (image_expand_error)
+							else if (rotate_bool)
 							{
-								Vector2f_r p1 = rotate_point(x_ + (j * PIXEL_SIZE_MAX * texture_width) + image_expand_error_fx_x, (y_ - i * PIXEL_SIZE_MAX * texture_height) + image_expand_error_fx_y, rot_x, rot_y, angle_);
+								Vector2f_r p1 = rotate_point(x_ + (j * PIXEL_SIZE_MAX * texture_width), (y_ - i * PIXEL_SIZE_MAX * texture_height), rot_x, rot_y, angle_);
 								draw_pixel(p1.x, p1.y, col, window);
+								if (image_expand_error)
+								{
+									Vector2f_r p1 = rotate_point(x_ + (j * PIXEL_SIZE_MAX * texture_width) + image_expand_error_fx_x, (y_ - i * PIXEL_SIZE_MAX * texture_height) + image_expand_error_fx_y, rot_x, rot_y, angle_);
+									draw_pixel(p1.x, p1.y, col, window);
+								}
+								pixel_count++;
 							}
 						}
 						ipx += 3;
-						//std::cout << index << " pixel: RGB " << static_cast<int>(data[index]) << " " << static_cast<int>(data[index + 1]) << " " << static_cast<int>(data[index + 2]) << std::endl;
+						if (using_tileset)
+						{
+							if (j >= width_x2-width_x1) // because j starts with 0
+							{
+								j = texture_original_width;
+								ipx += (texture_original_width - 1 - (width_x2-width_x1)) * 3;
+							}
+						}
 					}
 				}
 			}
