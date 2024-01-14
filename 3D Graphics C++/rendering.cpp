@@ -3351,10 +3351,10 @@ public:
 					    unsigned int g1 = static_cast<unsigned int>(data[ipx + 1]);
 					    unsigned int b1 = static_cast<unsigned int>(data[ipx + 2]);
 						bool alpha_pixel = false;
-						/*if (alpha_opacity && in_range(r1,(uint32)alpha_color.red,(uint32)alpha_color_margin.red) && in_range(g1, (uint32)alpha_color.green, (uint32)alpha_color_margin.green) && in_range(b1, (uint32)alpha_color.blue, (uint32)alpha_color_margin.blue))
+						if (alpha_opacity && in_range(r1,(uint32)alpha_color.red,(uint32)alpha_color_margin.red) && in_range(g1, (uint32)alpha_color.green, (uint32)alpha_color_margin.green) && in_range(b1, (uint32)alpha_color.blue, (uint32)alpha_color_margin.blue))
 						{
 							alpha_pixel = true;
-						}*/
+						}
 						if (!alpha_pixel)
 						{
 							//if (once == false)
