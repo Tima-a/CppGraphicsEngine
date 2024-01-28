@@ -48,9 +48,9 @@ So it firsly fills all the left side of ellipse with central vertical line and t
 ![cpp3](https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/2f52b510-c66b-4fc6-859d-7fc0c4bff027)
 ![cpp4](https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/5f97c45d-6a62-4bfe-99eb-e5da64bb374d)
 # 2D Text
-Actually, the 2D Text object is created by dividing the user-input text into chars (letters) and drawing them separately. Every letter is drawn uniquely. For example, letter A has one vector facing top-right, one vector facing down-right, and one straight vector between them.<br />
-This is done with every character. Also numbers and doubles can be inputted as text.<br />
-![cpp6](https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/03b5ba43-fdcf-41e9-9ec2-490b78519626)
+The 2D Text object is created by dividing the user-input text into chars (letters) and drawing them separately. Every char is drawn using Arial font image and dividing it into tile set of characters.<br />
+Thus, the text is drawn. Also numbers and doubles can be inputted as text.<br />
+![cpp6new](https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/c59dd3a7-c6b6-4987-8a12-275594ee7693)
 
 # Images, Sprites
 Here I used the stb_image library. It gets every pixel's color of the image in RGB format. Then, my engine draws those pixels as a rectangle and creates an image.<br />
