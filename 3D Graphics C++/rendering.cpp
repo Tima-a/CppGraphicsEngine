@@ -2701,7 +2701,7 @@ public:
 				ipx = (texture_original_width * height_y1) + width_x1;
 				ipx *= 3;
 				x_ = x;
-				y_ = y+height_y2;
+				y_ = y+height_y2*texture_width;
 			}
 			float angle_ = angle;
 			float rot_x = x;
@@ -2721,17 +2721,26 @@ public:
 				rot_y = y + (texture_original_height / 2.0f) * texture_height;
 			}
 			bool image_expand_error = false;
-			float image_expand_error_fx_x = 0.0f;
-			float image_expand_error_fx_y = 0.0f;
+			int image_expand_error_fx_x = 0;
+			int image_expand_error_fx_y = 0;
+			float higher_length = 0.0f;
+			if (texture_width >= texture_height)
+			{
+				higher_length = texture_width;
+			}
+			else
+			{
+				higher_length = texture_height;
+			}
 			if (texture_width - PIXEL_SIZE_MAX > 0.0f)
 			{
 				image_expand_error = true;
-				image_expand_error_fx_x = texture_width - PIXEL_SIZE_MAX;
+				image_expand_error_fx_x = ceil(texture_width - PIXEL_SIZE_MAX);
 			}
 			if (texture_height - PIXEL_SIZE_MAX > 0.0f)
 			{
 				image_expand_error = true;
-				image_expand_error_fx_y = texture_height - PIXEL_SIZE_MAX;
+				image_expand_error_fx_y = ceil(texture_height - PIXEL_SIZE_MAX);
 			}
 			area_ = texture_original_height * texture_original_width;
 			if (!using_tileset)
@@ -2759,10 +2768,52 @@ public:
 							if (!rotate_bool)
 							{
 								draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width), (y_ - i * PIXEL_SIZE_MAX * texture_height), col, window);
-								if (image_expand_error)
+								if (higher_length > 1.0f)
 								{
-									draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width) + image_expand_error_fx_x, (y_ - i * PIXEL_SIZE_MAX * texture_height) + image_expand_error_fx_y, col, window);
+									for (int k = 1; k < floor(higher_length)+1; k++)
+									{
+										draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width) - (float)k, (y_ - i * PIXEL_SIZE_MAX * texture_height), col, window);
+										draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width), (y_ - i * PIXEL_SIZE_MAX * texture_height) - (float)k, col, window);
+										draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width) - (float)k, (y_ - i * PIXEL_SIZE_MAX * texture_height) - (float)k, col, window);
+									}
 								}
+								if (higher_length > 2.0f)
+								{
+									for (int t = 1; t < floor(higher_length); t++)
+									{
+										for (int p = 1; p < 1 + t; p++)
+										{
+											float n = floor(1+t);
+											/*float z = int(n - i);*/
+											draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width) - (float)n, (y_ - i * PIXEL_SIZE_MAX * texture_height) - (float)(n - p), col, window);
+											draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width) - (float)(n - p), (y_ - i * PIXEL_SIZE_MAX * texture_height) - (float)n, col, window);
+										}
+									}
+								}
+								//if (higher_length > 1.0f)
+								//{
+								//	draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width) - 1.0f, (y_ - i * PIXEL_SIZE_MAX * texture_height), col, window);
+								//	draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width), (y_ - i * PIXEL_SIZE_MAX * texture_height) - 1.0f, col, window);
+								//	draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width) - 1.0f, (y_ - i * PIXEL_SIZE_MAX * texture_height) - 1.0f, col, window);
+								//}
+								//if (higher_length > 2.0f)
+								//{
+								//	draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width) - 2.0f, (y_ - i * PIXEL_SIZE_MAX * texture_height), col, window);
+								//	draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width) - 2.0f, (y_ - i * PIXEL_SIZE_MAX * texture_height) - 1.0f, col, window);
+								//	draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width), (y_ - i * PIXEL_SIZE_MAX * texture_height) - 2.0f, col, window);
+								//	draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width) - 1.0f, (y_ - i * PIXEL_SIZE_MAX * texture_height) - 2.0f, col, window);
+								//	draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width) - 2.0f, (y_ - i * PIXEL_SIZE_MAX * texture_height) - 2.0f, col, window);
+								//}
+								//if (higher_length > 3.0f)
+								//{
+								//	draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width) - 3.0f, (y_ - i * PIXEL_SIZE_MAX * texture_height), col, window);
+								//	draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width) - 3.0f, (y_ - i * PIXEL_SIZE_MAX * texture_height) - 1.0f, col, window);
+								//	draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width) - 1.0f, (y_ - i * PIXEL_SIZE_MAX * texture_height) - 3.0f, col, window);
+								//	draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width) - 3.0f, (y_ - i * PIXEL_SIZE_MAX * texture_height) - 2.0f, col, window);
+								//	draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width), (y_ - i * PIXEL_SIZE_MAX * texture_height) - 3.0f, col, window);
+								//	draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width) - 2.0f, (y_ - i * PIXEL_SIZE_MAX * texture_height) - 3.0f, col, window);
+								//	draw_pixel(x_ + (j * PIXEL_SIZE_MAX * texture_width) - 3.0f, (y_ - i * PIXEL_SIZE_MAX * texture_height) - 3.0f, col, window);
+								//}
 								pixel_count++;
 
 							}
@@ -2799,24 +2850,59 @@ namespace text2d
 	class text
 	{
 	private:
-		Vector2i y_special_poses_ch[6] =
+		int special_ch_ascii[19] =
+		{
+			81,
+			103,
+			106,
+			112,
+			113,
+			121,
+			44,
+			40,
+			41,
+			42,
+			43,
+			45,
+			60,
+			61,
+			62,
+			126,
+			34,
+			36,
+			64
+		};
+		Vector2i y_special_poses_ch[18] =
 		{
 			{73,120},//Q
 			{144,189},//g
 			{132,188},//j
 			{204,247},//p,q,y
 		    {287,302}, // ,
+			{82,148},//(
+			{82,148},//)
+			{82,106},//*
+			{92,126},// +
+			{113,120},//-
+			{91,127},//<
+			{96,122},//=
+			{91,127},//>
+			{102,118},//~
+			{99,118},//"
+			{2,63}, // $
+			{2,69} // @
 		};
-		Vector2i y_poses_ch[5] =
+		Vector2i y_poses_ch[7] =
 		{
 			{14,58},
 			{73,117},
 			{132,176},
 			{194,236},
-			{251,296}
-			//Special characters: Q, g, j, p, q, y, "," ,
+			{251,296},
+			{2,56}
+			//Special characters: Q, g, j, p, q, y, "," , +, -, *, <, >, (, ), ~, =, ", $, @
 		};
-		Vector2i x_poses_ch[67] =
+		Vector2i x_poses_ch[85] =
 		{
 			{13,51},//A
 			{58,90},//B
@@ -2858,7 +2944,7 @@ namespace text2d
 			{333,338},//l
 			{345,385},//m
 			{392,417},//n
-			{424,451},//o
+			{422,451},//o
 			{14,39},//p
 			{46,71},//q
 			{79,95},//r
@@ -2884,12 +2970,54 @@ namespace text2d
 			{425,432},//,
 			{403,419},//-
 			{439,445},//.
-			{339,356}// /
+			{339,356},// /
+			{8,16},// !
+			{522,542},// "
+			{416,456},//#
+			{246,280},// $
+			{101,156}, // %
+		    {43,76},// ?
+			{477,544},//@
+			//{300,340},//euro sign
+			//{359,397},//pound sign
+			{312,331},// (
+			{354,373},// )
+			{144,170}, // *
+			{6,41},//+
+			{63,85},//-
+			{192,227}, // <
+			{453,496},// =
+			{251,286}, // >
+			{396,433},// ~
 		};
 		Vector2f* next_pos = new Vector2f(0.0f, 0.0f);
 		int array_pos_ch_x(int ch_ascii)
 		{
 			int n = 0;
+			if (int(ch_ascii) == 45)
+			{
+				n = (int)ch_ascii - 45 + 78;
+			}
+			if (int(ch_ascii) == 126)
+			{
+				n = (int)ch_ascii - 126 + 80+2;
+			}
+			if (int(ch_ascii) >= 60 && int(ch_ascii) <= 62)
+			{
+				n = (int)ch_ascii - 60 + 79;
+			}
+			if (int(ch_ascii) >= 40 && int(ch_ascii) <= 43)
+			{
+				n = (int)ch_ascii - 40 + 74;
+			}
+			if (int(ch_ascii) >= 63 && int(ch_ascii) <= 64)
+			{
+				n = (int)ch_ascii - 63+73-1;
+			}
+			if (int(ch_ascii) >= 33 && int(ch_ascii) <= 37)
+			{
+				n = (int)ch_ascii - 33 + 68-1;
+			}
 			if (int(ch_ascii) >= 65 && int(ch_ascii) <= 90)
 			{
 				n = (int)ch_ascii - 65;
@@ -2900,9 +3028,9 @@ namespace text2d
 			}
 			if (int(ch_ascii) >= 48 && int(ch_ascii) <= 57)
 			{
-				n = (int)ch_ascii - 48 + 53; // 52 is from the numbers begin.
+				n = (int)ch_ascii - 48 + 53-1; // 52 is from the numbers begin.
 			}
-			if (int(ch_ascii) >= 44 && int(ch_ascii) <= 47)
+			if (int(ch_ascii) >= 44 && int(ch_ascii) <= 47 && int(ch_ascii)!=45)
 			{
 				n = (int)ch_ascii - 44 + 63; // 63 is from these signs begin.
 			}
@@ -2914,12 +3042,20 @@ namespace text2d
 		}
 		inline void draw_char(const char ch, Vector2f& position, int num)
 		{
-			if (int(ch) != 32)
+			if (int(ch) != 32 && int(ch) != 10)
 			{
 				int k = array_pos_ch_x(int(ch));
 				int u = 0;
 				bool special_ch = false;
-				if (int(ch) != 81 && int(ch) != 103 && int(ch) != 106 && int(ch) != 112 && int(ch) != 113 && int(ch) != 121 && int(ch) != 44)
+				int d = 0;
+				for (int a = 0; a < 19; a++)
+				{
+					if (special_ch_ascii[a] != ch)
+					{
+						d++;
+					}
+				}
+				if (d == 19)
 				{
 					if (k < 14)
 					{
@@ -2941,71 +3077,142 @@ namespace text2d
 					{
 						u = 4;
 					}
+					if (int(ch) == 33 || int(ch) == 37 || int(ch) == 63 || int(ch) == 38 || int(ch) == 35)
+					{
+						u = 5;
+					}
 				}
 				else
 				{
 					special_ch = true;
 				}
-				Sprite s_ch(window, "a.jpg", position.x, position.y, ch_width, ch_height, true);
+				Sprite s_ch(window, "default_ch.jpg", position.x, position.y, ch_width, ch_height, true);
+				if (int(ch) == 63 || int(ch) == 33 || int(ch) == 37 || int(ch) == 38 || int(ch) == 36 || int(ch) == 35 || int(ch) == 64 || int(ch) == 43 || int(ch) == 45 || int(ch) == 42 || int(ch) == 60 || int(ch) == 61 || int(ch) == 62 || int(ch) == 40 || int(ch) == 41 || int(ch) == 126 || int(ch) == 34 || int(ch) == 61)
+				{
+					s_ch.texture_path = "special_ch.jpg";
+				}
 				int g = 0;
-				if (num > 0)
+				if (num > 0 && initial_spacing)
 				{
 					g = x_poses_ch[array_pos_ch_x(int(content[num - 1]))].y - x_poses_ch[array_pos_ch_x(int(content[num - 1]))].x;//getting width of the previous letter
 				}
-				current_spacing += g + ch_spacing;
+				current_spacing += g * ch_width + ch_spacing;
+				s_ch.y -= current_vertical_spacing*ch_height;
 				s_ch.x += current_spacing;
 				s_ch.using_tileset = true;
-				s_ch.width_x1 = x_poses_ch[k].x / ch_width; // converts it to ascii code and A is 65 in ascii.
-				s_ch.width_x2 = x_poses_ch[k].y / ch_width;
+				s_ch.width_x1 = x_poses_ch[k].x;
+				s_ch.width_x2 = x_poses_ch[k].y;
 				if (special_ch == false)
 				{
-					s_ch.height_y1 = y_poses_ch[u].x / ch_height;
-					s_ch.height_y2 = y_poses_ch[u].y / ch_height;
+					s_ch.height_y1 = y_poses_ch[u].x;
+					s_ch.height_y2 = y_poses_ch[u].y;
 				}
 				else
 				{
+					if (int(ch) == 64)
+					{
+						u = 16;
+					}
+					if (int(ch) == 36)
+					{
+						u = 15;
+					}
+					if (int(ch) == 40)
+					{
+						u = 5;
+					}
+					if (int(ch) == 41)
+					{
+						u = 6;
+					}
+					if (int(ch) == 42)
+					{
+						u = 7;
+						s_ch.y += 27 * ch_height;
+					}
+					if (int(ch) == 43)
+					{
+						u = 8;
+						s_ch.y += 10 * ch_height;
+					}
+					if (int(ch) == 45)
+					{
+						u = 9;
+						s_ch.y += 25 * ch_height;
+					}
+					if (int(ch) == 60)
+					{
+						u = 10;
+						s_ch.y += 10 * ch_height;
+					}
+					if (int(ch) == 61)
+					{
+						u = 11;
+						s_ch.y += 10 * ch_height;
+					}
+					if (int(ch) == 62)
+					{
+						u = 12;
+						s_ch.y += 10 * ch_height;
+					}
+					if (int(ch) == 126)
+					{
+						u = 13;
+						s_ch.y += 18 * ch_height;
+					}
+					if (int(ch) == 34)
+					{
+						u = 14;
+					}
+					if (int(ch) == 45)
+					{
+						u = 9;
+						s_ch.y -= 3 * ch_height;
+					}
 					if (int(ch) == 81)
 					{
 						u = 0;
-						s_ch.y -= 3;
+						s_ch.y -= 3 * ch_height;
 					}
 					if (int(ch) == 103)
 					{
 						u = 1;
-						s_ch.y -= 13;
+						s_ch.y -= 13 * ch_height;
 					}
 					if (int(ch) == 106)
 					{
 						u = 2;
-						s_ch.y -= 17;
+						s_ch.y -= 17 * ch_height;
 					}
 					if (int(ch) == 112 || int(ch) == 113 || int(ch) == 121)
 					{
 						u = 3;
-						s_ch.y -= 11;
+						s_ch.y -= 11 * ch_height;
 					}
 					if (int(ch) == 44)
 					{
 						u = 4;
-						s_ch.y -= 8;
+						s_ch.y -= 8 * ch_height;
 					}
-					s_ch.height_y1 = y_special_poses_ch[u].x / ch_height;
-					s_ch.height_y2 = y_special_poses_ch[u].y / ch_height;
+					s_ch.height_y1 = y_special_poses_ch[u].x;
+					s_ch.height_y2 = y_special_poses_ch[u].y;
 
 				}
 				s_ch.alpha_opacity = true;
 				s_ch.alpha_color = Color32(255.0f, 255.0f, 255.0f, 255.0f);
-				s_ch.alpha_color_margin = Color32(220.0f, 220.0f, 220.0f, 220.0f);
+				s_ch.alpha_color_margin = Color32(240.0f, 240.0f, 240.0f, 240.0f);
 				s_ch.draw_sprite();
+				initial_spacing = true;
 			}
-			else
+			else if (int(ch) == 32)
 			{
-				int g = 0;
-				if (num > 0)
-				{
-					g = x_poses_ch[array_pos_ch_x(int(content[num - 1]))].y - x_poses_ch[array_pos_ch_x(int(content[num - 1]))].x;//getting width of the previous letter
-				}
-				current_spacing += g + ch_spacing;
+				current_spacing += ch_spacing;
+			}
+			else if (int(ch) == 10)
+			{
+				current_vertical_spacing += vertical_spacing;
+				current_spacing = 0;
+				initial_spacing = false;
 			}
 		}
 	public:
@@ -3013,14 +3220,17 @@ namespace text2d
 		float x = 0.0f;
 		float y = 0.0f;
 		float ch_spacing = 0.0f;
+		float space_width = 0.0f;
 		float ch_width = 0.0f;
 		float ch_height = 0.0f;
-		float space_width = 0.0f;
 		int current_spacing=0;
+		int current_vertical_spacing = 0;
+		int vertical_spacing = 0;
 		uint32 color = colors.red;
 		bool visible = true;
+		bool initial_spacing = false;
 		WINDOW window;
-		text(WINDOW win, const char* txt, float x_, float y_, float ch_width_, float ch_height_, float ch_space_, uint32 color_, bool visible_ = true)
+		text(WINDOW win, const char* txt, float x_, float y_, float ch_width_, float ch_height_, float space_width_, float vertical_spacing_, float ch_space_, uint32 color_, bool visible_ = true)
 		{
 			window = win;
 			x = x_; y = y_;
@@ -3028,12 +3238,13 @@ namespace text2d
 			ch_spacing = ch_space_;
 			ch_width = ch_width_;
 			ch_height = ch_height_;
-			space_width = ch_width / 3.0f;
+			space_width = space_width_;
+			vertical_spacing = vertical_spacing_;
 			color = color_;
 			visible = visible_;
 			next_pos = new Vector2f(x_, y_);
 		}
-		text(WINDOW win, const char* txt, Vector2f pos_, float ch_width_, float ch_height_, float ch_space_, uint32 color_, bool visible_ = true)
+		text(WINDOW win, const char* txt, Vector2f pos_, float ch_width_, float ch_height_, float space_width_, float vertical_spacing_, float ch_space_, uint32 color_, bool visible_ = true)
 		{
 			window = win;
 			x = pos_.x;
@@ -3042,7 +3253,8 @@ namespace text2d
 			ch_spacing = ch_space_;
 			ch_width = ch_width_;
 			ch_height = ch_height_;
-			space_width = ch_width / 3.0f;
+			space_width = space_width_;
+			vertical_spacing = vertical_spacing_;
 			color = color_;
 			visible = visible_;
 			next_pos = new Vector2f(pos_.x, pos_.y);
