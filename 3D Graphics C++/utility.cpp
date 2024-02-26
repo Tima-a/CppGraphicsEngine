@@ -191,13 +191,17 @@ static inline int get_quantity_of_digits(double a, bool after_dot)
 {
 	int digits_num_after_dot = 0;
 	int digits_num_before_dot = 0;
-	float x = 0.0f;
+	double x = a;
+	if ((a < 1.0 || (a>-1.0&&a<0.0)) && !after_dot)
+	{
+		return 1;
+	}
 	if (!after_dot)
 	{
 		for (int i = 0; i < 1000; i++)
 		{
-			x = a / pow(10.0f, i); // divide number by 10 in for-i cycle and when number will be less than 1 return i as quantity of digits before dot.
-			if (x < 1.0f)
+			x = a / pow(10.0, i); // divide number by 10 in for-i cycle and when number will be less than 1 return i as quantity of digits before dot.
+			if (x < 1.0)
 			{
 				digits_num_before_dot = i;
 				break;
@@ -208,11 +212,11 @@ static inline int get_quantity_of_digits(double a, bool after_dot)
 	{
 		for (int i = 3; i < 2003; i++)//starts with 3 because truncA(a,2) and truncA(a,1) will be always the same and function won't work if i will start with 1 or 2
 		{
-			float y = truncA(a, i);
-			float x = truncA(a, i - 1); // when i will be more than length of digits after dot by 1 and i - 1 will be equal to length to digits after dot truncA(i) and trunc(i-1) will equal and it will show the quantity of digits after dot. Simply, truncA(3.12f, 3) and truncA(3.12f, 4) will return the same number because 3(argument) will give the value 3.12 and any other numbers higher than 3 will give the same number because there is nothing to give more that will differ from 3.12
-			if (x == y)
+			double y = truncA(a, i+3);
+			double x = truncA(a, i); // when i will be more than length of digits after dot by 1 and i - 1 will be equal to length to digits after dot truncA(i) and trunc(i-1) will equal and it will show the quantity of digits after dot. Simply, truncA(3.12f, 3) and truncA(3.12f, 4) will return the same number because 3(argument) will give the value 3.12 and any other numbers higher than 3 will give the same number because there is nothing to give more that will differ from 3.12
+			if (x==y)
 			{
-				digits_num_after_dot = i - 2;
+				digits_num_after_dot = i - 1;
 				break;
 			}
 		}
@@ -302,6 +306,67 @@ static inline int get_text_last_index(char* txt_)
 		}
 	}
 }
+static inline int search_for_ch(const char* full_ch, char ch)
+{
+	for (int i = 0; i < get_text_last_index(full_ch); i++)
+	{
+		if (full_ch[i] == ch)
+		{
+			return i;
+			break;
+		}
+	}
+	return -1;
+}
+static inline int array_pos_ch_x(int ch_ascii)
+{
+	int n = 0;
+	if (int(ch_ascii) == 45)
+	{
+		n = (int)ch_ascii - 45 + 78;
+	}
+	if (int(ch_ascii) == 126)
+	{
+		n = (int)ch_ascii - 126 + 80 + 2;
+	}
+	if (int(ch_ascii) >= 60 && int(ch_ascii) <= 62)
+	{
+		n = (int)ch_ascii - 60 + 79;
+	}
+	if (int(ch_ascii) >= 40 && int(ch_ascii) <= 43)
+	{
+		n = (int)ch_ascii - 40 + 74;
+	}
+	if (int(ch_ascii) >= 63 && int(ch_ascii) <= 64)
+	{
+		n = (int)ch_ascii - 63 + 73 - 1;
+	}
+	if (int(ch_ascii) >= 33 && int(ch_ascii) <= 37)
+	{
+		n = (int)ch_ascii - 33 + 68 - 1;
+	}
+	if (int(ch_ascii) >= 65 && int(ch_ascii) <= 90)
+	{
+		n = (int)ch_ascii - 65;
+	}
+	if (int(ch_ascii) >= 97 && int(ch_ascii) <= 122)
+	{
+		n = (int)ch_ascii - 97 + 26; // 25 is from lowercase letters begin.
+	}
+	if (int(ch_ascii) >= 48 && int(ch_ascii) <= 57)
+	{
+		n = (int)ch_ascii - 48 + 53 - 1; // 52 is from the numbers begin.
+	}
+	if (int(ch_ascii) >= 44 && int(ch_ascii) <= 47 && int(ch_ascii) != 45)
+	{
+		n = (int)ch_ascii - 44 + 63; // 63 is from these signs begin.
+	}
+	if (int(ch_ascii) == 38)
+	{
+		n = (int)ch_ascii - 38 + 63; // 62 is for &
+	}
+	return n;
+}
 static inline bool check_if_float_has_digits(float num)
 {
 	// if decimal - true, fractional - false
@@ -378,9 +443,11 @@ static inline const char* tocnstch(int n)
 	}
 	return (const char*)cnst_ch;
 }
-static inline const char* tocnstch(double n)
+static inline const char* tocnstch(double n_)
 {
 	//Alghoritm works by converting double to int in this way. Exmaple: dtoi(0.901) = 901; Example: dtoi(193.29103) = 19329103
+	double n = fabs(n_);
+	bool done = false;
 	double m = n;
 	int dot_place = get_quantity_of_digits(n, false);
 	if (n < 0.0)
@@ -409,23 +476,40 @@ static inline const char* tocnstch(double n)
 	{
 		cnst_ch[j] = '\0';
 	}
-	if (n < 0)
+	if (n_ < 0)
 	{
 		append_chars(cnst_ch, "-");
+
+	}
+	if (trunc(m) == 0)
+	{
+		append_chars(cnst_ch, int_cnst_chars[0]);
+	}
+	if (m < 1.0)
+	{
+		append_chars(cnst_ch, ".");
+		if (trunc(m) == 0)
+		{
+			// add additional zeroes when n > 0.0 && n < 1.0. Because, dtoi(0.01) = 1 and dtoi(0.00000000001) is also equals 1
+			int x = get_quantity_of_digits(m, true);
+			int y = get_quantity_of_digits(n, false);
+			int zerodiff = x-y;
+			//so here i get the difference in get_quantity_of_digits(m,true) and get_quantity_of_digits(dtoi(n),true) to get difference in zeros and add them 
+			for (int j = 0; j < zerodiff; j++)
+			{
+				append_chars(cnst_ch, int_cnst_chars[0]);
+			}
+		}
 	}
 	for (int i = get_quantity_of_digits(fn, false); i > 0; i--)
 	{
-		if (trunc(m) == 0)
-		{
-			append_chars(cnst_ch, int_cnst_chars[0]);
-		}
-		if (dot_place == (get_quantity_of_digits(fn, false) - i))
+		if (dot_place==(get_quantity_of_digits(fn, false) - i) && m>=1.0f)
 		{
 			append_chars(cnst_ch, ".");
 			if (trunc(m) == 0)
 			{
 				// add additional zeroes when n > 0.0 && n < 1.0. Because, dtoi(0.01) = 1 and dtoi(0.00000000001) is also equals 1
-				int zerodiff = get_quantity_of_digits(m, true) - get_quantity_of_digits(dtoi(n), true) - 1;
+				int zerodiff = get_quantity_of_digits(m, true) - get_quantity_of_digits(n, true) - 1;
 				//so here i get the difference in get_quantity_of_digits(m,true) and get_quantity_of_digits(dtoi(n),true) to get difference in zeros and add them 
 				for (int j = 0; j < zerodiff; j++)
 				{
@@ -519,6 +603,34 @@ static inline int cnstchtoint(const char* n)
 	}
 	return m;
 }
+static inline const char* sub_char(const char* full_ch, int pos1, int pos2)
+{
+	char sub_ch[100] = "";
+	for (int i = pos1; i < pos2; i++)
+	{
+		append_chars(sub_ch, new char[2]{ full_ch[i], '\0' });
+	}
+	return sub_ch;
+}
+static inline bool ch_equals(const char* ch1, const char* ch2)
+{
+	int k = 0;
+	for (int i = 0; i < get_text_last_index(ch1); i++)
+	{
+		if (ch1[k] == ch2[k])
+		{
+			k++;
+		}
+	}
+	if (k == get_text_last_index(ch1))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
 static inline float convert_pixels_to_metres(int px)
 {
 	return float(px) / 10000.0f;
@@ -528,6 +640,12 @@ static inline float convert_metres_to_pixels(float metres)
 	return float(metres) * 10000.0f;
 }
 static inline void swap(int& a, int& b)
+{
+	a = a + b;
+	b = a - b;
+	a = a - b;
+}
+static inline void swap(uint32& a, uint32& b)
 {
 	a = a + b;
 	b = a - b;
@@ -548,7 +666,9 @@ static inline bool in_range(type x, type range_num, type range)
 	{
 		swap(x_, range_num_);
 	}
-	if (x_ > range_num_ - range && range_num_ < x_ + range)
+	int a = range_num_ - range;
+	int b = x_ + range;
+	if ((int)x_ > a && (int)range_num_ < b)
 	{
 		return true;
 	}
