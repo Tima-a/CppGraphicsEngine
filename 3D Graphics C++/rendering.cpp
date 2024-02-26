@@ -17,6 +17,13 @@ const float VECTOR_LQ = 1.0f; // 1 coordinate unit equals one pixel
 const float PIXEL_SIZE_STLN = 1.0f;
 #define MAX_FUNCTION_SIZE 100
 #define MAX_PIXEL_QUANTITY = 1000*1000
+struct camera_global
+{
+	float x;
+	float y;
+	float width;
+	float height;
+} cam;
 //Pixel size presets
 struct Colors
 {
@@ -299,12 +306,14 @@ inline static void refresh_screen(uint32 color, WINDOW& window_)
 //Draw pixels on x, y
 inline static void draw_pixel(float x, float y, uint32 color, WINDOW& window)
 {
-	/*if ((x >= 0.0f && x < _win.win_width_px[window.wnd_param]) && (y > 0.0f && y < _win.win_height_px[window.wnd_param]))
-	{*/
-	y += 40.0f; //fixing some bugs
-	uint32* pixel = (uint32*)_win.win_memory[window.wnd_param] + (int)x + (int)y * _win.win_width[window.wnd_param];
-	*pixel++ = color;
-	//}
+	if ((x >= 0.0f + cam.x && x < cam.width + cam.x) && (y > 0.0f + cam.y && y < cam.height + cam.y))
+	{
+		x -= cam.x;
+		y -= cam.y;
+		y += 40.0f; //fixing some bugs
+		uint32* pixel = (uint32*)_win.win_memory[window.wnd_param] + (int)x + (int)y * _win.win_width[window.wnd_param];
+		*pixel++ = color;
+	}
 }
 namespace ellipse2d
 {
@@ -2625,6 +2634,8 @@ public:
 	int width_x2 = 0;
 	int height_y1 = 0;
 	int height_y2 = 0;
+	bool flip_horizontally = false;
+	bool flip_vertically = false;
 	bool once = false;
 	Sprite(WINDOW win, Texture& texture_, float x_, float y_, float img_width_, float img_height_, bool visible_)
 	{
@@ -2750,13 +2761,23 @@ public:
 			}
 			if (data != nullptr && texture_original_height > 0 && texture_original_width > 0)
 			{
-				for (int i = height_y1; i < height_y2; i++)
+				for (int i_ = height_y1; i_ < height_y2; i_++)
 				{
-					for (int j = 0; j < texture_original_width; j++)
+					for (int j_ = 0; j_ < texture_original_width; j_++)
 					{
-					    unsigned int r1 = static_cast<unsigned int>(data[ipx]);
-					    unsigned int g1 = static_cast<unsigned int>(data[ipx + 1]);
-					    unsigned int b1 = static_cast<unsigned int>(data[ipx + 2]);
+						int i = i_;
+						int j = j_;
+						if (flip_vertically)
+						{
+							i = (height_y2 - (i_ - height_y1));
+						}
+						if (flip_horizontally)
+						{
+							j = (texture_original_width - j_);
+						}
+					    uint32 r1 = static_cast<uint32>(data[ipx]);
+					    uint32 g1 = static_cast<uint32>(data[ipx + 1]);
+					    uint32 b1 = static_cast<uint32>(data[ipx + 2]);
 						bool alpha_pixel = false;
 						if (alpha_opacity && in_range(r1,(uint32)alpha_color.red,(uint32)alpha_color_margin.red) && in_range(g1, (uint32)alpha_color.green, (uint32)alpha_color_margin.green) && in_range(b1, (uint32)alpha_color.blue, (uint32)alpha_color_margin.blue))
 						{
@@ -2832,9 +2853,9 @@ public:
 						ipx += 3;
 						if (using_tileset)
 						{
-							if (j >= width_x2-width_x1) // because j starts with 0
+							if (j_ >= width_x2-width_x1) // because j starts with 0
 							{
-								j = texture_original_width;
+								j_ = texture_original_width;
 								ipx += (texture_original_width - 1 - (width_x2-width_x1)) * 3;
 							}
 						}
@@ -2991,55 +3012,6 @@ namespace text2d
 			{396,433},// ~
 		};
 		Vector2f* next_pos = new Vector2f(0.0f, 0.0f);
-		int array_pos_ch_x(int ch_ascii)
-		{
-			int n = 0;
-			if (int(ch_ascii) == 45)
-			{
-				n = (int)ch_ascii - 45 + 78;
-			}
-			if (int(ch_ascii) == 126)
-			{
-				n = (int)ch_ascii - 126 + 80+2;
-			}
-			if (int(ch_ascii) >= 60 && int(ch_ascii) <= 62)
-			{
-				n = (int)ch_ascii - 60 + 79;
-			}
-			if (int(ch_ascii) >= 40 && int(ch_ascii) <= 43)
-			{
-				n = (int)ch_ascii - 40 + 74;
-			}
-			if (int(ch_ascii) >= 63 && int(ch_ascii) <= 64)
-			{
-				n = (int)ch_ascii - 63+73-1;
-			}
-			if (int(ch_ascii) >= 33 && int(ch_ascii) <= 37)
-			{
-				n = (int)ch_ascii - 33 + 68-1;
-			}
-			if (int(ch_ascii) >= 65 && int(ch_ascii) <= 90)
-			{
-				n = (int)ch_ascii - 65;
-			}
-			if (int(ch_ascii) >= 97 && int(ch_ascii) <= 122)
-			{
-				n = (int)ch_ascii - 97 + 26; // 25 is from lowercase letters begin.
-			}
-			if (int(ch_ascii) >= 48 && int(ch_ascii) <= 57)
-			{
-				n = (int)ch_ascii - 48 + 53-1; // 52 is from the numbers begin.
-			}
-			if (int(ch_ascii) >= 44 && int(ch_ascii) <= 47 && int(ch_ascii)!=45)
-			{
-				n = (int)ch_ascii - 44 + 63; // 63 is from these signs begin.
-			}
-			if (int(ch_ascii) == 38)
-			{
-				n = (int)ch_ascii - 38 + 63; // 62 is for &
-			}
-			return n;
-		}
 		inline void draw_char(const char ch, Vector2f& position, int num)
 		{
 			if (int(ch) != 32 && int(ch) != 10)
@@ -3604,3 +3576,89 @@ namespace graphs
 		}
 	};
 }
+Vector2f_r get_mouse_position(WINDOW window_)
+{
+		POINT cursorPos;
+		GetCursorPos(&cursorPos);
+		ScreenToClient(window_.GetWindowHandleByIndex(), &cursorPos);
+		Vector2f_r p1;
+		p1.x = cursorPos.x;
+		p1.y = cursorPos.y;
+		return p1;
+}
+class Button
+{
+public:
+	WINDOW window;
+	float upper_x = 0.0f;
+	float upper_y = 0.0f;
+	float bottom_x = 0.0f;
+	float bottom_y = 0.0f;
+	bool selected = false;
+	bool pressed = false;
+	Button(WINDOW window_, float upper_x_, float bottom_x_, float upper_y_, float bottom_y_)
+	{
+		window = window_;
+		upper_x = upper_x_;
+		upper_y = upper_y_;
+		bottom_x = bottom_y_;
+		bottom_y = bottom_y_;
+	}
+    void InitializeButton()
+	{
+		Vector2f_r pos_mouse = get_mouse_position(window);
+		if (pos_mouse.x >= bottom_x && pos_mouse.x <= upper_x && pos_mouse.y >= bottom_y && pos_mouse.y <= upper_y)
+		{
+			selected = true;
+		}
+		else
+		{
+			selected = false;
+		}
+		if (selected && Input::KeyPressed(Input::Keys.LeftMouse) && 0x8000)
+		{
+			pressed = true;;
+		}
+		else
+		{
+			pressed = false;
+		}
+	}
+};
+class Camera
+{
+public:
+	WINDOW window;
+	float x = 0.0f;
+	float y = 0.0f;
+	float width = 0.0f;
+	float height = 0.0f;
+	Color32 background_col;
+	Camera(WINDOW window_, float x_, float y_, int w_, int h_)
+	{
+		window = window_;
+		x = x_;
+		y = y_;
+		width = w_;
+		height = h_;
+	}
+	Camera(WINDOW window_, float x_, float y_)//width and height are set by default to screen width and height
+	{
+		window = window_;
+		x = x_;
+		y = y_;
+		width = window_.width;
+		height = window_.height;
+	}
+	void SetColor(Color32 col)
+	{
+		background_col = col;
+	}
+	void Init()
+	{
+		cam.x = x;
+		cam.y = y;
+		cam.width = width;
+		cam.height = height;
+	}
+};
