@@ -1,10 +1,10 @@
-WINDOW window3("Graphics Engine", 300, 100, 1500, 700);
-
-//physics2d::PhysicsComponent p1;
+WINDOW window3("Graphics Engine", 300, 100, 1620, 980);
+Camera c1(window3, 0.0f, 0.0f, _win.win_width_px[window3.wnd_param], _win.win_height_px[window3.wnd_param]);
+audio a1("test.mp3");
 static void simulategame()
 {
+    c1.Init();
     refresh_screen(colors.blue, window3);
-    //text2d::text t1(window3, "hello", _win.win_width_px[window3.wnd_param] / 2+100.0f, _win.win_height_px[window3.wnd_param] / 2, 50.0f, 50.0f, 10.0f, colors.red, true); t1.draw();
     //p1.ApplyPhysicsComponent(1.0f, r1);
     //p1.wind_type = ACCELERATING_WIND;
     //p1.object_throw_angle = 25.0f;
@@ -36,15 +36,31 @@ static void simulategame()
     //r1.draw();
     /*ellipse2d::ellipsef e1(window3, _win.win_width_px[window3.wnd_param]/2+200, _win.win_height_px[window3.wnd_param]/2+100, 50.0f, 75.0f, colors.white, 0, 3600, true, true);
     e1.draw();*/
-    Sprite s1(window3, "a.jpg", _win.win_width_px[window3.wnd_param] / 2 + 50.0f, _win.win_height_px[window3.wnd_param] / 2 + 50.0f, 1.0f, 1.0f, true);
-    s1.alpha_opacity = true;
-    s1.alpha_color = Color32(255.0f, 255.0f, 255.0f, 0.0f);
-    s1.alpha_color_margin = Color32(220.0f,220.0f, 220.0f,220.0f);
-    s1.using_tileset = true;
-    s1.width_x1 = 70;
-    s1.width_x2 = 260;
-    s1.height_y1 = 120;
-    s1.height_y2 = 260;
-    s1.draw_sprite();
+    /*float x = 0;
+    float y = 0;
+    POINT cursorPos;
+    GetCursorPos(&cursorPos);
+    ScreenToClient(hWnd, &cursorPos);
+    x = cursorPos.x;
+    y = cursorPos.y;*/
+    //Sprite s1(window3, "sea.jpg", _win.win_width_px[window3.wnd_param] / 2 + 20.0f, _win.win_height_px[window3.wnd_param] / 2 + 20.0f, 1.0f, 1.0f, true);
+    //s1.flip_horizontally = true;
+    //s1.flip_vertically = true;
+    //s1.draw_sprite();
+    //rectangle::rectf r1(window3, _win.win_width_px[window3.wnd_param] / 2.0f, _win.win_height_px[window3.wnd_param], 100.0f, 50.0f, colors.red, true, true); r1.draw();
+    //Button b1(window3, _win.win_width_px[window3.wnd_param] / 2.0f + 50.0f, _win.win_width_px[window3.wnd_param] / 2.0f - 50.0f, _win.win_height_px[window3.wnd_param] / 2.0f + 25.0f, _win.win_height_px[window3.wnd_param] / 2.0f - 25.0f);
+    //b1.InitializeButton();
+    if (Input::KeyPressed(Input::Keys.D))
+    {
+        c1.x++;
+        a1.play();
+        a1.set_volume(100, AudioLeft);
+
+    }
+    //bool k = ch_equals("Salam", "salam");
+    //const char* k = sub_char("Salam want to go home!", 1, 8);
+    //text2d::text t1(window3, tocnstch(0.1001231), _win.win_width_px[window3.wnd_param] / 2 + 200.0f, _win.win_height_px[window3.wnd_param] / 2+200, 1.5f, 1.5f, 12.0f, 50.0f, 3.0f, colors.red, true); t1.draw();
+    //text2d::text t2(window3, tocnstch(dtoi(b1.cursory)), _win.win_width_px[window3.wnd_param] / 2 - 200.0f, _win.win_height_px[window3.wnd_param] / 2+200, 1.5f, 1.5f, 12.0f, 50.0f, 3.0f, colors.red, true); t2.draw();
+    
     draw_coordinate_grid(colors.yellow, window3);
 }
