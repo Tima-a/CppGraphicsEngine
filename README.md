@@ -18,7 +18,6 @@ It creates a line of width user inputted and draws that line from upper height t
 ![cpp1](https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/60bf005b-a6c4-4d63-bce1-c14e10356754)
 
 # Vectors
-Was really difficult for me to write, but i still managed to do it.<br />
 How does my engine draw vectors?<br />
 Firstly, it checks what type of vector it is(straight or not).<br />
 If vector is not straight then it calculates the slope of a vector by formula m=(y2-y1)/(x2-x1). Then, it calculates the direction to which the resulting vector should be facing by comparing the (x2-x1) and (y2-y1).<br />
@@ -49,13 +48,14 @@ So it firsly fills all the left side of ellipse with central vertical line and t
 ![cpp4](https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/5f97c45d-6a62-4bfe-99eb-e5da64bb374d)
 # 2D Text
 The 2D Text object is created by dividing the user-input text into chars (letters) and drawing them separately. Every char is drawn using Arial font image and dividing it into tile set of characters.<br />
-Thus, the text is drawn. Also numbers and doubles can be inputted as text.<br />
+Text class supports drawing all English alphabet letters, numbers and special characters.<br />
 ![cpp6new](https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/c59dd3a7-c6b6-4987-8a12-275594ee7693)
 
 # Images, Sprites
 Here I used the stb_image library. It gets every pixel's color of the image in RGB format. Then, my engine draws those pixels as a rectangle and creates an image.<br />
 Then if the user wants to resize and move an image, the user creates a Sprite class. Resizing works by increasing or decreasing size of the pixels.<br />
-Sprite class also has many filters like red, green, blue and grayscale.
+Sprite class also has many filters like red, green, blue and grayscale. Alpha color is used to ignore drawing pixels with specified color provided by user. Now sprite can be represented as a tilemap. <br />
+There is setting which lets user to crop the image from x1 to x2 and y1 to y2 and use as tiles.<br />
 ![cpp7](https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/b3536f74-5371-4b33-875a-27c7147f06b8)
 ![cpp8](https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/164c592a-9643-4348-a961-2a011d9a0c85)
 
@@ -95,8 +95,19 @@ In conclusion, we convert every x and y force to velocity. <br />
 We add to y coordinate of the object the full y velocity and we add to x coordinate of the object the full x velocity.<br />
 ![2023-09-30 18-16-14 (online-video-cutter com) (2)](https://github.com/Tima-a/CppGraphicsEngine/assets/107584760/82158179-85f9-4052-9c71-8b6ff09eebe4)
 Here, an object with a mass of 1 kg is thrown at 25 degrees, with an initial velocity of 20 m/s, and accelerating wind is acting from 90 degrees (from the right side of the screen to the left) with a wind acceleration of 4 m/s^2. The air is dry at an altitude of 10,000 meters. All these values can be modified which impact air resistance and wind resistance.
+# Audio
+Now any type of audio can be played, especially  .mp3 format. Audio class has many functions as to stop the current audio track, change its volume(left and right also), speed, get treble, bass, bit depth and sample frequency. <br />
+Audio class works with mci library which I made much more simple to use and added more functionality.<br />
+# Input
+Improved Windows keyboard input and made it more simple and user-friendly with all VKL codes replaced by characters they represent. Added more functions such as if any key is pressed, key is up, pressed, released. <br />
+# Camera
+To create a 2D camera user must create a camera class object with current position x, position y, and render width and height. If no camera is active, a default black screen will be shown. <br />
+# Buttons
+User can create buttons by instantiating button class object and specifying region which button covers(x1,x2,y1,y2) and which action should be done to activate(press a specific key or mouse button). <br />
 # Utility
-I have utility.cpp, which has many useful functions that my program uses in rendering.cpp or that the user can utilize.
+There are dozens of handy functions in utility.cpp which are primarily designed for rendering.cpp and game.cpp. <br />
+The one of the most important goals in my engine was to not use any copied code, powerful libraries like iostream, string, STL and etc. <br />
+So, I designed various algorithms to convert int to const char* and vice versa used in text class and other vital areas, advanced floor and trunc techniques and many other very useful functions. <br />
 # Why do I do it?
 I made my own engine for pure excitement. I really like Mathematics, Physics and Programming, so the only option for me which combines all this three subjects was to build my own engine.
 
