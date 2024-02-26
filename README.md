@@ -107,7 +107,7 @@ User can create buttons by instantiating button class object and specifying regi
 # Utility
 There are dozens of handy functions in utility.cpp which are primarily designed for rendering.cpp and game.cpp. <br />
 The one of the most important goals in my engine was to not use any copied code, powerful libraries like iostream, string, STL and etc. <br />
-So, I designed various algorithms to convert int to const char* and vice versa used in text class and other vital areas, advanced floor and trunc techniques and many other very useful functions. <br />
+So, I designed various algorithms to convert int to const char* and vice versa, get substring of const char*, check if they are equal. This functions are  used in text class and other vital areas with advanced floor and trunc techniques and many other very useful functions. <br />
 # Why do I do it?
 I made my own engine for pure excitement. I really like Mathematics, Physics and Programming, so the only option for me which combines all this three subjects was to build my own engine.
 
