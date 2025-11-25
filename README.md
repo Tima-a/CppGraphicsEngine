@@ -1,6 +1,6 @@
-# C++ Graphics Engine: Built From Scratch
+# C++ Graphics Engine
 
-C++ Graphics Engine is a graphics engine written on C++ fully from scratch for building desktop applications and games on C++ which is still in progress.
+C++ Graphics Engine is a graphics engine written on C++ fully from scratch for building desktop applications and games on C++ which is still in progress.<br />
 **Key Features:**
 
 * **Interface:** Simple, flexible and user-friendly programming interface.
