@@ -1,9 +1,14 @@
-# C++ Graphics Engine
-C++ Graphics Engine is a graphics engine written by Teymur Aghayev on C++ for building desktop applications, and games on C++ which is still in progress.<br />
-My engine can draw simple shapes like rectangles, triangles, ellipses, vectors. Also it can draw 2D Text and import images as sprites. It also has basic Physics simulations.<br />
-I started writing this engine in summer of 2019.<br />
-You can use C++ Graphics engine just by downloading the project and the in Visual Studio open an existing project and select C++ Graphics Engine folder.<br />
+# C++ Graphics Engine: Built From Scratch
 
+C++ Graphics Engine is a graphics engine written on C++ fully from scratch for building desktop applications and games on C++ which is still in progress.
+**Key Features:**
+
+* **Interface:** Simple, flexible and user-friendly programming interface.
+* **Rendering:** Rendering basic 2D/3D shapes, images, and text.
+* **Media & Input:** Audio configuration, camera control and manual input handling.
+* **Simulation:** Functional physics simulation program.
+
+I started this project in Summer 2019 by the pure excitement and challenge of building my own game development programs fully from scratch.
 # Features
 Firstly, user must creates the WINDOW class with user-input x, y, width, and height.<br />
 The user has simulategame() function which is a main loop function where all user code is written. In the beggining of main loop user must update the window with the refresh_screen(color, window) function.<br />
@@ -108,8 +113,6 @@ User can create buttons by instantiating button class object and specifying regi
 There are dozens of handy functions in utility.cpp which are primarily designed for rendering.cpp and game.cpp. <br />
 The one of the most important goals in my engine was to not use any copied code, powerful libraries like iostream, string, STL and etc. <br />
 So, I designed various algorithms to convert int to const char* and vice versa, get substring of const char*, check if they are equal. This functions are  used in text class and other vital areas with advanced floor and trunc techniques and many other very useful functions. <br />
-# Why do I do it?
-I made my own engine for pure excitement. I really like Mathematics, Physics and Programming, so the only option for me which combines all this three subjects was to build my own engine.
 
 
 
