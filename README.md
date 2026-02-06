@@ -68,7 +68,7 @@ To create a 2D camera user must create a camera class object with current positi
 # Buttons
 User can create buttons by instantiating button class object and specifying region which button covers and which action should be done to activate(press a specific key or mouse button). <br />
 # Author
-Teymur Aghayev
+Teymur Aghayev <br>
 Email: teymur.aghayev@stud.vilniustech.lt
 
 
